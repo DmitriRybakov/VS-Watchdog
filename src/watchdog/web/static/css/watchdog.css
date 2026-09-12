@@ -1,0 +1,55 @@
+/* Watchdog stylesheet.
+   Base: Pico CSS 2.0.6 classless build (MIT), vendored in this folder.
+   No remote asset is requested at runtime. */
+
+@import url("pico.classless.min.css");
+
+:root {
+  --wd-gap: 1rem;
+}
+
+.site-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--wd-gap);
+  padding: var(--wd-gap) 0;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.site-header .brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  text-decoration: none;
+}
+
+.site-header .subtitle,
+.muted {
+  color: var(--pico-muted-color);
+  font-size: 0.9rem;
+}
+
+.card {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--wd-gap);
+  margin-block: var(--wd-gap);
+}
+
+.button {
+  width: auto;
+}
+
+.ping {
+  margin-top: var(--wd-gap);
+}
+
+.ok {
+  color: var(--pico-ins-color);
+}
+
+.site-footer {
+  padding: var(--wd-gap) 0;
+  border-top: 1px solid var(--pico-muted-border-color);
+  color: var(--pico-muted-color);
+  font-size: 0.85rem;
+}

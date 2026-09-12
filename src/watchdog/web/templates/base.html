@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Watchdog{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='css/watchdog.css') }}" />
+    <script src="{{ url_for('static', path='js/htmx.min.js') }}" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="/">Watchdog</a>
+      <span class="subtitle">Entr Advisory &amp; Decision Support</span>
+    </header>
+    <main>{% block content %}{% endblock %}</main>
+    <footer class="site-footer">
+      <span>Version {{ version }}</span>
+    </footer>
+  </body>
+</html>
