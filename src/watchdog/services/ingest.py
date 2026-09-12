@@ -34,7 +34,7 @@ from typing import Any, Literal
 from watchdog.core.clock import utc_now
 from watchdog.core.enums import RunKind, RunStatus, SourcePlatform
 from watchdog.core.logging import get_logger
-from watchdog.core.models import QuarantinedNotice, Run, Tender, Watermark
+from watchdog.core.models import QuarantinedNotice, Run, SchemaCheck, Tender, Watermark
 from watchdog.services.ted import get_config
 from watchdog.sources.base import TenderSource
 from watchdog.sources.errors import MappingError
@@ -54,11 +54,19 @@ DEFAULT_BATCH_SIZE = 100
 
 
 class DatabaseNotReady(RuntimeError):
-    """The database has no tables yet, because the migration has not been run.
+    """The database does not have the tables and columns this code expects.
 
-    Its own type so the caller can say what to do next instead of showing a
-    database error to a colleague who has never seen one.
+    Its own type, carrying what is missing, so the caller can say what to do next
+    instead of showing a database error to a colleague who has never seen one.
     """
+
+    def __init__(self, check: SchemaCheck) -> None:
+        super().__init__(
+            "the database has no tables yet"
+            if check.empty
+            else f"the database schema is out of date; missing {check.summary}"
+        )
+        self.check = check
 
 
 @dataclass(frozen=True)
@@ -68,11 +76,20 @@ class IngestWindow:
     window_from: datetime
     window_to: datetime
     reason: str
+    # Set when this window starts *after* the last successful run: the days in
+    # between were never collected, so finishing this window does not mean the
+    # source has been read up to its end.
+    gap_from: datetime | None = None
 
     @property
     def query_dates(self) -> tuple[date, date]:
         """The window as calendar dates, which is the precision a source query has."""
         return (self.window_from.date(), self.window_to.date())
+
+    @property
+    def leaves_no_gap(self) -> bool:
+        """True when finishing this window really does mean nothing is outstanding."""
+        return self.gap_from is None
 
 
 @dataclass
@@ -189,6 +206,12 @@ def plan_window(
     The order is deliberate. An explicit instruction from a person wins over the
     watermark, and the watermark wins over the backfill default. Whatever wins,
     the window never ends later than ``now``.
+
+    A window that starts after the last successful run leaves the days in between
+    uncollected. That is recorded here as ``gap_from``, and it stops the watermark
+    moving to the end of a window that did not cover everything behind it - which
+    would silently skip those days for ever. Reaching further back than the
+    watermark is fine and still advances it: nothing is left behind.
     """
     if backfill_from is not None:
         window_from = datetime.combine(backfill_from, datetime.min.time(), tzinfo=UTC)
@@ -213,7 +236,19 @@ def plan_window(
             "check the date you gave"
         )
 
-    return IngestWindow(window_from=window_from, window_to=now, reason=reason)
+    last_successful_at = watermark.last_successful_at if watermark is not None else None
+    gap_from = (
+        last_successful_at
+        if last_successful_at is not None and window_from > last_successful_at
+        else None
+    )
+
+    return IngestWindow(
+        window_from=window_from,
+        window_to=now,
+        reason=reason,
+        gap_from=gap_from,
+    )
 
 
 def ingest(
@@ -310,12 +345,12 @@ def ingest(
         # Anything the source raises: a transport failure, an incomplete page, a
         # rejected query. The window is not finished, so the watermark stays.
         complete = False
-        errors.append(f"the source could not be read to the end: {exc}")
+        errors.append(f"the source could not be read to the end: {_brief(exc)}")
         log.error(
             "ingest_source_failed",
             run_id=run_id,
             source=platform.value,
-            reason=str(exc),
+            reason=_brief(exc),
             exc_info=True,
         )
 
@@ -335,7 +370,9 @@ def ingest(
         log.error("ingest_counts_do_not_reconcile", run_id=run_id, **counts.as_dict())
 
     status = _status(complete, counts)
-    advanced = complete and not dry_run
+    # A window that skipped days cannot report the source as read up to its end,
+    # however cleanly it ran.
+    advanced = complete and not dry_run and window.leaves_no_gap
     if advanced:
         repository.set_watermark(platform, window.window_to)
 
@@ -522,7 +559,7 @@ def _retry_one(
             reason=str(exc),
         )
     except Exception as exc:
-        message = f"{notice.source_id}: {exc}"
+        message = f"{notice.source_id}: {_brief(exc)}"
         errors.append(message)
         log.error(
             "quarantine_retry_failed", run_id=run_id, source_id=notice.source_id, exc_info=True
@@ -534,7 +571,7 @@ def _retry_one(
     try:
         written = store.save_recovered_tender(tender, run_id=run_id, quarantine_id=notice.id)
     except Exception as exc:
-        message = f"{notice.source_id} could not be saved: {exc}"
+        message = f"{notice.source_id} could not be saved: {_brief(exc)}"
         errors.append(message)
         log.error(
             "quarantine_retry_save_failed", run_id=run_id, source_id=notice.source_id, exc_info=True
@@ -563,9 +600,23 @@ def _retry_status(counts: dict[str, int]) -> RunStatus:
 
 
 def _ready(store: Repository) -> Repository:
-    if not store.is_ready():
-        raise DatabaseNotReady("the database has no tables yet")
+    check = store.check_schema()
+    if not check.ok:
+        raise DatabaseNotReady(check)
     return store
+
+
+def _brief(exc: Exception) -> str:
+    """The first line of an error, and no more than that.
+
+    A database error carries the whole failed statement and every bound value
+    after its first line, and here those values are the notice itself. That must
+    reach neither the log nor the screen, and 16KB of SQL is not a sentence
+    anybody can act on.
+    """
+    lines = str(exc).strip().splitlines()
+    text = lines[0].strip() if lines else type(exc).__name__
+    return text if len(text) <= 200 else f"{text[:197]}..."
 
 
 @dataclass
@@ -626,7 +677,7 @@ def _write_tenders(
     except Exception as exc:
         return _Written(
             failed=len(batch),
-            error=f"{len(batch)} notice(s) could not be written: {exc}",
+            error=f"{len(batch)} notice(s) could not be written: {_brief(exc)}",
             error_type=type(exc).__name__,
         )
 
@@ -648,7 +699,7 @@ def _write_quarantine(
             failed=len(batch),
             error=(
                 f"{len(batch)} unreadable notice(s) could not be quarantined "
-                f"and would have been lost: {exc}"
+                f"and would have been lost: {_brief(exc)}"
             ),
             error_type=type(exc).__name__,
         )

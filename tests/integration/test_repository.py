@@ -10,6 +10,7 @@ from datetime import UTC, date, datetime, timedelta, timezone
 from decimal import Decimal
 
 import pytest
+from sqlalchemy import text
 
 from watchdog.core.enums import (
     Band,
@@ -39,6 +40,7 @@ from watchdog.core.models import (
 )
 from watchdog.storage.db import create_db_engine, create_session_factory
 from watchdog.storage.repository import Repository
+from watchdog.storage.tables import Base
 
 VERSIONS = ScreeningVersions(
     rules_version="rules-1",
@@ -53,13 +55,49 @@ def test_an_unmigrated_database_is_reported_rather_than_raised() -> None:
     # the migration. That must be a sentence, not a database error.
     engine = create_db_engine("sqlite+pysqlite:///:memory:")
     try:
-        assert Repository(create_session_factory(engine)).is_ready() is False
+        check = Repository(create_session_factory(engine)).check_schema()
     finally:
         engine.dispose()
 
+    assert check.ok is False
+    assert check.empty is True
+    assert "tender" in check.missing_tables
+
+
+def test_a_database_one_migration_behind_names_the_column_it_is_missing() -> None:
+    # The case that produced 16KB of SQL: every table present, one column short.
+    engine = create_db_engine("sqlite+pysqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    try:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE tender DROP COLUMN first_seen_run_id"))
+        check = Repository(create_session_factory(engine)).check_schema()
+    finally:
+        engine.dispose()
+
+    assert check.ok is False
+    assert check.empty is False, "the database exists; it is behind, not absent"
+    assert check.missing_tables == []
+    assert check.missing_columns == ["tender.first_seen_run_id"]
+    assert check.summary == "tender.first_seen_run_id"
+
+
+def test_a_database_missing_one_table_is_reported_without_querying_it() -> None:
+    engine = create_db_engine("sqlite+pysqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    try:
+        with engine.begin() as connection:
+            connection.execute(text("DROP TABLE quarantine"))
+        check = Repository(create_session_factory(engine)).check_schema()
+    finally:
+        engine.dispose()
+
+    assert check.missing_tables == ["quarantine"]
+    assert check.empty is False
+
 
 def test_a_migrated_database_reports_itself_ready(repository: Repository) -> None:
-    assert repository.is_ready() is True
+    assert repository.check_schema().ok is True
 
 
 def screening_for(tender: Tender, *, score: int = 4, band: Band = Band.REVIEW) -> ScreeningResult:

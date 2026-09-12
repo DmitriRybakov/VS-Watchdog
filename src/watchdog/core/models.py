@@ -487,3 +487,28 @@ class UpsertStats(BaseModel):
     new: int = 0
     updated: int = 0
     unchanged: int = 0
+
+
+class SchemaCheck(BaseModel):
+    """Whether the database has the tables and columns this code expects.
+
+    Checked before a command touches anything, because the alternative is a query
+    failing partway through with a message that is mostly SQL. A database one
+    migration behind is a different sentence from one that has never been set up,
+    but the answer to both is the same: run the migration.
+    """
+
+    missing_tables: list[str] = Field(default_factory=list)
+    # "table.column" for each column the code expects and the database lacks.
+    missing_columns: list[str] = Field(default_factory=list)
+    # True when the database holds no tables at all: nothing has ever been run here.
+    empty: bool = False
+
+    @property
+    def ok(self) -> bool:
+        return not self.missing_tables and not self.missing_columns
+
+    @property
+    def summary(self) -> str:
+        """The first few things that are missing, for a one-line explanation."""
+        return ", ".join([*self.missing_tables, *self.missing_columns][:5])

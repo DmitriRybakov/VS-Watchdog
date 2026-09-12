@@ -20,8 +20,7 @@ from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel
-from sqlalchemy import Select, and_, func, nulls_last, or_, select, update
-from sqlalchemy.exc import OperationalError, ProgrammingError
+from sqlalchemy import Select, and_, func, inspect, nulls_last, or_, select, update
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
 from watchdog.core.clock import utc_now
@@ -30,6 +29,7 @@ from watchdog.core.models import (
     QuarantinedNotice,
     Review,
     Run,
+    SchemaCheck,
     ScreeningResult,
     ScreeningVersions,
     Tender,
@@ -45,6 +45,7 @@ from watchdog.core.models import (
 )
 from watchdog.storage.db import SessionFactory
 from watchdog.storage.tables import (
+    Base,
     QuarantineRow,
     ReviewRow,
     RunRow,
@@ -126,18 +127,38 @@ class Repository:
     def __init__(self, session_factory: SessionFactory | Callable[[], Session]) -> None:
         self._session_factory = session_factory
 
-    def is_ready(self) -> bool:
-        """True when the schema exists. False means the migration has not been run yet.
+    def check_schema(self) -> SchemaCheck:
+        """Compare the database against the tables and columns this code expects.
 
         Here rather than in a caller because only this file may ask the database
-        anything. SQLite and PostgreSQL report a missing table differently.
+        anything. Asking the catalogue directly, rather than running a query and
+        seeing whether it explodes, is what makes a database one migration behind
+        report itself by name instead of as a failed INSERT.
         """
         with self._session_factory() as session:
-            try:
-                session.execute(select(func.count()).select_from(RunRow))
-            except (OperationalError, ProgrammingError):
-                return False
-        return True
+            inspector = inspect(session.connection())
+            present = set(inspector.get_table_names())
+
+            missing_tables: list[str] = []
+            missing_columns: list[str] = []
+
+            for name, table in sorted(Base.metadata.tables.items()):
+                if name not in present:
+                    missing_tables.append(name)
+                    continue
+
+                existing = {column["name"] for column in inspector.get_columns(name)}
+                missing_columns.extend(
+                    f"{name}.{column.name}"
+                    for column in table.columns
+                    if column.name not in existing
+                )
+
+        return SchemaCheck(
+            missing_tables=missing_tables,
+            missing_columns=missing_columns,
+            empty=not present,
+        )
 
     # ------------------------------------------------------------------ tenders
 

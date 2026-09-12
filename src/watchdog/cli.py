@@ -11,7 +11,7 @@ from watchdog import __version__
 from watchdog.core.countries import country_name, country_names
 from watchdog.core.enums import RunStatus, SourcePlatform
 from watchdog.core.logging import configure_logging, get_logger
-from watchdog.core.models import Run
+from watchdog.core.models import Run, SchemaCheck
 from watchdog.core.settings import get_settings
 from watchdog.services import ingest as ingest_service
 from watchdog.services import ted as ted_service
@@ -186,7 +186,7 @@ def ingest(
             on_progress=_report_progress,
         )
     except ingest_service.DatabaseNotReady as exc:
-        _report_unmigrated_database()
+        _report_schema_problem(exc.check)
         raise typer.Exit(code=1) from exc
     except ValueError as exc:
         typer.secho(f"That window cannot be read: {exc}", fg=typer.colors.RED)
@@ -210,7 +210,7 @@ def runs(
     try:
         history = ingest_service.recent_runs(limit=limit)
     except ingest_service.DatabaseNotReady as exc:
-        _report_unmigrated_database()
+        _report_schema_problem(exc.check)
         raise typer.Exit(code=1) from exc
 
     if not history:
@@ -235,7 +235,7 @@ def quarantine_list(
     try:
         notices = ingest_service.list_quarantined(limit=limit, include_resolved=include_resolved)
     except ingest_service.DatabaseNotReady as exc:
-        _report_unmigrated_database()
+        _report_schema_problem(exc.check)
         raise typer.Exit(code=1) from exc
 
     if not notices:
@@ -280,7 +280,7 @@ def quarantine_retry(
     try:
         outcome = ingest_service.retry_quarantined(ids=ids or None, limit=limit)
     except ingest_service.DatabaseNotReady as exc:
-        _report_unmigrated_database()
+        _report_schema_problem(exc.check)
         raise typer.Exit(code=1) from exc
 
     if not outcome.counts["attempted"]:
@@ -317,11 +317,40 @@ def quarantine_retry(
         raise typer.Exit(code=1)
 
 
-def _report_unmigrated_database() -> None:
-    typer.secho("The database has not been set up yet.", fg=typer.colors.RED)
+def _report_gap(outcome: ingest_service.IngestOutcome) -> None:
+    """Say which days this window does not cover, and how to collect them."""
+    gap_from = outcome.window.gap_from
+    if gap_from is None:
+        return
+
+    missing = outcome.window.window_from - gap_from
+    tense = "does not cover" if outcome.dry_run else "did not collect"
+
+    typer.secho(
+        f"This window starts after the last successful run, so it {tense} "
+        f"{missing.days} day(s) of notices: "
+        f"{gap_from.strftime('%Y-%m-%d %H:%M')} to "
+        f"{outcome.window.window_from.strftime('%Y-%m-%d %H:%M')} UTC.",
+        fg=typer.colors.YELLOW,
+    )
+    typer.echo(
+        "How far the source has been read is left where it is, so nothing is "
+        "skipped. Collect everything outstanding with:"
+    )
+    typer.echo(f"  watchdog ingest --since-days {missing.days + 1}")
+
+
+def _report_schema_problem(check: SchemaCheck) -> None:
+    if check.empty:
+        typer.secho("The database has not been set up yet.", fg=typer.colors.RED)
+    else:
+        typer.secho("The database schema is out of date.", fg=typer.colors.RED)
+        typer.echo(f"  It does not have: {check.summary}")
+
     typer.echo("Run this once, then try again:")
     typer.echo("  .\\tasks.ps1 migrate      (on Windows)")
     typer.echo("  make migrate             (on Linux or in a container)")
+    typer.echo("Nothing was changed.")
 
 
 def _parse_date(value: str | None, option: str) -> date | None:
@@ -386,6 +415,15 @@ def _report_outcome(outcome: ingest_service.IngestOutcome) -> None:
                 "The next run will start from "
                 f"{outcome.window.window_to.strftime('%Y-%m-%d %H:%M')} UTC, less the overlap."
             )
+            return
+
+        # A dry run is exactly when someone is checking whether a window is safe,
+        # so both reasons are worth saying: it stored nothing, and it would have
+        # left days behind even if it had.
+        if outcome.window.gap_from is not None:
+            _report_gap(outcome)
+        if outcome.dry_run:
+            typer.echo("Nothing was stored, so how far the source has been read is unchanged.")
         return
 
     colour = _STATUS_COLOURS.get(outcome.status, typer.colors.RED)

@@ -10,11 +10,12 @@ from __future__ import annotations
 
 import copy
 from collections.abc import Iterator, Sequence
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
 import pytest
 from freezegun import freeze_time
+from sqlalchemy import text
 from tests.conftest import load_ted_fixture, ted_fixture_names
 
 from watchdog.core.clock import utc_now
@@ -34,6 +35,7 @@ from watchdog.sources.errors import MappingError, TransportError
 from watchdog.sources.ted.mapper import map_notice
 from watchdog.storage.db import create_db_engine, create_session_factory
 from watchdog.storage.repository import Repository
+from watchdog.storage.tables import Base
 
 NOW = datetime(2026, 3, 2, 7, 0, tzinfo=UTC)
 BASE_NOTICE = "form_type_competition_is_a_contract_notice"
@@ -286,6 +288,50 @@ def test_the_watermark_moves_to_the_end_of_the_window_only_on_success(
     assert outcome.watermark_advanced is True
     assert watermark is not None
     assert watermark.last_successful_at == window.window_to
+
+
+@freeze_time(NOW)
+def test_a_manual_window_cannot_advance_the_watermark_past_an_uncollected_gap(
+    repository: Repository,
+) -> None:
+    # Three weeks without a run, then someone asks for the last seven days. The
+    # run succeeds, but a fortnight was never collected, so moving the watermark
+    # to the end of this window would skip those notices for good.
+    three_weeks_ago = NOW - timedelta(days=21)
+    repository.set_watermark(SourcePlatform.TED, three_weeks_ago)
+
+    window = plan_window(
+        repository.get_watermark(SourcePlatform.TED),
+        now=NOW,
+        since_days=7,
+    )
+    outcome = run_ingest(repository, FakeSource([[notice("900021-2026")]]), window=window)
+
+    assert outcome.status is RunStatus.SUCCESS, "the run itself did what it was asked"
+    assert outcome.counts.new == 1
+    assert outcome.watermark_advanced is False
+
+    watermark = repository.get_watermark(SourcePlatform.TED)
+    assert watermark is not None
+    assert watermark.last_successful_at == three_weeks_ago, "the gap is still outstanding"
+
+
+@freeze_time(NOW)
+def test_the_next_ordinary_run_still_collects_the_days_the_manual_window_skipped(
+    repository: Repository,
+) -> None:
+    three_weeks_ago = NOW - timedelta(days=21)
+    repository.set_watermark(SourcePlatform.TED, three_weeks_ago)
+
+    manual = plan_window(repository.get_watermark(SourcePlatform.TED), now=NOW, since_days=7)
+    run_ingest(repository, FakeSource([[notice("900022-2026")]]), window=manual)
+
+    ordinary = plan_window(repository.get_watermark(SourcePlatform.TED), now=NOW)
+    source = FakeSource([[notice("900023-2026")]])
+    outcome = run_ingest(repository, source, window=ordinary)
+
+    assert source.windows[0][0] == (three_weeks_ago - timedelta(hours=48)).date()
+    assert outcome.watermark_advanced is True
 
 
 # ------------------------------------------------------------------ quarantine
@@ -619,6 +665,28 @@ def test_a_dry_run_reports_what_would_change_and_stores_nothing(
     assert repository.get_watermark(SourcePlatform.TED) == watermark_before
 
 
+@freeze_time(NOW)
+def test_a_dry_run_still_reports_a_window_that_would_leave_a_gap(
+    repository: Repository,
+) -> None:
+    # A dry run is when someone is checking whether a window is safe, so this is
+    # exactly when the gap matters most.
+    three_weeks_ago = NOW - timedelta(days=21)
+    repository.set_watermark(SourcePlatform.TED, three_weeks_ago)
+
+    window = plan_window(repository.get_watermark(SourcePlatform.TED), now=NOW, since_days=7)
+    outcome = run_ingest(
+        repository,
+        FakeSource([[notice("900062-2026")]]),
+        window=window,
+        dry_run=True,
+    )
+
+    assert outcome.dry_run is True
+    assert outcome.window.gap_from == three_weeks_ago
+    assert outcome.window.leaves_no_gap is False
+
+
 # ------------------------------------------------------------- write failures
 
 
@@ -638,6 +706,48 @@ def test_a_write_that_fails_stops_the_run_and_holds_the_watermark(
     assert outcome.counts.reconciles
     assert outcome.watermark_advanced is False
     assert any("could not be written" in message for message in outcome.errors)
+
+
+@freeze_time(NOW)
+def test_a_database_error_never_carries_its_statement_or_the_notice_into_a_message(
+    repository: Repository, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A SQLAlchemy error puts the whole failed statement and every bound value
+    # after its first line, and here those values are the notice itself.
+    def refuse(*_args: Any, **_kwargs: Any) -> None:
+        raise RuntimeError(
+            "(sqlite3.OperationalError) table tender has no column named first_seen_run_id\n"
+            "[SQL: INSERT INTO tender (id, source, title) VALUES (?, ?, ?)]\n"
+            "[parameters: ('ted:900071-2026', 'ted', 'Hydrogen feasibility study')]"
+        )
+
+    monkeypatch.setattr(Repository, "upsert_tenders", refuse)
+
+    outcome = run_ingest(repository, FakeSource([[notice("900071-2026")]]))
+
+    reported = " ".join(outcome.errors)
+    assert "no column named first_seen_run_id" in reported
+    assert "INSERT INTO" not in reported
+    assert "parameters" not in reported
+
+
+@freeze_time(NOW)
+def test_a_schema_one_migration_behind_is_a_sentence_not_a_statement() -> None:
+    engine = create_db_engine("sqlite+pysqlite:///:memory:")
+    Base.metadata.create_all(engine)
+    try:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE tender DROP COLUMN first_seen_run_id"))
+        store = Repository(create_session_factory(engine))
+
+        with pytest.raises(DatabaseNotReady) as caught:
+            recent_runs(repository=store)
+    finally:
+        engine.dispose()
+
+    assert caught.value.check.missing_columns == ["tender.first_seen_run_id"]
+    assert caught.value.check.empty is False
+    assert "out of date" in str(caught.value)
 
 
 @freeze_time(NOW)

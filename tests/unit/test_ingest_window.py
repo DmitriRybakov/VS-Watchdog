@@ -8,7 +8,7 @@ looks right in local time is a day short west of Greenwich.
 
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 import pytest
 
@@ -90,3 +90,44 @@ def test_a_full_backfill_starts_at_midnight_utc_on_the_date_given() -> None:
 def test_a_window_that_would_start_in_the_future_is_refused() -> None:
     with pytest.raises(ValueError, match="in the future"):
         plan_window(None, now=NOW, backfill_from=date(2026, 6, 1))
+
+
+# --------------------------------------------------------------------- gaps
+
+
+def test_a_manual_window_that_starts_after_the_watermark_is_marked_as_leaving_a_gap() -> None:
+    # Nobody has ingested for three weeks and someone asks for the last seven
+    # days. Advancing to the end of that window would skip a fortnight for ever.
+    three_weeks_ago = NOW - timedelta(days=21)
+
+    window = plan_window(watermark_at(three_weeks_ago), now=NOW, since_days=7)
+
+    assert window.leaves_no_gap is False
+    assert window.gap_from == three_weeks_ago
+
+
+def test_a_manual_window_that_reaches_further_back_than_the_watermark_leaves_no_gap() -> None:
+    window = plan_window(watermark_at(NOW - timedelta(days=21)), now=NOW, since_days=30)
+
+    assert window.leaves_no_gap is True
+    assert window.gap_from is None
+
+
+def test_a_full_backfill_before_the_watermark_leaves_no_gap() -> None:
+    window = plan_window(
+        watermark_at(datetime(2026, 2, 20, 6, 0, tzinfo=UTC)),
+        now=NOW,
+        backfill_from=date(2026, 1, 1),
+    )
+
+    assert window.leaves_no_gap is True
+
+
+def test_the_ordinary_watermark_window_never_leaves_a_gap() -> None:
+    window = plan_window(watermark_at(datetime(2026, 2, 28, 6, 0, tzinfo=UTC)), now=NOW)
+
+    assert window.leaves_no_gap is True
+
+
+def test_a_first_run_cannot_leave_a_gap_because_there_is_nothing_behind_it() -> None:
+    assert plan_window(None, now=NOW, backfill_days=30).leaves_no_gap is True
