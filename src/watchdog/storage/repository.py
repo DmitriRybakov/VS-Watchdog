@@ -27,6 +27,7 @@ from sqlalchemy.orm import InstrumentedAttribute, Session
 from watchdog.core.clock import utc_now
 from watchdog.core.enums import RunKind, RunStatus, SourcePlatform
 from watchdog.core.models import (
+    QuarantinedNotice,
     Review,
     Run,
     ScreeningResult,
@@ -44,6 +45,7 @@ from watchdog.core.models import (
 )
 from watchdog.storage.db import SessionFactory
 from watchdog.storage.tables import (
+    QuarantineRow,
     ReviewRow,
     RunRow,
     ScreeningResultRow,
@@ -162,20 +164,7 @@ class Repository:
                     stats.new += 1
                     continue
 
-                changed = _changed_fields(row, tender)
-                for field in changed:
-                    if field in MATERIAL_CHANGE_FIELDS:
-                        session.add(
-                            TenderChangeRow(
-                                tender_id=row.id,
-                                field=field,
-                                old_value=_as_text(getattr(row, field)),
-                                new_value=_as_text(getattr(tender, field)),
-                                source_version=tender.source_version,
-                                detected_at=utc_now(),
-                            )
-                        )
-
+                changed = _record_changes(session, row, tender)
                 _apply_source_fields(row, tender)
                 row.last_seen_at = tender.last_seen_at
                 if run_id is not None:
@@ -276,6 +265,143 @@ class Repository:
                 .all()
             )
             return [TenderChange.model_validate(row) for row in rows]
+
+    # --------------------------------------------------------------- quarantine
+
+    def quarantine_notices(
+        self, notices: Sequence[QuarantinedNotice], *, run_id: str | None = None
+    ) -> int:
+        """Record notices the mapper could not read. Meeting one again updates its row.
+
+        ``first_seen_at`` is written once. The payload, the reason and the run are
+        replaced every time, so the row always describes the most recent failure
+        rather than a stale one nobody can reproduce.
+        """
+        if not notices:
+            return 0
+
+        with self._session_factory() as session:
+            for notice in notices:
+                row = session.get(QuarantineRow, notice.id)
+                if row is None:
+                    row = QuarantineRow(
+                        id=notice.id,
+                        source=notice.source.value,
+                        source_id=notice.source_id,
+                        first_seen_at=notice.first_seen_at,
+                    )
+                    session.add(row)
+
+                row.payload = notice.payload
+                row.error = notice.error
+                row.error_type = notice.error_type
+                row.run_id = run_id if run_id is not None else notice.run_id
+                row.last_seen_at = notice.last_seen_at
+                # It failed again, so whatever an earlier retry concluded is undone.
+                row.resolved = False
+
+            session.commit()
+
+        return len(notices)
+
+    def resolve_quarantine(self, ids: Iterable[str]) -> None:
+        """Mark these notices readable again. Called when one finally maps.
+
+        A notice must be in exactly one of the two places, so a later ingest that
+        succeeds where an earlier one failed closes the quarantine row itself.
+        """
+        quarantine_ids = list(ids)
+        if not quarantine_ids:
+            return
+
+        with self._session_factory() as session:
+            session.execute(
+                update(QuarantineRow)
+                .where(
+                    QuarantineRow.id.in_(quarantine_ids),
+                    QuarantineRow.resolved.is_(False),
+                )
+                .values(resolved=True)
+            )
+            session.commit()
+
+    def list_quarantine(
+        self, *, unresolved_only: bool = True, limit: int = 50
+    ) -> list[QuarantinedNotice]:
+        """Quarantined notices, most recently seen first."""
+        conditions = [QuarantineRow.resolved.is_(False)] if unresolved_only else []
+
+        with self._session_factory() as session:
+            rows = (
+                session.execute(
+                    select(QuarantineRow)
+                    .where(*conditions)
+                    .order_by(QuarantineRow.last_seen_at.desc(), QuarantineRow.id.asc())
+                    .limit(max(1, limit))
+                )
+                .scalars()
+                .all()
+            )
+            return [QuarantinedNotice.model_validate(row) for row in rows]
+
+    def get_quarantined(self, ids: Iterable[str]) -> list[QuarantinedNotice]:
+        """The named quarantined notices, resolved or not, in the order given."""
+        wanted = list(ids)
+        if not wanted:
+            return []
+
+        with self._session_factory() as session:
+            rows = (
+                session.execute(select(QuarantineRow).where(QuarantineRow.id.in_(wanted)))
+                .scalars()
+                .all()
+            )
+            by_id = {row.id: QuarantinedNotice.model_validate(row) for row in rows}
+            return [by_id[key] for key in wanted if key in by_id]
+
+    def save_recovered_tender(self, tender: Tender, *, run_id: str, quarantine_id: str) -> bool:
+        """Store a tender recovered from quarantine and resolve it, in one transaction.
+
+        One transaction so a failed save can never leave a resolved row with no
+        tender behind it. Returns True when the tender row was written, False when
+        the register already held a newer sighting and the stored payload was
+        stale - in both cases the notice is readable, so the row is resolved.
+        """
+        with self._session_factory() as session:
+            row = session.get(TenderRow, tender.id)
+
+            if row is None:
+                session.add(_new_row(tender, run_id))
+                written = True
+            elif row.last_seen_at <= tender.last_seen_at:
+                _record_changes(session, row, tender)
+                _apply_source_fields(row, tender)
+                row.last_seen_at = tender.last_seen_at
+                row.last_seen_run_id = run_id
+                written = True
+            else:
+                # A later run already read this notice. An older payload must never
+                # be allowed to write over it.
+                written = False
+
+            quarantined = session.get(QuarantineRow, quarantine_id)
+            if quarantined is not None:
+                quarantined.resolved = True
+
+            session.commit()
+
+        return written
+
+    def record_retry_failure(self, quarantine_id: str, *, error: str, error_type: str) -> None:
+        """It still cannot be read. Keep the newest reason; the payload and run stay."""
+        with self._session_factory() as session:
+            row = session.get(QuarantineRow, quarantine_id)
+            if row is None:
+                raise ValueError(f"unknown quarantined notice {quarantine_id!r}")
+
+            row.error = error
+            row.error_type = error_type
+            session.commit()
 
     # ---------------------------------------------------------------- screening
 
@@ -694,6 +820,28 @@ def _changed_fields(row: TenderRow, tender: Tender) -> list[str]:
         for field in SOURCE_FIELDS
         if getattr(row, field) != _column_value(getattr(tender, field))
     ]
+
+
+def _record_changes(session: Session, row: TenderRow, tender: Tender) -> list[str]:
+    """Log the material differences and return every field that changed.
+
+    Shared by the ingest upsert and the quarantine retry so the two can never
+    disagree about what a colleague is told about.
+    """
+    changed = _changed_fields(row, tender)
+    for field in changed:
+        if field in MATERIAL_CHANGE_FIELDS:
+            session.add(
+                TenderChangeRow(
+                    tender_id=row.id,
+                    field=field,
+                    old_value=_as_text(getattr(row, field)),
+                    new_value=_as_text(getattr(tender, field)),
+                    source_version=tender.source_version,
+                    detected_at=utc_now(),
+                )
+            )
+    return changed
 
 
 def _column_value(value: Any) -> Any:

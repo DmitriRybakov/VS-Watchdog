@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import date
+from typing import Annotated
 
 import typer
 
@@ -17,7 +18,9 @@ from watchdog.services import ted as ted_service
 
 app = typer.Typer(help="Watchdog - tender screening for Entr Advisory & Decision Support.")
 config_app = typer.Typer(help="Inspect and check the configuration.")
+quarantine_app = typer.Typer(help="Notices that could not be read, and recovering them.")
 app.add_typer(config_app, name="config")
+app.add_typer(quarantine_app, name="quarantine")
 
 # What each run status means on screen, and the colour it is printed in.
 _STATUS_COLOURS = {
@@ -218,6 +221,102 @@ def runs(
         _print_run(run)
 
 
+@quarantine_app.command("list")
+def quarantine_list(
+    limit: int = typer.Option(50, "--limit", min=1, max=500, help="How many to show."),
+    include_resolved: bool = typer.Option(
+        False, "--all", help="Include notices that have since been recovered."
+    ),
+) -> None:
+    """Show notices that could not be read, with the reason each one failed."""
+    settings = get_settings()
+    configure_logging(settings.log_level, json_output=not settings.is_dev)
+
+    try:
+        notices = ingest_service.list_quarantined(limit=limit, include_resolved=include_resolved)
+    except ingest_service.DatabaseNotReady as exc:
+        _report_unmigrated_database()
+        raise typer.Exit(code=1) from exc
+
+    if not notices:
+        typer.secho(
+            "Nothing in quarantine. Every notice read so far was understood.", fg=typer.colors.GREEN
+        )
+        return
+
+    for item in notices:
+        state = "recovered" if item.resolved else "needs attention"
+        colour = typer.colors.GREEN if item.resolved else typer.colors.YELLOW
+        typer.secho(f"{item.id}  {state}", fg=colour)
+        typer.echo(f"  reason    {item.error}  [{item.error_type}]")
+        typer.echo(f"  seen      {item.first_seen_at.strftime('%Y-%m-%d %H:%M')} UTC")
+        typer.echo(f"  from run  {item.run_id or 'unknown'}")
+
+    unresolved = sum(1 for item in notices if not item.resolved)
+    typer.echo("")
+    typer.echo(f"{unresolved} notice(s) need attention. The full notice is stored for each one.")
+    typer.echo("Once the mapping is fixed, recover them with: watchdog quarantine retry")
+
+
+@quarantine_app.command("retry")
+def quarantine_retry(
+    ids: Annotated[
+        list[str] | None,
+        typer.Option(
+            "--id",
+            help="Retry only these, as shown by 'quarantine list'. Repeat for several.",
+        ),
+    ] = None,
+    limit: int = typer.Option(200, "--limit", min=1, max=1000, help="How many to try at once."),
+) -> None:
+    """Read stored payloads again with today's mapping.
+
+    Fetches nothing and never changes how far a source has been read, so it is
+    safe to run at any time.
+    """
+    settings = get_settings()
+    configure_logging(settings.log_level, json_output=not settings.is_dev)
+
+    try:
+        outcome = ingest_service.retry_quarantined(ids=ids or None, limit=limit)
+    except ingest_service.DatabaseNotReady as exc:
+        _report_unmigrated_database()
+        raise typer.Exit(code=1) from exc
+
+    if not outcome.counts["attempted"]:
+        typer.echo("Nothing to retry.")
+        return
+
+    for item in outcome.results:
+        if item.outcome == "recovered":
+            typer.secho(f"  recovered  {item.source_id}", fg=typer.colors.GREEN)
+        elif item.outcome == "already_current":
+            typer.secho(f"  already in the register  {item.source_id}", fg=typer.colors.GREEN)
+        elif item.outcome == "still_failing":
+            typer.secho(
+                f"  still unreadable  {item.source_id}: {item.reason}", fg=typer.colors.YELLOW
+            )
+        else:
+            typer.secho(
+                f"  could not be handled  {item.source_id}: {item.reason}", fg=typer.colors.RED
+            )
+
+    counts = outcome.counts
+    typer.echo("")
+    typer.echo(
+        f"{counts['attempted']} tried: {counts['recovered']} recovered, "
+        f"{counts['already_current']} already current, "
+        f"{counts['still_failing']} still unreadable."
+    )
+    typer.echo("How far each source has been read was not changed.")
+
+    if not outcome.ok:
+        typer.secho(
+            f"The retry did not finish cleanly ({outcome.status.value}).", fg=typer.colors.RED
+        )
+        raise typer.Exit(code=1)
+
+
 def _report_unmigrated_database() -> None:
     typer.secho("The database has not been set up yet.", fg=typer.colors.RED)
     typer.echo("Run this once, then try again:")
@@ -268,11 +367,20 @@ def _report_outcome(outcome: ingest_service.IngestOutcome) -> None:
             fg=typer.colors.YELLOW,
         )
         for item in outcome.quarantined:
-            typer.echo(f"  - {item.source_id}: {item.reason}")
-        typer.echo("  They are still at the source and will be tried again next run.")
+            typer.echo(f"  - {item.source_id}: {item.error}")
+        typer.echo("  Their payloads are stored. See them with: watchdog quarantine list")
 
     if outcome.ok:
-        typer.secho("Done.", fg=typer.colors.GREEN)
+        if outcome.quarantined:
+            # A bare "Done" would be read as "nothing to look at", and nobody
+            # reads run counts by choice.
+            typer.secho(
+                f"Completed with warnings: {len(outcome.quarantined)} notice(s) need attention.",
+                fg=typer.colors.YELLOW,
+            )
+        else:
+            typer.secho("Done.", fg=typer.colors.GREEN)
+
         if outcome.watermark_advanced:
             typer.echo(
                 "The next run will start from "

@@ -249,6 +249,39 @@ class TenderChange(BaseModel):
     detected_at: UtcDatetime = Field(default_factory=utc_now)
 
 
+class QuarantinedNotice(BaseModel):
+    """A notice the mapper could not read, kept whole so it can be recovered later.
+
+    The payload is the point. Counting a failure and moving on would mean that
+    once the mapper is fixed the notice is gone unless someone reconstructs the
+    window by hand. Identity is (source, source_id), as it is for a tender, so
+    meeting the same broken notice again updates this row rather than adding one.
+
+    ``run_id`` is the ingest run that fetched the payload now stored here. A retry
+    never claims it: a retry has its own run record and leaves this pointing at
+    the run whose failure it is trying to undo.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    source: SourcePlatform
+    source_id: str
+    # Exactly what the source sent, untouched, so the mapper can be re-run on it.
+    payload: dict[str, Any] = Field(default_factory=dict)
+    # The most recent reason it could not be read, from an ingest or from a retry.
+    error: str
+    error_type: str
+    run_id: str | None = None
+    first_seen_at: UtcDatetime = Field(default_factory=utc_now)
+    last_seen_at: UtcDatetime = Field(default_factory=utc_now)
+    resolved: bool = False
+
+    @property
+    def id(self) -> str:
+        """The same identity a tender would have, so the two can never disagree."""
+        return make_tender_id(self.source, self.source_id)
+
+
 class RuleMatch(BaseModel):
     """One alias found in one field, with the text around it kept as evidence."""
 

@@ -11,9 +11,11 @@ never a second row and never a lost history.
 every write succeeded. A crash therefore leaves it where it was, and the next run
 repeats the same window - which is safe precisely because the run is idempotent.
 
-**Loud about what it could not do.** A notice that cannot be mapped is
-quarantined by publication number on the run and the rest of the page still
-lands. It never stops the run, and it never disappears.
+**Loud about what it could not do.** A notice that cannot be mapped is stored in
+quarantine, payload and all, and the rest of the page still lands. It never stops
+the run and it never disappears. Every notice the source hands us therefore ends
+in exactly one of two places: the tender table or quarantine. Failing to write
+*either* is a silent loss, so it holds the watermark and the run is partial.
 
 The overlap window exists because sources publish corrections and late entries: a
 notice can appear carrying a publication date that a finished run already passed.
@@ -27,15 +29,16 @@ import uuid
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
+from typing import Any, Literal
 
 from watchdog.core.clock import utc_now
 from watchdog.core.enums import RunKind, RunStatus, SourcePlatform
 from watchdog.core.logging import get_logger
-from watchdog.core.models import Run, Tender, Watermark
+from watchdog.core.models import QuarantinedNotice, Run, Tender, Watermark
 from watchdog.services.ted import get_config
 from watchdog.sources.base import TenderSource
 from watchdog.sources.errors import MappingError
-from watchdog.sources.ted import TedClient, TedSource, TedSourceConfig
+from watchdog.sources.ted import TedClient, TedSource, TedSourceConfig, map_notice
 from watchdog.storage.db import get_session_factory
 from watchdog.storage.repository import Repository
 
@@ -107,14 +110,6 @@ class IngestCounts:
 
 
 @dataclass(frozen=True)
-class QuarantinedNotice:
-    """One notice that could not be mapped, named so a person can go and look."""
-
-    source_id: str
-    reason: str
-
-
-@dataclass(frozen=True)
 class IngestOutcome:
     """The result of one run, in the shape the CLI and the web layer report it."""
 
@@ -135,6 +130,49 @@ class IngestOutcome:
 
 ProgressCallback = Callable[[IngestCounts], None]
 SourceFactory = Callable[[str], TenderSource]
+
+# How a stored payload is turned into a tender again, per source. The dates are
+# when the payload was received, never now.
+Mapper = Callable[[dict[str, Any], datetime, datetime], Tender]
+
+_MAPPERS: dict[SourcePlatform, Mapper] = {
+    SourcePlatform.TED: lambda payload, first_seen_at, last_seen_at: map_notice(
+        payload,
+        source=SourcePlatform.TED,
+        first_seen_at=first_seen_at,
+        last_seen_at=last_seen_at,
+    ),
+}
+
+
+@dataclass(frozen=True)
+class RetryResult:
+    """What happened to one quarantined notice when the current mapper saw it.
+
+    ``already_current`` means it mapped, but the register already held a newer
+    sighting, so the stored payload was not allowed to write over it. The notice
+    is readable either way, so it stops being quarantined.
+    """
+
+    id: str
+    source_id: str
+    outcome: Literal["recovered", "already_current", "still_failing", "failed"]
+    reason: str | None = None
+
+
+@dataclass(frozen=True)
+class RetryOutcome:
+    """The result of one quarantine retry. It has no window and no watermark."""
+
+    status: RunStatus
+    run_id: str
+    counts: dict[str, int]
+    results: tuple[RetryResult, ...] = ()
+    errors: tuple[str, ...] = ()
+
+    @property
+    def ok(self) -> bool:
+        return self.status is RunStatus.SUCCESS
 
 
 def plan_window(
@@ -212,7 +250,27 @@ def ingest(
 
     complete = True
     batch: list[Tender] = []
+    unreadable: list[QuarantinedNotice] = []
     window_from, window_to = window.query_dates
+
+    def flush() -> bool:
+        """Write both halves of the invariant. False means stop: writing is broken."""
+        nonlocal batch, unreadable
+        ok = True
+
+        if batch:
+            written = _write_tenders(repository, batch, run_id=run_id, dry_run=dry_run)
+            batch = []
+            ok = _apply(written, counts, errors, run_id, platform) and ok
+
+        if unreadable:
+            written = _write_quarantine(repository, unreadable, run_id=run_id, dry_run=dry_run)
+            unreadable = []
+            ok = _apply(written, counts, errors, run_id, platform) and ok
+
+        if on_progress is not None:
+            on_progress(counts)
+        return ok
 
     try:
         for raw in source.discover(window_from, window_to):
@@ -222,28 +280,30 @@ def ingest(
                 tender = source.to_tender(raw)
             except MappingError as exc:
                 item = QuarantinedNotice(
+                    source=platform,
                     source_id=exc.source_id or raw.source_id,
-                    reason=str(exc),
+                    payload=raw.payload,
+                    error=str(exc),
+                    error_type=type(exc).__name__,
+                    run_id=run_id,
+                    first_seen_at=raw.retrieved_at,
+                    last_seen_at=raw.retrieved_at,
                 )
+                unreadable.append(item)
                 quarantined.append(item)
-                errors.append(f"quarantined {item.source_id}: {item.reason}")
-                counts.quarantined += 1
+                errors.append(f"quarantined {item.source_id}: {item.error}")
                 log.warning(
                     "ingest_notice_quarantined",
                     run_id=run_id,
                     source=platform.value,
                     source_id=item.source_id,
-                    reason=item.reason,
+                    reason=item.error,
                 )
-                continue
+            else:
+                batch.append(tender)
 
-            batch.append(tender)
-            if len(batch) >= batch_size:
-                written = _write(repository, batch, run_id=run_id, dry_run=dry_run)
-                batch = []
-                complete = _apply(written, counts, errors, run_id, platform) and complete
-                if on_progress is not None:
-                    on_progress(counts)
+            if len(batch) + len(unreadable) >= batch_size:
+                complete = flush() and complete
                 if not complete:
                     break
     except Exception as exc:
@@ -261,11 +321,8 @@ def ingest(
 
     # Whatever arrived before the failure is still worth keeping; a partial run
     # that threw its work away would have to fetch it all again.
-    if batch:
-        written = _write(repository, batch, run_id=run_id, dry_run=dry_run)
-        complete = _apply(written, counts, errors, run_id, platform) and complete
-        if on_progress is not None:
-            on_progress(counts)
+    if batch or unreadable:
+        complete = flush() and complete
 
     if not counts.reconciles:
         # An accounting mistake means we do not know what happened to a notice,
@@ -359,7 +416,150 @@ def recent_runs(*, limit: int = 20, repository: Repository | None = None) -> lis
     return store.list_runs(limit=limit)
 
 
+# ------------------------------------------------------------------ quarantine
+
+
+def list_quarantined(
+    *,
+    limit: int = 50,
+    include_resolved: bool = False,
+    repository: Repository | None = None,
+) -> list[QuarantinedNotice]:
+    """Notices the mapper could not read, most recently seen first."""
+    store = _ready(repository or Repository(get_session_factory()))
+    return store.list_quarantine(unresolved_only=not include_resolved, limit=limit)
+
+
+def retry_quarantined(
+    *,
+    ids: Sequence[str] | None = None,
+    limit: int = 200,
+    repository: Repository | None = None,
+) -> RetryOutcome:
+    """Re-run today's mapper over stored payloads. Never touches the watermark.
+
+    A retry is not an ingest: it fetches nothing, so how far the source has been
+    read is none of its business. It gets its own run record, and each recovered
+    notice is stored and resolved in one transaction so a failed save leaves the
+    notice unresolved rather than resolved and missing.
+    """
+    store = _ready(repository or Repository(get_session_factory()))
+
+    notices = (
+        store.get_quarantined(ids)
+        if ids
+        else store.list_quarantine(unresolved_only=True, limit=limit)
+    )
+
+    platforms = {notice.source for notice in notices}
+    run = store.start_run(
+        RunKind.RETRY,
+        source=platforms.pop() if len(platforms) == 1 else None,
+    )
+
+    results: list[RetryResult] = []
+    errors: list[str] = []
+
+    for notice in notices:
+        results.append(_retry_one(store, notice, run_id=run.run_id, errors=errors))
+
+    counts = {
+        "attempted": len(notices),
+        "recovered": sum(1 for item in results if item.outcome == "recovered"),
+        "already_current": sum(1 for item in results if item.outcome == "already_current"),
+        "still_failing": sum(1 for item in results if item.outcome == "still_failing"),
+        "failed": sum(1 for item in results if item.outcome == "failed"),
+    }
+    status = _retry_status(counts)
+
+    store.finish_run(
+        run.run_id,
+        status=status,
+        counts=counts,
+        errors=errors,
+        watermark_advanced=False,
+    )
+
+    log.info("quarantine_retry_finished", run_id=run.run_id, status=status.value, **counts)
+
+    return RetryOutcome(
+        status=status,
+        run_id=run.run_id,
+        counts=counts,
+        results=tuple(results),
+        errors=tuple(errors),
+    )
+
+
 # ------------------------------------------------------------------- internals
+
+
+def _retry_one(
+    store: Repository,
+    notice: QuarantinedNotice,
+    *,
+    run_id: str,
+    errors: list[str],
+) -> RetryResult:
+    mapper = _MAPPERS.get(notice.source)
+    if mapper is None:
+        message = f"{notice.source_id}: no mapper for source {notice.source.value!r}"
+        errors.append(message)
+        return RetryResult(
+            id=notice.id, source_id=notice.source_id, outcome="failed", reason=message
+        )
+
+    try:
+        # Dated when the payload was received, not now, so a retry can never
+        # re-date a notice a later run has already read correctly.
+        tender = mapper(notice.payload, notice.first_seen_at, notice.last_seen_at)
+    except MappingError as exc:
+        store.record_retry_failure(notice.id, error=str(exc), error_type=type(exc).__name__)
+        return RetryResult(
+            id=notice.id,
+            source_id=notice.source_id,
+            outcome="still_failing",
+            reason=str(exc),
+        )
+    except Exception as exc:
+        message = f"{notice.source_id}: {exc}"
+        errors.append(message)
+        log.error(
+            "quarantine_retry_failed", run_id=run_id, source_id=notice.source_id, exc_info=True
+        )
+        return RetryResult(
+            id=notice.id, source_id=notice.source_id, outcome="failed", reason=message
+        )
+
+    try:
+        written = store.save_recovered_tender(tender, run_id=run_id, quarantine_id=notice.id)
+    except Exception as exc:
+        message = f"{notice.source_id} could not be saved: {exc}"
+        errors.append(message)
+        log.error(
+            "quarantine_retry_save_failed", run_id=run_id, source_id=notice.source_id, exc_info=True
+        )
+        return RetryResult(
+            id=notice.id, source_id=notice.source_id, outcome="failed", reason=message
+        )
+
+    return RetryResult(
+        id=notice.id,
+        source_id=notice.source_id,
+        outcome="recovered" if written else "already_current",
+    )
+
+
+def _retry_status(counts: dict[str, int]) -> RunStatus:
+    """A notice that still cannot be read is the expected answer, not a failure.
+
+    Only a notice we could not record an outcome for at all makes the run less
+    than successful.
+    """
+    if not counts["failed"]:
+        return RunStatus.SUCCESS
+    recorded = counts["recovered"] + counts["already_current"] + counts["still_failing"]
+    return RunStatus.PARTIAL if recorded else RunStatus.FAILED
 
 
 def _ready(store: Repository) -> Repository:
@@ -375,6 +575,7 @@ class _Written:
     new: int = 0
     updated: int = 0
     unchanged: int = 0
+    quarantined: int = 0
     failed: int = 0
     error: str | None = None
     error_type: str | None = None
@@ -404,7 +605,7 @@ def _start_run(
     return run.run_id
 
 
-def _write(
+def _write_tenders(
     repository: Repository,
     batch: Sequence[Tender],
     *,
@@ -418,11 +619,37 @@ def _write(
             return _Written(new=new, updated=len(batch) - new)
 
         stats = repository.upsert_tenders(batch, run_id=run_id)
+        # One of the two places, not both: a notice that reads correctly now closes
+        # the quarantine row an earlier run opened for it.
+        repository.resolve_quarantine(tender.id for tender in batch)
         return _Written(new=stats.new, updated=stats.updated, unchanged=stats.unchanged)
     except Exception as exc:
         return _Written(
             failed=len(batch),
             error=f"{len(batch)} notice(s) could not be written: {exc}",
+            error_type=type(exc).__name__,
+        )
+
+
+def _write_quarantine(
+    repository: Repository,
+    batch: Sequence[QuarantinedNotice],
+    *,
+    run_id: str,
+    dry_run: bool,
+) -> _Written:
+    """Record what could not be mapped. Failing to is a silent loss, not a warning."""
+    try:
+        if not dry_run:
+            repository.quarantine_notices(batch, run_id=run_id)
+        return _Written(quarantined=len(batch))
+    except Exception as exc:
+        return _Written(
+            failed=len(batch),
+            error=(
+                f"{len(batch)} unreadable notice(s) could not be quarantined "
+                f"and would have been lost: {exc}"
+            ),
             error_type=type(exc).__name__,
         )
 
@@ -438,6 +665,7 @@ def _apply(
     counts.new += written.new
     counts.updated += written.updated
     counts.unchanged += written.unchanged
+    counts.quarantined += written.quarantined
     counts.failed += written.failed
 
     if written.error is None:
@@ -475,8 +703,12 @@ __all__ = [
     "IngestOutcome",
     "IngestWindow",
     "QuarantinedNotice",
+    "RetryOutcome",
+    "RetryResult",
     "ingest",
     "ingest_ted",
+    "list_quarantined",
     "plan_window",
     "recent_runs",
+    "retry_quarantined",
 ]

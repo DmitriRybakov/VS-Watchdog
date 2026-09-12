@@ -18,7 +18,7 @@ from freezegun import freeze_time
 from tests.conftest import load_ted_fixture, ted_fixture_names
 
 from watchdog.core.clock import utc_now
-from watchdog.core.enums import RunStatus, SourcePlatform
+from watchdog.core.enums import RunKind, RunStatus, SourcePlatform
 from watchdog.core.models import Tender
 from watchdog.services.ingest import (
     DatabaseNotReady,
@@ -27,6 +27,7 @@ from watchdog.services.ingest import (
     ingest,
     plan_window,
     recent_runs,
+    retry_quarantined,
 )
 from watchdog.sources.base import RawNotice
 from watchdog.sources.errors import MappingError, TransportError
@@ -330,6 +331,215 @@ def test_a_quarantined_notice_does_not_hold_the_watermark_back(repository: Repos
     outcome = run_ingest(repository, FakeSource([[unmappable("900031-2026")]]))
 
     assert outcome.watermark_advanced is True
+
+
+@freeze_time(NOW)
+def test_the_payload_of_a_quarantined_notice_is_kept_whole(repository: Repository) -> None:
+    payload = unmappable("900033-2026")
+
+    run_ingest(repository, FakeSource([[payload]]))
+
+    stored = repository.list_quarantine()
+    assert [item.source_id for item in stored] == ["900033-2026"]
+    assert stored[0].payload == payload, "the mapper can only be re-run on the whole notice"
+    assert stored[0].source is SourcePlatform.TED
+    assert stored[0].error_type == "MappingError"
+    assert stored[0].resolved is False
+
+
+@freeze_time(NOW)
+def test_a_quarantined_notice_names_the_run_that_fetched_it(repository: Repository) -> None:
+    outcome = run_ingest(repository, FakeSource([[unmappable("900034-2026")]]))
+
+    assert repository.list_quarantine()[0].run_id == outcome.run_id
+
+
+@freeze_time(NOW)
+def test_meeting_the_same_broken_notice_again_updates_rather_than_inserts(
+    repository: Repository,
+) -> None:
+    run_ingest(repository, FakeSource([[unmappable("900035-2026")]]))
+
+    with freeze_time(datetime(2026, 3, 3, 7, 0, tzinfo=UTC)):
+        second = run_ingest(repository, FakeSource([[unmappable("900035-2026")]]))
+
+    stored = repository.list_quarantine(unresolved_only=False, limit=100)
+    assert len(stored) == 1
+    assert stored[0].first_seen_at == NOW, "when we first met it does not move"
+    assert stored[0].last_seen_at == datetime(2026, 3, 3, 7, 0, tzinfo=UTC)
+    assert stored[0].run_id == second.run_id
+
+
+@freeze_time(NOW)
+def test_a_notice_that_fails_to_quarantine_holds_the_watermark_and_is_partial(
+    repository: Repository, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A notice recorded in neither place is a silent loss, which is the one
+    # outcome the watermark exists to prevent.
+    def refuse(*_args: Any, **_kwargs: Any) -> None:
+        raise RuntimeError("the quarantine table is not accepting writes")
+
+    monkeypatch.setattr(Repository, "quarantine_notices", refuse)
+
+    outcome = run_ingest(
+        repository,
+        FakeSource([[notice("900036-2026"), unmappable("900037-2026")]]),
+    )
+
+    assert outcome.status is RunStatus.PARTIAL
+    assert outcome.counts.quarantined == 0
+    assert outcome.counts.failed == 1
+    assert outcome.counts.reconciles
+    assert outcome.watermark_advanced is False
+    assert repository.get_watermark(SourcePlatform.TED) is None
+    assert any("would have been lost" in message for message in outcome.errors)
+
+
+@freeze_time(NOW)
+def test_a_notice_that_starts_mapping_correctly_stops_being_quarantined(
+    repository: Repository,
+) -> None:
+    # The invariant is exactly one of two places, so a later run that reads it
+    # closes the quarantine row rather than leaving it in both.
+    run_ingest(repository, FakeSource([[unmappable("900038-2026")]]))
+    assert len(repository.list_quarantine()) == 1
+
+    run_ingest(repository, FakeSource([[notice("900038-2026")]]))
+
+    assert repository.list_quarantine() == []
+    assert repository.list_quarantine(unresolved_only=False)[0].resolved is True
+    assert repository.get_tender(tender_id("900038-2026")) is not None
+
+
+# --------------------------------------------------------------------- retry
+
+
+@freeze_time(NOW)
+def test_a_retry_recovers_a_notice_once_the_mapping_works(repository: Repository) -> None:
+    run_ingest(repository, FakeSource([[unmappable("900040-2026")]]))
+    quarantined = repository.list_quarantine()[0]
+
+    # Standing in for a fixed mapper: the same payload, now readable.
+    repository.quarantine_notices(
+        [quarantined.model_copy(update={"payload": notice("900040-2026")})],
+        run_id=quarantined.run_id,
+    )
+
+    outcome = retry_quarantined(repository=repository)
+
+    assert outcome.status is RunStatus.SUCCESS
+    assert outcome.counts["recovered"] == 1
+    assert repository.get_tender(tender_id("900040-2026")) is not None
+    assert repository.list_quarantine() == []
+
+
+@freeze_time(NOW)
+def test_a_retry_gets_its_own_run_and_never_moves_the_watermark(
+    repository: Repository,
+) -> None:
+    run_ingest(repository, FakeSource([[unmappable("900041-2026")]]))
+    watermark_before = repository.get_watermark(SourcePlatform.TED)
+
+    outcome = retry_quarantined(repository=repository)
+
+    run = repository.get_run(outcome.run_id)
+    assert run is not None
+    assert run.kind is RunKind.RETRY
+    assert run.watermark_advanced is False
+    assert run.window_from is None and run.window_to is None
+    assert repository.get_watermark(SourcePlatform.TED) == watermark_before
+
+
+@freeze_time(NOW)
+def test_a_retry_keeps_the_original_failures_run_reference(repository: Repository) -> None:
+    ingested = run_ingest(repository, FakeSource([[unmappable("900042-2026")]]))
+
+    retry = retry_quarantined(repository=repository)
+
+    still_there = repository.list_quarantine()[0]
+    assert still_there.run_id == ingested.run_id
+    assert still_there.run_id != retry.run_id
+
+
+@freeze_time(NOW)
+def test_a_notice_that_still_cannot_be_read_stays_quarantined_and_is_not_a_failure(
+    repository: Repository,
+) -> None:
+    run_ingest(repository, FakeSource([[unmappable("900043-2026")]]))
+
+    outcome = retry_quarantined(repository=repository)
+
+    assert outcome.status is RunStatus.SUCCESS
+    assert outcome.counts["still_failing"] == 1
+    assert outcome.counts["recovered"] == 0
+    assert repository.list_quarantine()[0].resolved is False
+
+
+@freeze_time(NOW)
+def test_a_retry_does_not_overwrite_newer_tender_data_with_an_older_payload(
+    repository: Repository,
+) -> None:
+    # Quarantined on day one, read correctly on day three by a normal run. The
+    # stored payload is now older than the register and must not win.
+    run_ingest(repository, FakeSource([[unmappable("900044-2026")]]))
+    repository.quarantine_notices(
+        [
+            repository.list_quarantine()[0].model_copy(
+                update={"payload": notice("900044-2026", published="2026-02-01+01:00")}
+            )
+        ]
+    )
+
+    later = datetime(2026, 3, 5, 7, 0, tzinfo=UTC)
+    with freeze_time(later):
+        run_ingest(repository, FakeSource([[notice("900044-2026", published="2026-03-04+01:00")]]))
+
+    # Named explicitly: the normal run already resolved it, which is the point.
+    outcome = retry_quarantined(repository=repository, ids=[tender_id("900044-2026")])
+
+    stored = repository.get_tender(tender_id("900044-2026"))
+    assert stored is not None
+    assert outcome.counts["already_current"] == 1
+    assert outcome.counts["recovered"] == 0
+    assert stored.published_date == date(2026, 3, 4), "the newer sighting stands"
+    assert stored.last_seen_at == later
+
+
+@freeze_time(NOW)
+def test_a_failed_save_leaves_the_notice_unresolved(
+    repository: Repository, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    run_ingest(repository, FakeSource([[unmappable("900045-2026")]]))
+    quarantined = repository.list_quarantine()[0]
+    repository.quarantine_notices(
+        [quarantined.model_copy(update={"payload": notice("900045-2026")})],
+        run_id=quarantined.run_id,
+    )
+
+    def refuse(*_args: Any, **_kwargs: Any) -> None:
+        raise RuntimeError("the database is not accepting writes")
+
+    monkeypatch.setattr(Repository, "save_recovered_tender", refuse)
+
+    outcome = retry_quarantined(repository=repository)
+
+    assert outcome.status is RunStatus.FAILED
+    assert outcome.counts["failed"] == 1
+    assert repository.list_quarantine()[0].resolved is False
+    assert repository.get_tender(tender_id("900045-2026")) is None
+
+
+@freeze_time(NOW)
+def test_a_retry_can_be_limited_to_named_notices(repository: Repository) -> None:
+    run_ingest(
+        repository,
+        FakeSource([[unmappable("900046-2026"), unmappable("900047-2026")]]),
+    )
+
+    outcome = retry_quarantined(repository=repository, ids=[tender_id("900046-2026")])
+
+    assert outcome.counts["attempted"] == 1
+    assert [item.source_id for item in outcome.results] == ["900046-2026"]
 
 
 # --------------------------------------------------------- nothing is deleted

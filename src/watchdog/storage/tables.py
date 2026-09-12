@@ -192,6 +192,39 @@ class TenderRow(Base):
     )
 
 
+class QuarantineRow(Base):
+    """A notice that could not be mapped, with the payload kept so it can be retried.
+
+    The other half of the ingest invariant: every notice the source hands us is
+    either a tender row or a row here. Rows are updated and resolved, never
+    deleted, so a notice that was once unreadable keeps its evidence.
+    """
+
+    __tablename__ = "quarantine"
+
+    # "{source}:{source_id}", the same identity a tender would have.
+    id: Mapped[str] = mapped_column(String(255), primary_key=True)
+
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+    source_id: Mapped[str] = mapped_column(String(128), nullable=False)
+
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    error: Mapped[str] = mapped_column(Text, nullable=False)
+    error_type: Mapped[str] = mapped_column(String(64), nullable=False)
+
+    # The ingest run that fetched this payload. A retry never overwrites it.
+    run_id: Mapped[str | None] = mapped_column(String(64))
+
+    first_seen_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
+    resolved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    __table_args__ = (
+        UniqueConstraint("source", "source_id", name="uq_quarantine_source_source_id"),
+        Index("ix_quarantine_resolved_last_seen_at", "resolved", "last_seen_at"),
+    )
+
+
 class TenderChangeRow(Base):
     """One material change seen between two versions of a notice."""
 

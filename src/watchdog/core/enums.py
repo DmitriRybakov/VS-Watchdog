@@ -148,6 +148,8 @@ class RulesRoute(StrEnum):
 class RunKind(StrEnum):
     INGEST = "ingest"
     SCREEN = "screen"
+    # Re-running the current mapper over payloads an earlier ingest could not read.
+    RETRY = "retry"
 
 
 class RunStatus(StrEnum):
