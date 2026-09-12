@@ -51,11 +51,18 @@ health endpoint.
 
 ## Database migrations
 
-Migrations are an explicit command. They never run at startup.
+Migrations are an explicit command. They never run at startup, so starting the application can never
+change the shape of the database.
 
 ```powershell
 .\.venv\Scripts\python.exe -m alembic upgrade head
 ```
+
+Run this once after cloning, and again after pulling a change that adds a migration. It creates the
+tables - `tender`, `tender_change`, `screening_result`, `review`, `tender_detail`, `run` and
+`watermark` - in whatever database `DATABASE_URL` points at: the SQLite file under `data/` on a
+laptop, PostgreSQL when hosted. Nothing is ever deleted from those tables; superseded results and
+notices that vanished from the source stay, and stay searchable.
 
 ## Task runner
 
