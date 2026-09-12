@@ -5,9 +5,11 @@ Rules that the types here enforce, because getting them wrong is expensive:
 - An unknown fact is ``None``. Never ``""``, never ``"Unknown"``, never ``0``.
 - A moment in time is a timezone-aware UTC timestamp; a naive one is rejected.
   A publication date is a calendar date, because that is all the source tells us.
+  A deadline with no time of day is a date, and its ``deadline`` stays ``None``.
 - Money keeps its currency next to it.
 - The final score is 1-5; an axis score is 0-5 or ``None`` for "not established".
 - Identity is (source, source_id). A title is never an identifier.
+- What gets screened is ``screening_blocks``, never the source's own display title.
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ from watchdog.core.enums import (
     Band,
     BidRoute,
     ContractNature,
+    DeadlineType,
     DecisionStage,
     Domain,
     NoticeStage,
@@ -59,21 +62,51 @@ def make_tender_id(source: SourcePlatform, source_id: str) -> str:
     return f"{source.value}{ID_SEPARATOR}{source_id}"
 
 
-def content_hash(
-    title: str,
-    description: str | None,
-    cpv_main: str | None,
-    cpv_additional: Sequence[str],
-) -> str:
-    """Hash of exactly what a screening judged, so a corrected notice is re-judged.
+class TextBlock(BaseModel):
+    """One piece of original source text, kept separate from the others.
 
-    Additional CPV codes are sorted: a reordered list is not a changed notice.
+    Blocks exist so that matching can do two things it cannot do on one joined
+    string: count a rule once per tender however many blocks it appears in, and
+    satisfy an acronym's context requirement *inside* a block only. Two
+    independent texts joined end to end create an adjacency that means nothing,
+    and a proximity window straddling the join would fire on it.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    # The source field the text came from, e.g. "title-proc".
+    field: str
+    # Three-letter language code as the source gave it, or None if it said nothing.
+    language: str | None = None
+    text: str
+
+    @property
+    def label(self) -> str:
+        return f"[{self.field}/{self.language or 'und'}]"
+
+
+def screening_text_from_blocks(blocks: Sequence[TextBlock]) -> str:
+    """The blocks as one labelled string, for a prompt or for display.
+
+    Matching reads the blocks, not this. The labels are here so that a person
+    reading an explanation can see which field and language a quote came from.
+    """
+    return "\n\n".join(f"{block.label}\n{block.text}" for block in blocks)
+
+
+def content_hash(screening_text: str, cpv_all: Sequence[str]) -> str:
+    """Hash of exactly what a screening read, so a corrected notice is re-judged.
+
+    It covers the screening text in full - every language variant, every lot
+    description - and every CPV code, not just the main one. Hashing less than we
+    screen would let a corrected Dutch title leave a stale assessment looking
+    current, which is the one failure this field exists to prevent.
+
+    CPV codes are sorted: a reordered list is not a changed notice.
     """
     parts = [
-        title,
-        description if description is not None else _HASH_NULL,
-        cpv_main if cpv_main is not None else _HASH_NULL,
-        ",".join(sorted(cpv_additional)),
+        screening_text if screening_text else _HASH_NULL,
+        ",".join(sorted(cpv_all)),
     ]
     return hashlib.sha256(_HASH_SEPARATOR.join(parts).encode("utf-8")).hexdigest()
 
@@ -83,6 +116,10 @@ class Tender(BaseModel):
 
     Source text is kept exactly as received, in its original language. Case,
     accents and hyphens are normalised inside matching code only.
+
+    ``title`` is the source's display title and may be a machine-composed one;
+    ``title_native`` is what the buyer actually wrote. Screening reads
+    ``screening_blocks``. See docs/decisions/0002.
     """
 
     model_config = ConfigDict(from_attributes=True)
@@ -92,25 +129,53 @@ class Tender(BaseModel):
     source_version: str | None = None
     source_url: str | None = None
 
+    # The display title. On TED this is composed as
+    # "<country> - <CPV label> - <buyer's title>" and translated into 24 languages.
     title: str
     title_language: str | None = None
+    # The buyer's own title, in the buyer's own language. None means the source
+    # did not give one; the notice is still screened on its description.
+    title_native: str | None = None
+    title_native_language: str | None = None
     description: str | None = None
 
     buyer_name: str | None = None
     buyer_country: str | None = None
+    # The codes exactly as the source gave them, NUTS regions and countries mixed
+    # together in one string. Kept whole and unresolved; see docs/decisions/0003.
     place_of_performance: str | None = None
+    # Where the work happens, at country level, ISO 3166-1 alpha-3. A different
+    # question from who is buying: a French buyer can procure a study for Angola,
+    # and a register with only one country field loses that notice.
+    place_of_performance_country: list[str] = Field(default_factory=list)
 
     # TED publishes a calendar date. Storing it as midnight UTC would invent a
     # precision we do not have and read as the day before, west of Greenwich.
     published_date: date | None = None
+    # The full moment, only when the source gave a time of day as well as a date.
     deadline: UtcDatetime | None = None
+    # The calendar date, set whenever any deadline is known. The register computes
+    # urgency from this; a missing time is never filled in with 23:59.
+    deadline_date: date | None = None
+    # Which source field the deadline was read from, verbatim.
+    deadline_source: str | None = None
+    deadline_type: DeadlineType = DeadlineType.UNKNOWN
 
     notice_stage: NoticeStage = NoticeStage.OTHER
     notice_subtype: str | None = None
+    # The procedure-level nature, as the source states it.
     contract_nature: ContractNature = ContractNature.UNKNOWN
+    # Every nature the notice mentions, deduplicated. A works contract with a
+    # services component appears in both. Every filter and facet on "services"
+    # uses this list, never the scalar above.
+    contract_natures: list[ContractNature] = Field(default_factory=list)
 
     cpv_main: str | None = None
     cpv_additional: list[str] = Field(default_factory=list)
+    # Every code on the notice, procedure and lot level, deduplicated. This is
+    # what matching reads: the specific code often exists only on a lot while the
+    # procedure-level code is something generic.
+    cpv_all: list[str] = Field(default_factory=list)
 
     estimated_value: Decimal | None = None
     currency: str | None = None
@@ -118,6 +183,9 @@ class Tender(BaseModel):
     documents_url: str | None = None
     languages: list[str] = Field(default_factory=list)
     multi_lot: bool = False
+
+    # The original text the screening reads, one block per field and language.
+    screening_blocks: list[TextBlock] = Field(default_factory=list)
 
     first_seen_at: UtcDatetime = Field(default_factory=utc_now)
     last_seen_at: UtcDatetime = Field(default_factory=utc_now)
@@ -130,15 +198,36 @@ class Tender(BaseModel):
 
     @property
     def screening_text(self) -> str:
-        """Title and description, the text the screening stage reads."""
-        if not self.description:
-            return self.title
-        return f"{self.title}\n\n{self.description}"
+        """Every original text variant, labelled. Never the composed display title."""
+        return screening_text_from_blocks(self.screening_blocks)
 
     @property
     def content_hash(self) -> str:
-        """Fingerprint of the title, description and CPV a screening would judge."""
-        return content_hash(self.title, self.description, self.cpv_main, self.cpv_additional)
+        """Fingerprint of the screening text and every CPV code a screening would judge."""
+        return content_hash(self.screening_text, self.cpv_all)
+
+    @property
+    def is_services(self) -> bool:
+        """True when the notice mentions services anywhere, not only as its main nature."""
+        return ContractNature.SERVICES in self.contract_natures
+
+    @property
+    def multi_country(self) -> bool:
+        """True when the work spans more than one country.
+
+        Derived rather than stored, unlike ``multi_lot``: the list it reads is
+        itself stored, so a column here could only ever disagree with it.
+        """
+        return len(self.place_of_performance_country) > 1
+
+    @property
+    def crosses_border_from_buyer(self) -> bool:
+        """True when the work happens somewhere other than the buyer's own country."""
+        if not self.buyer_country or not self.place_of_performance_country:
+            return False
+        return self.buyer_country.upper() not in {
+            code.upper() for code in self.place_of_performance_country
+        }
 
 
 class TenderChange(BaseModel):
@@ -325,7 +414,13 @@ class TenderFilters(BaseModel):
 
     source: SourcePlatform | None = None
     buyer_country: str | None = None
+    # Where the work happens. Matches against ``Tender.place_of_performance_country``,
+    # so a notice performed in several countries is found by any one of them.
+    place_of_performance_country: str | None = None
     notice_stage: NoticeStage | None = None
+    # Matches against ``Tender.contract_natures``, so a works contract with a
+    # services component is found by a services filter. Filtering the scalar
+    # would hide it.
     contract_nature: ContractNature | None = None
     published_from: date | None = None
     published_to: date | None = None

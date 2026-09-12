@@ -1,2 +1,455 @@
-# Entr Advisory & Decision Support mandate.
-# Placeholder - filled in a later step. Seeds the config_version table.
+# Entr Advisory & Decision Support — screening mandate
+#
+# This file states what we do and what we are for. It is owned by Entr, not by whoever
+# edits the code: the wording changes what gets shortlisted.
+#
+# Transcribed from the Entr Tender Screening Guide and corrected against internal Entr
+# service-line material (advisory service descriptions, the master deck, and the Advisory
+# & Decision Support SharePoint pages) in an in-house review, September 2026.
+#
+# THE FILE HAS TWO PARTS AND THEY ARE USED DIFFERENTLY:
+#   Part 1 (screening_mandate) is injected verbatim into every model assessment call.
+#     Keep it tight — it is paid for on every notice screened.
+#   Part 2 (commercial_reality) is NOT injected into screening. It informs the human
+#     review, the detailed summary at the extraction stage, and the bid-route decision.
+#
+# Bump `version` on every change to Part 1. Every screening result records the version it
+# was judged under, and a change marks earlier results stale. Part 2 changes do not
+# require a re-screen.
+
+version: 1
+updated: 2026-09-12
+owner: Entr Advisory & Decision Support
+
+# ===========================================================================
+# GOVERNING PRINCIPLE — read this before anything else
+# ===========================================================================
+
+principle: >
+  Relevance and bidability are assessed separately.
+
+  Relevance asks whether the opportunity matches Entr's domain, services and preferred
+  decision stage. Bidability asks whether Entr can realistically pursue it given
+  geography, value, language, eligibility, local-presence requirements, qualifications,
+  capacity and bid route.
+
+  A highly relevant opportunity may be commercially difficult to bid, and an opportunity
+  outside Entr's direct service scope may still carry project or market intelligence
+  value. Geography, contract size and language never reduce relevance — they change the
+  bid route.
+
+  Missing information is recorded as unknown and routed for review. It is never treated as
+  a negative fact.
+
+# ===========================================================================
+# PART 1 — SCREENING MANDATE   (injected into the model assessment prompt)
+# ===========================================================================
+
+screening_mandate:
+
+  identity: >
+    Entr Advisory & Decision Support is a team within Aker Solutions that supports
+    early-stage energy and decarbonisation projects. We are most valuable before major
+    commitments are locked in: while options are still open, before a concept is frozen,
+    before a contracting strategy is set.
+
+    Entr does not normally act as the EPC delivery entity or as an equipment supplier. We
+    do provide independent advisory, assurance and decision-support services that draw on
+    Aker Solutions' engineering, project-execution and operational experience.
+
+    Our work is advice, analysis and structured decision support. A typical engagement
+    helps a client frame an opportunity, choose between options, test whether a business
+    case holds, understand what a project will cost and how it should be delivered, or
+    challenge assumptions before money is committed.
+
+  # -----------------------------------------------------------------------
+  # Domain — three levels, not a binary. This is the primary filter.
+  # -----------------------------------------------------------------------
+
+  domain:
+    rule: >
+      The domain of the procured work decides relevance, not the identity of the buyer. A
+      hospital procuring a decarbonisation study for its estate is in domain; a hospital
+      procuring medical equipment is not, whatever the notice says about sustainability.
+
+      Domain has three levels. Core is our stated focus. Adjacent is energy or industrial
+      work that needs the kind of decision support we provide but is not energy-transition
+      work as such — relevant, but scored below core. Excluded is everything where energy
+      or climate language is incidental rather than the subject of the contract.
+
+    core:
+      - Low-carbon initiatives, including electrification and brownfield decarbonisation
+      - Carbon capture, transport, use and storage, and CO2 value chains
+      - Hydrogen — green, blue and derivatives including ammonia, methanol and e-fuels
+      - Renewable and low-carbon fuels — biofuels, e-fuels, sustainable aviation fuel,
+        methanol and ammonia. These value chains usually embed hydrogen production and CO2
+        streams, so a biofuel or e-fuel notice is core in its own right and not merely
+        adjacent to hydrogen
+      - Offshore and onshore wind, including floating wind
+      - Renewables more broadly, including solar and hybrid generation
+      - Energy storage, including batteries and grid-scale storage
+      - Electrical transmission and grid-connected infrastructure, including substations,
+        HVDC and subsea power
+      - Industrial decarbonisation, including process heat and emissions reduction at
+        existing facilities
+      - Low-carbon industrial production routes and electro-intensive industry — green
+        steel and direct reduced iron, low-carbon ammonia and fertiliser, and comparable
+        conversions of an existing production process to a low-carbon feedstock or
+        energy source
+      - Integrated and hybrid energy systems — combinations of wind, solar, storage, grid
+        connection and firm generation supplying an industrial load, an island or
+        off-grid site, or a production facility
+      - Energy transition and climate work where a technical decision is at stake
+
+    adjacent:
+      # Scored below core. See team_confirmation_required — the team has not yet ruled on
+      # how wide this level should be.
+      - Conventional energy projects requiring independent technical or commercial
+        decision support
+      - Industrial infrastructure where the decision is technical and early
+      - Energy-related infrastructure that is not itself a transition project but where a
+        fundamental energy decision is being made
+
+    excluded:
+      - Health, medical equipment, pharmaceuticals and healthcare procurement
+      - Education and training
+      - Social and welfare services
+      - Finance and banking, microfinance
+      - Defence, agriculture, general IT and general facilities management
+      - Anything where the energy or climate content is incidental language rather than
+        the subject of the contract
+
+  # -----------------------------------------------------------------------
+  # Services — what we actually do
+  # -----------------------------------------------------------------------
+
+  services:
+
+    core_categories:
+      - Project and opportunity framing, including business-case development and
+        validation
+      - Early-phase, feasibility and option studies
+      - Energy system modelling, sizing and optimisation
+      - Techno-economic assessment
+      - Execution and delivery strategy
+      - Technical consultancy, due diligence and independent assurance
+      - ESG and sustainability advisory where it is linked to a decision
+      - Management and decision support
+      - Project development and strategy
+
+    what_a_good_fit_looks_like:
+
+      project_and_opportunity_framing:
+        - Framing an opportunity and aligning it with client objectives and drivers
+        - Business-case development and validation
+        - Screening of concepts and documentation of trade-offs
+
+      early_phase_decision_support:
+        - Concept screening and optioneering
+        - Pre-FEED and pre-DG0 studies
+        - Comparison of alternative technologies or configurations
+        - Go / no-go decision support
+
+      energy_system_modelling_sizing_and_optimisation:
+        - Sizing and configuration of integrated energy systems — wind, solar, battery and
+          other storage, grid connection, and firm or backup generation in combination
+        - Hourly production and dispatch simulation against a demand, load or offtake
+          profile, across real historical weather years
+        - Optimisation of the capacity mix, storage sizing, grid-connection capacity and
+          curtailment, including the trade-offs between them
+        - Production profile modelling for energy carriers and final products — hydrogen,
+          ammonia, methanol, biofuel, sustainable aviation fuel, direct reduced iron and
+          similar — where an intermittent energy supply drives a conversion process
+        - Power-to-X and conversion-chain modelling — energy in to product out, with
+          utilisation, load-following behaviour, minimum turndown, ramp constraints and
+          storage buffers
+        - Yield, availability, capacity factor and energy-balance assessment
+        - Grid-connected, hybrid, islanded and off-grid configurations
+        - Linking the production profile to the business case — unit cost per MWh or per
+          tonne of product, and how the configuration changes it
+
+      techno_economic_assessment:
+        - High-level CAPEX and OPEX estimation, typically at Class 5 or Class 4 maturity
+          where scope definition, data availability and required assurance are appropriate
+        - LCOx, unit cost and breakeven analysis
+        - Sensitivity and scenario analysis linked to technical choices
+        - Cost benchmarking and reality checks
+
+      execution_and_delivery_strategy:
+        - Contracting and delivery models
+        - Scope splits, risk allocation and interface strategy
+        - Permitting and procurement strategy
+        - Schedule realism, long-lead identification and high-level constructability
+        - Supply chain and yard strategy at a high level
+
+      technical_assurance_and_due_diligence:
+        - Independent assessment of technical integrity, performance, operability,
+          maturity and project assumptions
+        - Technical due diligence — buyer, lender or seller side
+        - Red-flag reviews and deeper independent reviews
+        - Independent challenge of business case assumptions
+        - Risk and opportunity identification with quantified impact
+
+      project_development_and_strategy:
+        - Project development strategy and development roadmap
+        - Decision-gate planning
+        - Investment-readiness support
+
+      esg_and_sustainability:
+        - In scope where the work materially influences an energy, industrial, investment,
+          project-development or technical decision
+        - Life cycle assessment, carbon footprint analysis
+        - ESG integration into design or into the business case
+        - Support for regulatory, funding or investor requirements
+        - NOT standalone corporate reporting, generic sustainability communications, or
+          broad organisational ESG programmes with no technical decision attached
+
+      management_and_decision_support:
+        - Structured workshops
+        - Decision framing and documentation of trade-offs
+        - Value improvement and value assurance processes
+        - Alignment of stakeholders on key choices
+
+    definitions:
+      technical_assistance: >
+        Counts only where it is outcome-based advisory or decision support. Public tenders
+        use "technical assistance" for long-term embedded personnel, procurement
+        administration, institutional capacity building and general programme management —
+        none of which are ours. Time-based staff augmentation, embedded resourcing and
+        institutional-capacity programmes are out regardless of the sector.
+
+    not_us:
+      - EPC and construction execution as the delivery entity
+      - Detailed design and engineering delivery
+      - Equipment supply, installation and commissioning
+      - Maintenance, operations and asset management contracts
+      - Body-leasing, staff augmentation and framework resource provision
+      - Rural development, microfinance and general development programmes
+
+  # -----------------------------------------------------------------------
+  # Decision stage — when we are most valuable
+  # -----------------------------------------------------------------------
+
+  decision_stage:
+    rule: >
+      The earlier the decision, the more valuable we are. Our sweet spot is before a
+      concept is frozen, while options are genuinely still open. Work attached to a
+      decision already taken is worth less to us even when domain and service both fit.
+
+    earliest_and_best:
+      - Concept selection and option screening
+      - Pre-feasibility and feasibility
+      - Pre-FEED
+      - Market consultations and prior information notices, where the buyer is still
+        forming the scope
+
+    still_relevant:
+      - FEED and project definition
+      - Contracting and execution strategy set before award
+      - Due diligence ahead of an investment decision
+
+    usually_too_late:
+      - Detailed design against a frozen concept
+      - Construction, installation and commissioning
+      - Operations and maintenance
+
+  # -----------------------------------------------------------------------
+  # Edge cases — settled once, here
+  # -----------------------------------------------------------------------
+
+  edge_cases:
+    - case: A buyer outside our sectors procuring work inside them
+      ruling: In domain. The buyer's sector is not the domain. A hospital or municipality
+        procuring a decarbonisation study is our work.
+
+    - case: A notice in our sectors procuring construction, equipment or operations
+      ruling: Not a relevant advisory opportunity, but not noise either — an offshore wind
+        construction package tells us a project exists and is moving. Score it low on the
+        service axis and mark it as project intelligence rather than archiving it as
+        irrelevant. It should be findable, not on the shortlist.
+
+    - case: A study sizing or optimising an energy system for an industrial site or a
+        production facility
+      ruling: Core. This is our work whether the output is described as power supply,
+        energy system design, capacity optimisation, or the production profile of a
+        product such as hydrogen, ammonia, biofuel or direct reduced iron. The procured
+        subject is an early technical decision about configuration, and that is precisely
+        what we do.
+
+    - case: Sustainability or net-zero language attached to unrelated procurement
+      ruling: Out of domain. Boilerplate about a buyer's climate commitments is not the
+        subject of the contract.
+
+    - case: A large framework agreement covering many possible services
+      ruling: Relevant if advisory or study work is among the services named. Flag for
+        review rather than scoring on the framework's headline title — the framework
+        ceiling and the title routinely misrepresent the addressable scope.
+
+    - case: A notice too thin to judge
+      ruling: Not a rejection. We do not know, which means human review.
+
+    - case: A tender inviting us to help a client prepare its own bid
+      ruling: See team_confirmation_required. Do not confuse Entr bidding for work with
+        Entr advising a client on that client's bid — they are different opportunities and
+        only one of them is currently confirmed as our offering.
+
+# ===========================================================================
+# PART 2 — COMMERCIAL REALITY   (not injected into screening)
+# ===========================================================================
+#
+# These shape the bid route and the human review, never the relevance score. Most can only
+# be confirmed from the tender documents, so they are assessed at the summary stage, not
+# during screening. Where a notice does state one plainly, record it as a flag for the
+# reviewer.
+
+commercial_reality:
+
+  geography:
+    # Provisional, proposed in the in-house review. Not yet ratified by the team.
+    priority: Nordics, UK and selected Northwest European markets
+    acceptable: >
+      Wider EU/EEA where English submission and delivery are permitted and no unsupported
+      local-establishment requirement applies
+    opportunistic: >
+      Other regions where the opportunity is externally funded, strategically important,
+      or accessible through an Aker Solutions entity or a qualified partner
+    exclude: >
+      Jurisdictions where legal, compliance, security, language or local-presence
+      requirements cannot be satisfied
+    note: >
+      Geography changes the bid route, not the relevance score. A Portuguese advisory
+      opportunity in our domain is still highly relevant; it may simply need a partner.
+
+  contract_value:
+    basis: >
+      Judge the expected ENTR SCOPE value — not total project CAPEX, not the framework
+      ceiling, not the sum across all lots, not the maximum call-off value. These are
+      routinely an order of magnitude apart.
+    minimum_economic_bid: undecided   # lowest expected Entr revenue that justifies bid
+                                      # effort, approvals, contract review, mobilisation
+    maximum_credible_prime: undecided # largest scope Entr would lead without another
+                                      # Aker Solutions business, subcontractors or a
+                                      # consortium
+    rule: >
+      Below the minimum: normally no-bid unless strategic, repeatable, low-effort or
+      relationship-building. Between the two: target band. Above the maximum: commercial
+      review — consider consortium, subcontract or a broader Aker Solutions route. Value
+      unknown: do not reject, estimate the likely Entr share and flag the uncertainty.
+    note: >
+      Do not put numbers here until the team has looked at historical opportunities, bid
+      cost and typical study size.
+
+  languages:
+    # Distinguish notice language, procurement-document language, submission language,
+    # contract and delivery language, and clarification or presentation language. They are
+    # often different, and only the submission and delivery ones block a bid.
+    tier_1: undecided   # Entr can prepare, quality-control and submit directly
+    tier_2: undecided   # possible using internal native-language resources
+    tier_3: undecided   # possible only with an approved external or consortium partner
+    blocked: undecided  # mandatory language that cannot be supported
+    note: >
+      Machine translation supports screening. It does not establish formal bid capability.
+
+  local_presence:
+    rule: >
+      A local-presence requirement is a hard blocker only when it is mandatory, cannot be
+      met by an eligible Aker Solutions entity, and cannot legally be satisfied through a
+      subcontractor or consortium partner. Otherwise it is a bid-route condition requiring
+      verification.
+    agent_instruction: >
+      Record the named requirement — registered legal entity, tax or VAT registration,
+      local office, licensed personnel, local labour percentage, local references,
+      physical mobilisation, in-country consortium member — and request confirmation.
+      Never assert that an Aker Solutions entity satisfies it.
+
+  bid_route:
+    prime: >
+      Scope is predominantly Entr services, size and liability are proportionate, required
+      references are available, and no mandatory service lies outside our delivery
+      capability.
+    subcontractor: >
+      Another Aker Solutions business or an external party owns the client relationship
+      and Entr provides a defined advisory work package.
+    consortium_or_partner: >
+      Local presence or language is required, complementary specialist services are
+      material, references are not available to us alone, or multidisciplinary capacity is
+      needed.
+    group_led: >
+      The opportunity spans advisory and significant engineering or EPC scope and another
+      Aker Solutions entity is the natural contracting party.
+    default: >
+      Entr normally bids as prime for clearly bounded advisory assignments it can credibly
+      contract and deliver. For multidisciplinary, locally restricted, language-dependent
+      or execution-heavy opportunities, the route is through an appropriate Aker Solutions
+      entity, a subcontract, a partner or a consortium.
+
+  assessed_at_summary_stage_only:
+    # Real bid/no-bid factors that a short notice cannot support a judgement on. They are
+    # extracted with the detailed summary, for shortlisted tenders only. Screening must
+    # not guess at them.
+    - Mandatory references and qualification thresholds
+    - Required disciplines and delivery capacity
+    - Contract and liability conditions — liability caps, warranties, insurance, IP terms
+    - Framework and lot structure, and the genuinely addressable scope within it
+    - Whether a partner route exists for a requirement we cannot meet alone
+
+  visible_at_screening:
+    # These a notice does usually state, and they already feed the register.
+    - Submission deadline and the remaining bid lead time — a good opportunity found too
+      late is not an opportunity. The scoring policy penalises very short windows and the
+      register shows days remaining.
+    - Client and funding source, useful for strategic prioritisation, without confusing
+      buyer identity with domain.
+    - Evidence confidence — how much the notice actually stated versus what was inferred.
+      Already computed from description length, CPV presence and rule/model agreement.
+
+  strategic_exception: >
+    Low expected value does not automatically mean no-bid. Client access, market entry,
+    repeatability and intelligence value can justify pursuing a small assignment. This is
+    a human call recorded in the review, never a machine one.
+
+# ===========================================================================
+# PART 3 — TEAM CONFIRMATION REQUIRED
+# ===========================================================================
+#
+# Plausible but not substantiated in the internal material reviewed. They are included in
+# Part 1 above so screening is not artificially narrow, but they should be confirmed or
+# removed before this profile is treated as settled policy. Each one changes what gets
+# shortlisted.
+
+team_confirmation_required:
+
+  - item: How wide is the adjacent domain?
+    question: >
+      Is Watchdog strictly for energy transition and decarbonisation, or does conventional
+      energy and industrial work requiring Entr-type decision support belong in scope?
+      Internal SharePoint describes the offering as "fundamental energy-related decisions
+      and project implementation", which is wider than the Tender Screening Guide. This is
+      the single most consequential open question in the file.
+
+  - item: Solar as a standalone target market
+  - item: Batteries and grid-scale storage as a broad capability
+  - item: CBAM advisory
+  - item: Climate finance advisory
+  - item: All forms of life cycle assessment, or only decision-linked LCA
+  - item: EU-funded work outside Europe
+  - item: Local-language bid capability
+
+  - item: Incentive and grant advisory
+    note: >
+      Referenced in an internal investor-support document. Proposed wording if confirmed —
+      "funding, incentive and grant-related analysis where integrated with a technical,
+      ESG or business-case decision."
+
+  - item: Owner's engineering
+    question: >
+      Does "technical assistance" for us include owner's engineering assignments, or only
+      decision-support work? The definition in Part 1 currently excludes embedded and
+      time-based roles, which would exclude most owner's engineer scopes.
+
+  - item: Bid-development support
+    question: >
+      Internal material references bid-development support. Does Entr help clients prepare
+      their own tenders, proposals and commercial positioning? If yes it should be added
+      as a conditional service; if no it should stay out, because a model will otherwise
+      conflate "Entr bids for this" with "Entr helps the client bid for something else".

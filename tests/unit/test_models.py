@@ -7,12 +7,13 @@ from datetime import UTC, date, datetime, timedelta, timezone
 import pytest
 from pydantic import ValidationError
 
-from watchdog.core.enums import Band, Domain, SourcePlatform
+from watchdog.core.enums import Band, ContractNature, Domain, SourcePlatform
 from watchdog.core.models import (
     AxisScore,
     RulesResult,
     ScreeningResult,
     Tender,
+    TextBlock,
     content_hash,
     make_tender_id,
 )
@@ -26,35 +27,105 @@ def test_id_is_derived_from_source_and_source_id(make_tender) -> None:
     assert tender.id == make_tender_id(SourcePlatform.TED, "00123456-2026")
 
 
-def test_screening_text_is_title_and_description(make_tender) -> None:
-    tender = make_tender(title="Hydrogen study", description="Pre-FEED.")
+def test_screening_text_is_every_labelled_block(make_tender) -> None:
+    tender = make_tender(title_native="Hydrogen study", description="Pre-FEED.")
 
-    assert tender.screening_text == "Hydrogen study\n\nPre-FEED."
+    assert tender.screening_text == (
+        "[title-proc/eng]\nHydrogen study\n\n[description-proc/eng]\nPre-FEED."
+    )
 
 
-def test_screening_text_of_a_thin_notice_is_just_the_title(make_tender) -> None:
-    tender = make_tender(title="Hydrogen study", description=None)
+def test_screening_text_never_contains_the_composed_display_title(make_tender) -> None:
+    tender = make_tender(
+        title="Norway - Feasibility study, advisory service, analysis - Hydrogen study",
+        title_native="Hydrogen study",
+    )
 
-    assert tender.screening_text == "Hydrogen study"
+    # The CPV label in the composed title is the code we filtered on, restated.
+    assert "Feasibility study, advisory service, analysis" not in tender.screening_text
+
+
+def test_a_notice_with_no_native_title_is_screened_on_its_description(make_tender) -> None:
+    tender = make_tender(title_native=None, description="Pre-FEED.")
+
+    assert tender.screening_text == "[description-proc/eng]\nPre-FEED."
+
+
+def test_screening_text_of_a_notice_with_no_original_text_is_empty(make_tender) -> None:
+    tender = make_tender(title_native=None, description=None)
+
+    # Thin text routes to human review; it is never evidence of irrelevance.
+    assert tender.screening_text == ""
 
 
 def test_content_hash_changes_when_the_notice_is_corrected(make_tender) -> None:
     original = make_tender()
-    corrected = original.model_copy(update={"title": "Feasibility study, corrected"})
+    corrected = original.model_copy(
+        update={
+            "screening_blocks": [
+                TextBlock(field="title-proc", language="eng", text="Feasibility study, corrected")
+            ]
+        }
+    )
 
     assert original.content_hash != corrected.content_hash
 
 
-def test_content_hash_ignores_the_order_of_additional_cpv_codes() -> None:
-    first = content_hash("t", "d", "71241000", ["73210000", "09000000"])
-    second = content_hash("t", "d", "71241000", ["09000000", "73210000"])
+def test_content_hash_ignores_the_order_of_cpv_codes() -> None:
+    first = content_hash("text", ["73210000", "09000000"])
+    second = content_hash("text", ["09000000", "73210000"])
 
     assert first == second
 
 
-def test_a_missing_description_and_an_empty_one_hash_differently() -> None:
+def test_content_hash_changes_when_a_cpv_code_is_added() -> None:
+    assert content_hash("text", ["71241000"]) != content_hash("text", ["71241000", "09330000"])
+
+
+def test_no_screening_text_and_empty_screening_text_hash_differently() -> None:
     # An unknown fact is None, never "". The hash has to keep them apart.
-    assert content_hash("t", None, None, []) != content_hash("t", "", None, [])
+    assert content_hash("", []) == content_hash("", [])
+    assert content_hash("", []) != content_hash(" ", [])
+
+
+def test_a_hash_covering_one_language_would_miss_a_corrected_variant(make_tender) -> None:
+    dutch = TextBlock(field="title-proc", language="nld", text="Haalbaarheidsstudie")
+    french = TextBlock(field="title-proc", language="fra", text="Etude de faisabilite")
+
+    tender = make_tender().model_copy(update={"screening_blocks": [dutch, french]})
+    corrected = tender.model_copy(
+        update={
+            "screening_blocks": [
+                dutch,
+                TextBlock(
+                    field="title-proc", language="fra", text="Etude de faisabilite, corrigee"
+                ),
+            ]
+        }
+    )
+
+    assert tender.content_hash != corrected.content_hash
+
+
+def test_a_deadline_date_without_a_time_leaves_the_moment_null(make_tender) -> None:
+    tender = make_tender(deadline=None, deadline_date=date(2026, 4, 15))
+
+    assert tender.deadline is None
+    assert tender.deadline_date == date(2026, 4, 15)
+
+
+def test_a_notice_mentioning_services_anywhere_counts_as_services(make_tender) -> None:
+    tender = make_tender(contract_natures=[ContractNature.WORKS, ContractNature.SERVICES])
+    tender = tender.model_copy(update={"contract_nature": ContractNature.WORKS})
+
+    assert tender.contract_nature is ContractNature.WORKS
+    assert tender.is_services is True
+
+
+def test_a_works_only_notice_is_not_services(make_tender) -> None:
+    tender = make_tender(contract_natures=[ContractNature.WORKS])
+
+    assert tender.is_services is False
 
 
 def test_a_naive_timestamp_is_rejected() -> None:

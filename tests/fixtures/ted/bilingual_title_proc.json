@@ -1,0 +1,197 @@
+{
+  "deadline-receipt-tender-date-lot": [
+    "2026-11-17+01:00"
+  ],
+  "notice-type": "cn-standard",
+  "publication-number": "622963-2026",
+  "main-classification-proc": [
+    "71000000"
+  ],
+  "place-of-performance-country-proc": [
+    "BEL"
+  ],
+  "document-url-lot": [
+    "https://www.publicprocurement.be/publication-workspaces/3ffc8455-2c7d-4e80-92ea-5b533ba9188f/documents"
+  ],
+  "official-language": [
+    "FRA",
+    "NLD"
+  ],
+  "notice-subtype": "16",
+  "publication-date": "2026-09-10+02:00",
+  "contract-nature-main-proc": "services",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/622963-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/622963-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/622963-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/622963-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/622963-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/622963-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/622963-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/622963-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/622963-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/622963-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/622963-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/622963-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/622963-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/622963-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/622963-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/622963-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/622963-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/622963-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/622963-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/622963-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/622963-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/622963-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/622963-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/622963-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/622963-2026/pdf"
+    },
+    "pdfs": {
+      "FRA": "https://ted.europa.eu/fr/notice/622963-2026/pdfs",
+      "NLD": "https://ted.europa.eu/nl/notice/622963-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/622963-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/622963-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/622963-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/622963-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/622963-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/622963-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/622963-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/622963-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/622963-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/622963-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/622963-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/622963-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/622963-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/622963-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/622963-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/622963-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/622963-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/622963-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/622963-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/622963-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/622963-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/622963-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/622963-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/622963-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/622963-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/622963-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/622963-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/622963-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/622963-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/622963-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/622963-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/622963-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/622963-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/622963-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/622963-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/622963-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/622963-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/622963-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/622963-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/622963-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/622963-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/622963-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/622963-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/622963-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/622963-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/622963-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/622963-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/622963-2026/html"
+    }
+  },
+  "notice-identifier": "50ab29bd-6b53-4dfc-9f39-986968dca6c6",
+  "place-of-performance": [
+    "BE100",
+    "BEL",
+    "BE100",
+    "BEL"
+  ],
+  "deadline-receipt-request": [
+    "2026-11-17T11:00:00+01:00"
+  ],
+  "title-proc": {
+    "fra": "6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "nld": "6.25.1.9 Ontwerpopdracht voor de restauratie van de gevels van het Museum Kunst en Geschiedenis in de Jubelpark in Brussel - Dienstenopdracht - Openbare Procedure"
+  },
+  "main-classification-type-proc": "cpv",
+  "buyer-country": [
+    "BEL"
+  ],
+  "description-lot": {
+    "fra": [
+      "Restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles"
+    ],
+    "nld": [
+      "Restauratie van de gevels van het Museum Kunst en Geschiedenis in de Jubelpark in Brussel"
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "BEL"
+  ],
+  "deadline-receipt-tender-time-lot": [
+    "11:00:00+01:00"
+  ],
+  "classification-cpv": [
+    "71000000",
+    "71000000"
+  ],
+  "contract-nature": [
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "fra": [
+      "SPF Mobilité et Transports"
+    ],
+    "nld": [
+      "FOD Mobiliteit en Vervoer"
+    ]
+  },
+  "notice-title": {
+    "hun": "Belgium – Építészeti, építési, mérnöki és vizsgálati szolgáltatások – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "lav": "Beļģija – Arhitektūras, būvniecības, inženiertehniskie un pārbaudes pakalpojumi – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "swe": "Belgien – Arkitekt-, bygg-, ingenjörs- och besiktningstjänster – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "gle": "An Bheilg – Architectural, construction, engineering and inspection services – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "ell": "Βέλγιο – Υπηρεσίες αρχιτεκτονικής, κατασκευαστικών έργων, έργων πολιτικού μηχανικού και επίβλεψης – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "spa": "Bélgica – Servicios de arquitectura, construcción, ingeniería e inspección – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "est": "Belgia – Arhitektuuri-, ehitus-, inseneri- ja ehitusjärelevalveteenused – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "nld": "België – Dienstverlening op het gebied van architectuur, bouwkunde, civiele techniek en inspectie – 6.25.1.9 Ontwerpopdracht voor de restauratie van de gevels van het Museum Kunst en Geschiedenis in de Jubelpark in Brussel - Dienstenopdracht - Openbare Procedure",
+    "fin": "Belgia – Arkkitehti-, rakennus-, insinööri- ja tarkastuspalvelut – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "pol": "Belgia – Usługi architektoniczne, budowlane, inżynieryjne i kontrolne – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "hrv": "Belgija – Arhitektonske, građevne, tehničke i inspekcije usluge – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "ces": "Belgie – Architektonické, stavební, technické a inspekční služby – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "dan": "Belgien – Arkitekt-, konstruktions-, ingeniør- og inspektionsvirksomhed – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "ron": "Belgia – Servicii de arhitectură, de construcţii, de inginerie şi de inspecţie – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "por": "Bélgica – Serviços de arquitectura, construção, engenharia e inspecção – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "slk": "Belgicko – Architektonické, stavebné, inžinierske a inšpekčné služby – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "fra": "Belgique – Services d'architecture, services de construction, services d'ingénierie et services d'inspection – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "mlt": "Il-Belġju – Servizzi ta' perizja, kostruzzjoni, inġinerija u spezzjoni – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "deu": "Belgien – Dienstleistungen von Architektur-, Konstruktions- und Ingenieurbüros und Prüfstellen – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "lit": "Belgija – Architektūros, statybų, inžinerijos ir inspektavimo paslaugos – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "ita": "Belgio – Servizi architettonici, di costruzione, ingegneria e ispezione – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "bul": "Бeлгия – Архитектурни, строителни, инженерни и инспекционни услуги – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "slv": "Belgija – Arhitekturne, gradbeniške, inženirske in inšpekcijske storitve – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
+    "eng": "Belgium – Architectural, construction, engineering and inspection services – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte"
+  },
+  "title-lot": {
+    "fra": [
+      "Beliris-6.25.1.9 - 1"
+    ],
+    "nld": [
+      "Beliris-6.25.1.9 - 1"
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "fra": "Le présent marché porte sur l’étude de la restauration des façades du Musée Art et Histoire sur le site du Cinquantenaire à Bruxelles. La Régie des Bâtiments a déjà rénové les autres façades du site. Dès lors, l’étude en vue de la restauration des façades extérieures et des façades des cours intérieures du Musée Art et Histoire du Cinquantenaire est opportune pour la cohérence de l’ensemble. Ces façades sont classées, voir Arrêté de classement du 22.04.2004 en annexe 04. Le marché vise les études complètes en vue de - la restauration des façades du Musée Art et d’Histoire (voir périmètre en annexe), y compris les statues, les lettrages, etc. - la faisabilité de la mise aux normes incendie en façade des bâtiments et d’un chemin d’évacuation supplémentaire au rez-de-chaussée pour l’Horeca actuel - la restauration de l’hémicycle du Musée Art et Histoire - étudier et proposer des possibilités d’intégration et/ou de reconversion de l’ancienne entrée de l’esplanade du Musée Art & Histoire, en vue de renforcer sa visibilité et d’en faire un véritable espace de mise en valeur des activités et collections du Musée. Pour plus d'information voir le cahier spécial des charges en annexe à cet avis de marché.",
+    "nld": "Deze opdracht betreft de studie voor de restauratie van de gevels van het Museum Kunst en Geschiedenis (KMKG) in het Jubelpark in Brussel. De andere gevels van het complex werden al door de Regie der Gebouwen gerenoveerd. Om de samenhang van het geheel te waarborgen, is het dus wenselijk om een studie uit te voeren met het oog op de restauratie van de buitengevels en gevels van binnenplaatsen van het Museum Kunst en Geschiedenis. Deze gevels zijn beschermd, zie Besluit van bescherming van 22.04.2004 in bijlage 04. De opdracht de volledige studie voor - de restauratie van de gevels van het Museum Kunst en Geschiedenis (zie perimeter in de bijlage), met inbegrip van de beelden, opschriften enz. - de haalbaarheid van het aanpassen van de gevels van de gebouwen aan de brandveiligheidsnormen en het aanleggen van een extra vluchtweg op de begane grond voor de bestaande horecagelegenheid - de restauratie van de hemicycle van het Museum Kunst en Geschiedenis. - onderzoeken en voorstellen van mogelijkheden voor de integratie en/of herbestemming van de voormalige ingang aan de esplanade van het Museum Kunst & Geschiedenis, met als doel de zichtbaarheid van het museum te versterken en deze ruimte uit te bouwen tot een volwaardige etalage voor de activiteiten en collecties van het museum. Voor meer informatie zie het bijzonder bestek in bijlage van deze aankondiging van een opdracht."
+  }
+}

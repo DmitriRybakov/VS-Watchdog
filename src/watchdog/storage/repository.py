@@ -19,6 +19,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
+from pydantic import BaseModel
 from sqlalchemy import Select, and_, func, nulls_last, or_, select, update
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
@@ -34,9 +35,11 @@ from watchdog.core.models import (
     TenderDetail,
     TenderFilters,
     TenderPage,
+    TextBlock,
     UpsertStats,
     Watermark,
     content_hash,
+    screening_text_from_blocks,
 )
 from watchdog.storage.db import SessionFactory
 from watchdog.storage.tables import (
@@ -47,6 +50,7 @@ from watchdog.storage.tables import (
     TenderDetailRow,
     TenderRow,
     WatermarkRow,
+    contains_token,
 )
 
 # Everything on a tender that comes from the source. first_seen_at and
@@ -58,29 +62,40 @@ SOURCE_FIELDS: tuple[str, ...] = (
     "source_url",
     "title",
     "title_language",
+    "title_native",
+    "title_native_language",
     "description",
     "buyer_name",
     "buyer_country",
     "place_of_performance",
+    "place_of_performance_country",
     "published_date",
     "deadline",
+    "deadline_date",
+    "deadline_source",
+    "deadline_type",
     "notice_stage",
     "notice_subtype",
     "contract_nature",
+    "contract_natures",
     "cpv_main",
     "cpv_additional",
+    "cpv_all",
     "estimated_value",
     "currency",
     "documents_url",
     "languages",
     "multi_lot",
+    "screening_blocks",
     "raw",
 )
 
 # Changes a colleague needs to be told about; the rest are updated silently.
 MATERIAL_CHANGE_FIELDS: tuple[str, ...] = (
     "title",
+    "title_native",
     "deadline",
+    "deadline_date",
     "notice_stage",
     "source_version",
 )
@@ -89,6 +104,9 @@ MATERIAL_CHANGE_FIELDS: tuple[str, ...] = (
 SORT_KEYS: dict[str, InstrumentedAttribute[Any]] = {
     "published_date": TenderRow.published_date,
     "deadline": TenderRow.deadline,
+    # Sorting the register by urgency uses the date, which is set even when the
+    # source gave no time of day.
+    "deadline_date": TenderRow.deadline_date,
     "first_seen_at": TenderRow.first_seen_at,
     "last_seen_at": TenderRow.last_seen_at,
     "title": TenderRow.title,
@@ -311,9 +329,9 @@ class Repository:
         """Tenders whose current result no longer reflects how we screen today.
 
         A tender needs re-screening when it has never been screened, or when any of
-        these differ from its latest result: the content hash of its current title,
-        description and CPV; the rules, policy, profile or prompt version; the
-        provider or the model. Turning the model on therefore makes every
+        these differ from its latest result: the content hash of its current
+        screening text and CPV codes; the rules, policy, profile or prompt version;
+        the provider or the model. Turning the model on therefore makes every
         rules-only result stale, which is what we want.
         """
         with self._session_factory() as session:
@@ -337,10 +355,8 @@ class Repository:
             for tender in session.execute(
                 select(
                     TenderRow.id,
-                    TenderRow.title,
-                    TenderRow.description,
-                    TenderRow.cpv_main,
-                    TenderRow.cpv_additional,
+                    TenderRow.screening_blocks,
+                    TenderRow.cpv_all,
                 ).order_by(TenderRow.id.asc())
             ):
                 result = latest.get(tender.id)
@@ -348,11 +364,12 @@ class Repository:
                     stale.append(tender.id)
                     continue
 
+                blocks = [
+                    TextBlock.model_validate(block) for block in tender.screening_blocks or []
+                ]
                 current_hash = content_hash(
-                    tender.title,
-                    tender.description,
-                    tender.cpv_main,
-                    tender.cpv_additional or [],
+                    screening_text_from_blocks(blocks),
+                    tender.cpv_all or [],
                 )
                 if (
                     result.screened_content_hash != current_hash
@@ -578,10 +595,20 @@ def _filter_conditions(filters: TenderFilters) -> list[Any]:
         conditions.append(TenderRow.source == filters.source.value)
     if filters.buyer_country is not None:
         conditions.append(TenderRow.buyer_country == filters.buyer_country)
+    if filters.place_of_performance_country is not None:
+        # Where the work happens, which is a different question from who is buying.
+        conditions.append(
+            contains_token(
+                TenderRow.place_of_performance_country,
+                filters.place_of_performance_country,
+            )
+        )
     if filters.notice_stage is not None:
         conditions.append(TenderRow.notice_stage == filters.notice_stage.value)
     if filters.contract_nature is not None:
-        conditions.append(TenderRow.contract_nature == filters.contract_nature.value)
+        # The list, never the scalar: a works contract with a services component
+        # has to be found by a services filter, and TED's own filter keeps it.
+        conditions.append(contains_token(TenderRow.contract_natures, filters.contract_nature.value))
     if filters.published_from is not None:
         conditions.append(TenderRow.published_date >= filters.published_from)
     if filters.published_to is not None:
@@ -599,6 +626,7 @@ def _filter_conditions(filters: TenderFilters) -> list[Any]:
         conditions.append(
             or_(
                 TenderRow.title.ilike(pattern, escape="\\"),
+                TenderRow.title_native.ilike(pattern, escape="\\"),
                 TenderRow.description.ilike(pattern, escape="\\"),
             )
         )
@@ -636,8 +664,10 @@ def _column_value(value: Any) -> Any:
     """Store an enum as its value, so the database never holds a Python repr."""
     if isinstance(value, Enum):
         return value.value
+    if isinstance(value, BaseModel):
+        return value.model_dump(mode="json")
     if isinstance(value, list):
-        return list(value)
+        return [_column_value(item) for item in value]
     return value
 
 

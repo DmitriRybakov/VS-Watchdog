@@ -1,0 +1,243 @@
+{
+  "deadline-receipt-tender-date-lot": [
+    "2026-10-02+02:00",
+    "2026-10-02+02:00",
+    "2026-10-02+02:00",
+    "2026-10-02+02:00",
+    "2026-10-02+02:00"
+  ],
+  "notice-type": "cn-standard",
+  "publication-number": "596416-2026",
+  "main-classification-proc": [
+    "90910000"
+  ],
+  "additional-classification-proc": [
+    "90911200",
+    "90919200",
+    "90911300",
+    "90620000",
+    "90630000",
+    "90914000",
+    "90921000"
+  ],
+  "place-of-performance-country-proc": [
+    "POL"
+  ],
+  "document-url-lot": [
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details"
+  ],
+  "official-language": [
+    "POL"
+  ],
+  "notice-subtype": "16",
+  "publication-date": "2026-08-31+02:00",
+  "contract-nature-main-proc": "services",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/596416-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/596416-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/596416-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/596416-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/596416-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/596416-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/596416-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/596416-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/596416-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/596416-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/596416-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/596416-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/596416-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/596416-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/596416-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/596416-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/596416-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/596416-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/596416-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/596416-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/596416-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/596416-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/596416-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/596416-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/596416-2026/pdf"
+    },
+    "pdfs": {
+      "POL": "https://ted.europa.eu/pl/notice/596416-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/596416-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/596416-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/596416-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/596416-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/596416-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/596416-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/596416-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/596416-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/596416-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/596416-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/596416-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/596416-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/596416-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/596416-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/596416-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/596416-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/596416-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/596416-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/596416-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/596416-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/596416-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/596416-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/596416-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/596416-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/596416-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/596416-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/596416-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/596416-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/596416-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/596416-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/596416-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/596416-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/596416-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/596416-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/596416-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/596416-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/596416-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/596416-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/596416-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/596416-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/596416-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/596416-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/596416-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/596416-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/596416-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/596416-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/596416-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/596416-2026/html"
+    }
+  },
+  "notice-identifier": "9a3fe699-66d9-4d68-b046-43759f02da64",
+  "place-of-performance": [
+    "POL",
+    "PL225",
+    "PL225",
+    "PL613",
+    "PL417",
+    "PL713",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL"
+  ],
+  "deadline-receipt-request": [
+    "2026-10-02T10:00:00+02:00",
+    "2026-10-02T10:00:00+02:00",
+    "2026-10-02T10:00:00+02:00",
+    "2026-10-02T10:00:00+02:00",
+    "2026-10-02T10:00:00+02:00"
+  ],
+  "title-proc": {
+    "pol": "Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku."
+  },
+  "main-classification-type-proc": "cpv",
+  "buyer-country": [
+    "POL"
+  ],
+  "description-lot": {
+    "pol": [
+      "Przedmiotem zamówienia jest świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynku i na posesjach Krajowej Informacji Skarbowej od dnia następnego po dniu zawarcia umowy, nie wcześniej niż od dnia 1 stycznia 2027 r. do dnia 31 grudnia 2027 r. Opis przedmiotu zamówienia oraz wymagań Zamawiającego w zakresie realizacji usługi określają: - Załącznik nr 3 do SWZ – Ogólny opis przedmiotu zamówienia dotyczący wszystkich części postępowania; - Załącznik nr 4/I do SWZ – Szczegółowy opis przedmiotu zamówienia dla części I; - Załącznik nr 5 do SWZ – Projektowane postanowienia umowy dla części I-IV.",
+      "Przedmiotem zamówienia jest świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynku i na posesjach Delegatury Krajowej Informacji Skarbowej w Bielsku-Białej od dnia następnego po dniu zawarcia umowy, nie wcześniej niż od dnia 1 stycznia 2027 r. do dnia 31 grudnia 2027 r. Opis przedmiotu zamówienia oraz wymagań Zamawiającego w zakresie realizacji usługi określają: - Załącznik nr 3 do SWZ – Ogólny opis przedmiotu zamówienia dotyczący wszystkich części postępowania; - Załącznik nr 4/II do SWZ – Szczegółowy opis przedmiotu zamówienia dla części II; - Załącznik nr 5 do SWZ – Projektowane postanowienia umowy dla części I-IV",
+      "Przedmiotem zamówienia jest świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynku i na posesjach Delegatury Krajowej Informacji Skarbowej w Toruniu od dnia następnego po dniu zawarcia umowy, nie wcześniej niż od dnia 1 stycznia 2027 r. do dnia 31 grudnia 2027 r. Opis przedmiotu zamówienia oraz wymagań Zamawiającego w zakresie realizacji usługi określają: - Załącznik nr 3 do SWZ – Ogólny opis przedmiotu zamówienia dotyczący wszystkich części postępowania; - Załącznik nr 4/III do SWZ – Szczegółowy opis przedmiotu zamówienia dla części III; - Załącznik nr 5 do SWZ – Projektowane postanowienia umowy dla części I-IV.",
+      "Przedmiotem zamówienia jest świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynku i na posesjach Delegatury Krajowej Informacji Skarbowej w Lesznie od dnia następnego po dniu zawarcia umowy, nie wcześniej niż od dnia 1 stycznia 2027 r. do dnia 31 grudnia 2027 r. Opis przedmiotu zamówienia oraz wymagań Zamawiającego w zakresie realizacji usługi określają: - Załącznik nr 3 do SWZ – Ogólny opis przedmiotu zamówienia dotyczący wszystkich części postępowania; - Załącznik nr 4/IV do SWZ – Szczegółowy opis przedmiotu zamówienia dla części IV; - Załącznik nr 5 do SWZ – Projektowane postanowienia umowy dla części I-IV.",
+      "Przedmiotem zamówienia jest świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynku Delegatury Krajowej Informacji Skarbowej w Piotrkowie Trybunalskim od dnia następnego po dniu zawarcia umowy, nie wcześniej niż od dnia 1 stycznia 2027 r. do dnia 31 grudnia 2027 r. Opis przedmiotu zamówienia oraz wymagań Zamawiającego w zakresie realizacji usługi określają: - Załącznik nr 3 do SWZ – Ogólny opis przedmiotu zamówienia dotyczący wszystkich części postępowania; - Załącznik nr 4/V do SWZ – Szczegółowy opis przedmiotu zamówienia dla części V; - Załącznik nr 6 do SWZ – Projektowane postanowienia umowy dla części V."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL"
+  ],
+  "deadline-receipt-tender-time-lot": [
+    "10:00:00+02:00",
+    "10:00:00+02:00",
+    "10:00:00+02:00",
+    "10:00:00+02:00",
+    "10:00:00+02:00"
+  ],
+  "classification-cpv": [
+    "90910000",
+    "90911200",
+    "90919200",
+    "90911300",
+    "90620000",
+    "90630000",
+    "90914000",
+    "90921000",
+    "90910000",
+    "90910000",
+    "90910000",
+    "90910000",
+    "90910000"
+  ],
+  "contract-nature": [
+    "services",
+    "services",
+    "services",
+    "services",
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "pol": [
+      "Krajowa Informacja Skarbowa"
+    ]
+  },
+  "notice-title": {
+    "hun": "Lengyelország – Takarítási szolgáltatások – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "lav": "Polija – Uzkopšanas pakalpojumi – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "swe": "Polen – Städning – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "gle": "An Pholainn – Cleaning services – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "ell": "Πολωνία – Υπηρεσίες καθαρισμού – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "spa": "Polonia – Servicios de limpieza – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "est": "Poola – Puhastusteenused – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "nld": "Polen – Reinigingsdiensten – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "fin": "Puola – Siivous- ja puhdistuspalvelut – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "pol": "Polska – Usługi sprzątania – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "hrv": "Poljska – Usluge čišćenja – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "ces": "Polsko – Úklidové služby – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "dan": "Polen – Rengøring – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "ron": "Polonia – Servicii de curăţenie – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "por": "Polónia – Serviços de limpeza – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "slk": "Poľsko – Upratovacie služby – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "fra": "Pologne – Services de nettoyage – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "mlt": "Il-Polonja – Servizzi tat-tindif – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "deu": "Polen – Reinigungsdienste – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "lit": "Lenkija – Valymo paslaugos – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "ita": "Polonia – Servizi di pulizia – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "bul": "Полша – Услуги по почистване на сгради, промишлени инсталации и превозни средства – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "slv": "Poljska – Storitve čiščenja – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
+    "eng": "Poland – Cleaning services – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku."
+  },
+  "title-lot": {
+    "pol": [
+      "Część I - Usługa sprzątania: Krajowa Informacja Skarbowa ul. Warszawska 5, Bielsko-Biała",
+      "Część II - Usługa sprzątania: Delegatura Krajowej Informacji Skarbowej w Bielsku-Białej",
+      "Część III - Usługa sprzątania: Delegatura Krajowej Informacji Skarbowej w Toruniu",
+      "Część IV - Usługa sprzątania: Delegatura Krajowej Informacji Skarbowej w Lesznie",
+      "Część V - Usługa sprzątania: Delegatura Krajowej Informacji Skarbowej w Piotrkowie Trybunalskim"
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "pol": "Przedmiotem zamówienia jest świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej od dnia następnego po dniu zawarcia umowy, nie wcześniej niż od dnia 1 stycznia 2027 r. do dnia 31 grudnia 2027 r. Przedmiot zamówienia został podzielony na 5 części. Postępowanie obejmuje lokalizację Krajowej Informacji Skarbowej przy ul. Warszawskiej w Bielsku-Białej oraz Delegatury Krajowej Informacji Skarbowej w Bielsku-Białej, Toruniu, Lesznie i Piotrkowie Trybunalskim. Opis przedmiotu zamówienia oraz wymagań Zamawiającego w zakresie realizacji usługi określają: - Załącznik nr 3 do SWZ – Ogólny opis przedmiotu zamówienia dotyczący wszystkich części postępowania; - Załącznik nr 4/I-4/V do SWZ – Szczegółowe opisy przedmiotu zamówienia dla części I-V; - Załącznik nr 5 do SWZ – Projektowane postanowienia umowy dla części I-IV; - Załącznik nr 6 do SWZ – Projektowane postanowienia umowy dla części V."
+  }
+}

@@ -1,0 +1,201 @@
+{
+  "notice-type": "cn-standard",
+  "publication-number": "563282-2026",
+  "main-classification-proc": [
+    "45000000"
+  ],
+  "additional-classification-proc": [
+    "71241000",
+    "35710000",
+    "45310000",
+    "31682210",
+    "71335000"
+  ],
+  "place-of-performance-country-proc": [
+    "FRA"
+  ],
+  "official-language": [
+    "FRA"
+  ],
+  "notice-subtype": "17",
+  "publication-date": "2026-08-13+02:00",
+  "contract-nature-main-proc": "works",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/563282-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/563282-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/563282-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/563282-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/563282-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/563282-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/563282-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/563282-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/563282-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/563282-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/563282-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/563282-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/563282-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/563282-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/563282-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/563282-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/563282-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/563282-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/563282-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/563282-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/563282-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/563282-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/563282-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/563282-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/563282-2026/pdf"
+    },
+    "pdfs": {
+      "FRA": "https://ted.europa.eu/fr/notice/563282-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/563282-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/563282-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/563282-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/563282-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/563282-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/563282-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/563282-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/563282-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/563282-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/563282-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/563282-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/563282-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/563282-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/563282-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/563282-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/563282-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/563282-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/563282-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/563282-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/563282-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/563282-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/563282-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/563282-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/563282-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/563282-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/563282-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/563282-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/563282-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/563282-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/563282-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/563282-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/563282-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/563282-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/563282-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/563282-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/563282-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/563282-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/563282-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/563282-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/563282-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/563282-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/563282-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/563282-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/563282-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/563282-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/563282-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/563282-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/563282-2026/html"
+    }
+  },
+  "deadline-receipt-request-date-lot": [
+    "2025-12-19+01:00"
+  ],
+  "notice-identifier": "882ab815-c4f6-44ee-ae88-eaedac0508a8",
+  "place-of-performance": [
+    "FR106",
+    "FRA",
+    "FR106",
+    "FRA"
+  ],
+  "deadline-receipt-request": [
+    "2025-12-19T12:00:00+01:00"
+  ],
+  "title-proc": {
+    "fra": "MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE"
+  },
+  "main-classification-type-proc": "cpv",
+  "change-notice-version-identifier": "832207-2025",
+  "buyer-country": [
+    "FRA"
+  ],
+  "deadline-receipt-request-time-lot": [
+    "12:00:00+01:00"
+  ],
+  "description-lot": {
+    "fra": [
+      "La présente consultation a pour objet la passation d'un marché de conception/réalisation en vue de l'augmentation de capacité du système de transport CDGVAL de la plateforme de l'aéroport de Paris-Charles de Gaulle. En effet, afin d'adapter la demande de l'offre de transport intra­plateforme, Aéroports de Paris souhaite passer un marché de conception/réalisation pour augmenter les capacités de remisage et d'emport du système automatique de transport public CDGVAL de l'aéroport de Paris­-Charles de Gaulle actuellement en exploitation, tout en pérennisant le système actuel. Ainsi, les prestations envisagées consistent à optimiser et à ajouter des fonctionnalités au système existant, dont les caractéristiques techniques et fonctionnelles reposent sur des logiciels, protocoles, matériels et interfaces développés par l'entreprise SIEMENS. En effet, la capacité d'emport passagers devant être augmentée pour faire face aux prévisions d'augmentation des flux usagers, il faudra réaliser en particulier : ­ 1/ La construction de 3 voies de remisage supplémentaires dans le garage atelier du CDGVAL incluant entre autres les périmètres voies de guidage, automatisme de conduite et énergie traction. 2/ L'adaptation du système d'automatisation existant de la ligne pour prendre en compte : a/Le besoin d'augmentation des capacités d'emport ; b/ l'intégration des rames transférées de la LISA vers la ligne CDGVAL dans le réseau. c/ Les nouvelles voies de remisage. 3/ L'adaptation potentielle du système traction existant de la ligne. 4/ La mise en place d'un Mode Alternat à la station Terminal 2. 5/La prise en compte d'une solution à 2 quais au Terminal 2. Le marché est décomposé en une tranche ferme et trois tranches optionnelles. La tranche ferme comprend la réalisation des études associées aux prestations d'augmentation de capacité du système de transport incluant : - L'ajustement de la capacité d'emport de 4000 PPHPD. - Pour le périmètre du SMR Les automatismes de conduite, la pose des voies, la traction et autres systèmes précisés dans le Programme. La supervision à adapter prenant en compte les organes supplémentaires du SMR - Pour le périmètre de la ligne la mise en place du mode Alternat au T2 et les potentielles modifications de la supervision associées La tranche optionnelle 1 comprend la réalisation des études associées à la mise en place d'une solution double quai au T2 La tranche optionnelle 2 comprend la réalisation des travaux, installations, essais et mise en service des scopes suivants : - L'ajustement de la capacité d'emport de 4000 PPHPD. - Pour le périmètre du SMR Les automatismes de conduite, la pose des voies et la traction dont le scope est donné dans le programme technique. La supervision à adapter prenant en compte les organes supplémentaires du SMR - Pour le périmètre de la ligne la mise en place du mode Alternat au T2 et les potentielles modifications de la supervision associées La tranche optionnelle 3 comprend la réalisation des travaux, installations, essais et mise en service des modifications associées à la mise en place d'une solution double quai au T2"
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "FRA"
+  ],
+  "classification-cpv": [
+    "45000000",
+    "71241000",
+    "35710000",
+    "45310000",
+    "31682210",
+    "71335000",
+    "45000000",
+    "71241000",
+    "35710000",
+    "45310000",
+    "31682210",
+    "71335000"
+  ],
+  "contract-nature": [
+    "works",
+    "services",
+    "works",
+    "services"
+  ],
+  "buyer-name": {
+    "fra": [
+      "Aéroports de Paris"
+    ]
+  },
+  "notice-title": {
+    "hun": "Franciaország – Építési munkák – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "lav": "Francija – Celtniecības darbi – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "swe": "Frankrike – Anläggningsarbete – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "gle": "An Fhrainc – Construction work – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "ell": "Γαλλία – Κατασκευαστικές εργασίες – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "spa": "Francia – Trabajos de construcción – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "est": "Prantsusmaa – Ehitustööd – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "nld": "Frankrijk – Bouwwerkzaamheden – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "fin": "Ranska – Rakennustyöt – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "pol": "Francja – Roboty budowlane – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "hrv": "Francuska – Građevinski radovi – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "ces": "Francie – Stavební práce – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "dan": "Frankrig – Bygge- og anlægsarbejder – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "ron": "Franţa – Lucrări de construcţii – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "por": "França – Construção – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "slk": "Francúzsko – Stavebné práce – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "fra": "France – Travaux de construction – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "mlt": "Franza – Xogħol tal-kostruzzjoni – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "deu": "Frankreich – Bauarbeiten – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "lit": "Prancūzija – Statybos darbai – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "ita": "Francia – Lavori di costruzione – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "bul": "Фpaнция – Строителни и монтажни работи – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "slv": "Francija – Gradbena dela – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
+    "eng": "France – Construction work – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE"
+  },
+  "title-lot": {
+    "fra": [
+      "MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE"
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "fra": "La présente consultation a pour objet la passation d'un marché de conception/réalisation en vue de l'augmentation de capacité du système de transport CDGVAL de la plateforme de l'aéroport de Paris-Charles de Gaulle. En effet, afin d'adapter la demande de l'offre de transport intra­plateforme, Aéroports de Paris souhaite passer un marché de conception/réalisation pour augmenter les capacités de remisage et d'emport du système automatique de transport public CDGVAL de l'aéroport de Paris­-Charles de Gaulle actuellement en exploitation, tout en pérennisant le système actuel. Ainsi, les prestations envisagées consistent à optimiser et à ajouter des fonctionnalités au système existant, dont les caractéristiques techniques et fonctionnelles reposent sur des logiciels, protocoles, matériels et interfaces développés par l'entreprise SIEMENS. En effet, la capacité d'emport passagers devant être augmentée pour faire face aux prévisions d'augmentation des flux usagers, il faudra réaliser en particulier : ­ 1/ La construction de 3 voies de remisage supplémentaires dans le garage atelier du CDGVAL incluant entre autres les périmètres voies de guidage, automatisme de conduite et énergie traction. 2/ L'adaptation du système d'automatisation existant de la ligne pour prendre en compte : a/Le besoin d'augmentation des capacités d'emport ; b/ l'intégration des rames transférées de la LISA vers la ligne CDGVAL dans le réseau. c/ Les nouvelles voies de remisage. 3/ L'adaptation potentielle du système traction existant de la ligne. 4/ La mise en place d'un Mode Alternat à la station Terminal 2. 5/La prise en compte d'une solution à 2 quais au Terminal 2. Le marché est décomposé en une tranche ferme et trois tranches optionnelles. La tranche ferme comprend la réalisation des études associées aux prestations d'augmentation de capacité du système de transport incluant : - L'ajustement de la capacité d'emport de 4000 PPHPD. - Pour le périmètre du SMR Les automatismes de conduite, la pose des voies, la traction et autres systèmes précisés dans le Programme. La supervision à adapter prenant en compte les organes supplémentaires du SMR - Pour le périmètre de la ligne la mise en place du mode Alternat au T2 et les potentielles modifications de la supervision associées La tranche optionnelle 1 comprend la réalisation des études associées à la mise en place d'une solution double quai au T2 La tranche optionnelle 2 comprend la réalisation des travaux, installations, essais et mise en service des scopes suivants : - L'ajustement de la capacité d'emport de 4000 PPHPD. - Pour le périmètre du SMR Les automatismes de conduite, la pose des voies et la traction dont le scope est donné dans le programme technique. La supervision à adapter prenant en compte les organes supplémentaires du SMR - Pour le périmètre de la ligne la mise en place du mode Alternat au T2 et les potentielles modifications de la supervision associées La tranche optionnelle 3 comprend la réalisation des travaux, installations, essais et mise en service des modifications associées à la mise en place d'une solution double quai au T2"
+  }
+}

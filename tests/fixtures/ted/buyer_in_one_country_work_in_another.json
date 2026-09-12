@@ -1,0 +1,190 @@
+{
+  "deadline-receipt-tender-date-lot": [
+    "2026-10-19+02:00"
+  ],
+  "notice-type": "cn-standard",
+  "publication-number": "619675-2026",
+  "main-classification-proc": [
+    "90713000"
+  ],
+  "additional-classification-proc": [
+    "90500000",
+    "71313000"
+  ],
+  "place-of-performance-country-proc": [
+    "AGO"
+  ],
+  "document-url-lot": [
+    "https://www.marches-publics.gouv.fr/?page=Entreprise.EntrepriseAdvancedSearch&AllCons&id=3063429&orgAcronyme=s2d"
+  ],
+  "official-language": [
+    "FRA"
+  ],
+  "notice-subtype": "16",
+  "publication-date": "2026-09-09+02:00",
+  "contract-nature-main-proc": "services",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/619675-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/619675-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/619675-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/619675-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/619675-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/619675-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/619675-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/619675-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/619675-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/619675-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/619675-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/619675-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/619675-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/619675-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/619675-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/619675-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/619675-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/619675-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/619675-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/619675-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/619675-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/619675-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/619675-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/619675-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/619675-2026/pdf"
+    },
+    "pdfs": {
+      "FRA": "https://ted.europa.eu/fr/notice/619675-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/619675-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/619675-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/619675-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/619675-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/619675-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/619675-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/619675-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/619675-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/619675-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/619675-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/619675-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/619675-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/619675-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/619675-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/619675-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/619675-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/619675-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/619675-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/619675-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/619675-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/619675-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/619675-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/619675-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/619675-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/619675-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/619675-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/619675-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/619675-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/619675-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/619675-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/619675-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/619675-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/619675-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/619675-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/619675-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/619675-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/619675-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/619675-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/619675-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/619675-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/619675-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/619675-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/619675-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/619675-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/619675-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/619675-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/619675-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/619675-2026/html"
+    }
+  },
+  "notice-identifier": "a282f06f-8e08-471b-b3d8-32c407e56aad",
+  "place-of-performance": [
+    "AGO",
+    "AGO"
+  ],
+  "deadline-receipt-request": [
+    "2026-10-19T14:00:00+02:00"
+  ],
+  "title-proc": {
+    "fra": "INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE"
+  },
+  "main-classification-type-proc": "cpv",
+  "buyer-country": [
+    "FRA"
+  ],
+  "description-lot": {
+    "fra": [
+      "The tender covers the award of a service contract covering \"INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE\"."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "AGO"
+  ],
+  "deadline-receipt-tender-time-lot": [
+    "14:00:00+02:00"
+  ],
+  "classification-cpv": [
+    "90713000",
+    "90500000",
+    "71313000",
+    "90713000",
+    "71313000",
+    "90500000"
+  ],
+  "contract-nature": [
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "fra": [
+      "EXPERTISE FRANCE"
+    ]
+  },
+  "notice-title": {
+    "hun": "Franciaország – Környezetvédelmi tanácsadási szolgáltatások – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "lav": "Francija – Vides jautājumu konsultāciju pakalpojumi – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "swe": "Frankrike – Miljörådgivning – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "gle": "An Fhrainc – Environmental issues consultancy services – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "ell": "Γαλλία – Υπηρεσίες παροχής συμβουλών για περιβαλλοντικά ζητήματα – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "spa": "Francia – Servicios de asesoramiento sobre asuntos ambientales – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "est": "Prantsusmaa – Keskkonnaküsimuste nõuandeteenused – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "nld": "Frankrijk – Adviesdiensten inzake milieuproblematiek – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "fin": "Ranska – Ympäristöasioiden neuvontapalvelut – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "pol": "Francja – Usługi konsultacyjne w zakresie zagadnień dotyczących środowiska – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "hrv": "Francuska – Usluge savjetovanja u pitanjima okoliša – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "ces": "Francie – Poradenské služby související s otázkami životního prostředí – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "dan": "Frankrig – Rådgivning i forbindelse med miljøspørgsmål – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "ron": "Franţa – Servicii de consultanţă în probleme de mediu – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "por": "França – Serviços de consultoria sobre questões ambientais – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "slk": "Francúzsko – Konzultačné služby týkajúce sa otázok životného prostredia – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "fra": "France – Services de conseils environnementaux – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "mlt": "Franza – Servizzi ta' konsulenza dwar kwistjonijiet ambjentali – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "deu": "Frankreich – Beratung in Umweltfragen – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "lit": "Prancūzija – Konsultacijų aplinkosaugos klausimais paslaugos – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "ita": "Francia – Servizi di consulenza per questioni ambientali – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "bul": "Фpaнция – Консултантски услуги по проблемите на околната среда – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "slv": "Francija – Storitve svetovanja na področju okoljskih vprašanj – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
+    "eng": "France – Environmental issues consultancy services – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE"
+  },
+  "title-lot": {
+    "fra": [
+      "INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE"
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "fra": "The tender covers the award of a service contract covering \"INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE\"."
+  }
+}

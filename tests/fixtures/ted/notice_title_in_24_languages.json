@@ -1,0 +1,207 @@
+{
+  "notice-identifier": "cce1d46f-8c1e-4085-97af-56042cfbb35f",
+  "place-of-performance": [
+    "FR101",
+    "FRA",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA"
+  ],
+  "title-proc": {
+    "fra": "ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS."
+  },
+  "notice-type": "can-standard",
+  "publication-number": "406326-2026",
+  "main-classification-type-proc": "cpv",
+  "main-classification-proc": [
+    "71241000"
+  ],
+  "buyer-country": [
+    "FRA"
+  ],
+  "place-of-performance-country-proc": [
+    "FRA"
+  ],
+  "description-lot": {
+    "fra": [
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA"
+  ],
+  "official-language": [
+    "FRA"
+  ],
+  "classification-cpv": [
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000"
+  ],
+  "notice-subtype": "29",
+  "contract-nature": [
+    "services",
+    "services",
+    "services",
+    "services",
+    "services",
+    "services",
+    "services"
+  ],
+  "publication-date": "2026-06-15+02:00",
+  "buyer-name": {
+    "fra": [
+      "Centre d'Action Sociale de la Ville de Paris (CASVP)"
+    ]
+  },
+  "contract-nature-main-proc": "services",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/406326-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/406326-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/406326-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/406326-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/406326-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/406326-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/406326-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/406326-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/406326-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/406326-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/406326-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/406326-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/406326-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/406326-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/406326-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/406326-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/406326-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/406326-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/406326-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/406326-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/406326-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/406326-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/406326-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/406326-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/406326-2026/pdf"
+    },
+    "pdfs": {
+      "FRA": "https://ted.europa.eu/fr/notice/406326-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/406326-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/406326-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/406326-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/406326-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/406326-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/406326-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/406326-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/406326-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/406326-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/406326-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/406326-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/406326-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/406326-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/406326-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/406326-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/406326-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/406326-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/406326-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/406326-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/406326-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/406326-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/406326-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/406326-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/406326-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/406326-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/406326-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/406326-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/406326-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/406326-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/406326-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/406326-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/406326-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/406326-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/406326-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/406326-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/406326-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/406326-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/406326-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/406326-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/406326-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/406326-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/406326-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/406326-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/406326-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/406326-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/406326-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/406326-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/406326-2026/html"
+    }
+  },
+  "notice-title": {
+    "hun": "Franciaország – Megvalósíthatósági tanulmány, tanácsadó szolgáltatás, elemzés – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "lav": "Francija – Priekšizpēte, konsultāciju dienests, analīze – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "swe": "Frankrike – Genomförbarhetsstudie, rådgivning och analys – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "gle": "An Fhrainc – Feasibility study, advisory service, analysis – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "ell": "Γαλλία – Μελέτες σκοπιμότητας, υπηρεσίες παροχής συμβουλών, υπηρεσίες αναλύσεων – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "spa": "Francia – Estudio de viabilidad, servicios de asesoramiento, análisis – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "est": "Prantsusmaa – Teostatavusuuringud, nõuandeteenused, analüüs – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "nld": "Frankrijk – Haalbaarheidsstudie, adviesverlening, analyse – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "fin": "Ranska – Toteutettavuustutkimus, neuvontapalvelut, analyysit – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "pol": "Francja – Studia wykonalności, usługi doradcze, analizy – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "hrv": "Francuska – Studija izvodljivosti, savjetodavna usluga, analiza – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "ces": "Francie – Studie proveditelnosti, poradenství, analýza – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "dan": "Frankrig – Gennemførlighedsundersøgelser, rådgivning, analyser – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "ron": "Franţa – Studii de fezabilitate, servicii de consultanţă, analize – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "por": "França – Estudo de viabilidade, serviço consultivo, análise – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "slk": "Francúzsko – Štúdia realizovateľnosti, poradenská služba, analýza – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "fra": "France – Études de faisabilité, service de conseil, analyse – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "mlt": "Franza – Studji ta' fattibbiltà, servizz ta' konsulenza, analiżi – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "deu": "Frankreich – Durchführbarkeitsstudie, Beratung, Analyse – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "lit": "Prancūzija – Galimybių studijos, konsultavimo paslaugos, analizė – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "ita": "Francia – Studi di fattibilità, servizi di consulenza, analisi – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "bul": "Фpaнция – Проучване за осъществимост, консултантски услуги, анализ – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "slv": "Francija – Študija izvedljivosti, svetovanje, analiza – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",
+    "eng": "France – Feasibility study, advisory service, analysis – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS."
+  },
+  "title-lot": {
+    "fra": [
+      "Lot 1 : Assistance à maîtrise d'ouvrage pour le suivi d'exploitation en génie climatique (chauffage, ventilation, climatisation).",
+      "Lot 2 : Assistance à maîtrise d'ouvrage pour l'entretien des postes haute tension, des groupes électrogènes et des installations de basse tension.",
+      "Lot 3 : Assistance à maîtrise d’ouvrage pour l’entretien des ascenseurs, monte-charges et plates-formes élévatrices pour personnes à mobilité réduite.",
+      "Lot 4 : Assistance à maîtrise d’ouvrage pour l’entretien des systèmes de sécurité incendie.",
+      "Lot 5 : Assistance à maîtrise d’ouvrage pour les installations de sureté (contrôle d’accès, visiophonie, vidéosurveillance, fermetures automatiques).",
+      "Lot 6 : Assistance à maîtrise d’ouvrage pour le suivi fonctionnel des contrôles techniques réglementaires."
+    ]
+  },
+  "form-type": "result",
+  "description-proc": {
+    "fra": "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP) situés à Paris (75), en région parisienne (91, 92, 93, 94), et dans l'Aisne (02), en 6 lots séparés."
+  }
+}

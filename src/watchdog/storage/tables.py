@@ -69,6 +69,49 @@ class UtcDateTime(TypeDecorator[datetime]):
         return value.astimezone(UTC)
 
 
+class DelimitedList(TypeDecorator[list[str]]):
+    """A short list of codes stored as ``,a,b,`` so SQL can ask "does it contain".
+
+    A JSON array cannot be searched for a member in a way that works on both
+    SQLite and PostgreSQL. The leading and trailing commas make ``LIKE '%,x,%'``
+    exact: it cannot match ``services`` inside ``other_services``.
+
+    Only for closed vocabularies of short tokens. Anything containing a comma is
+    rejected rather than silently split on read.
+    """
+
+    impl = Text
+    cache_ok = True
+
+    DELIMITER = ","
+
+    def process_bind_param(self, value: list[str] | None, dialect: Dialect) -> str | None:
+        if value is None:
+            return None
+        items = [str(item) for item in value]
+        for item in items:
+            if self.DELIMITER in item:
+                raise ValueError(f"{item!r} contains the list delimiter and cannot be stored")
+        if not items:
+            return self.DELIMITER
+        return f"{self.DELIMITER}{self.DELIMITER.join(items)}{self.DELIMITER}"
+
+    def process_result_value(self, value: str | None, dialect: Dialect) -> list[str]:
+        if not value:
+            return []
+        return [item for item in value.split(self.DELIMITER) if item]
+
+    def coerce_compared_value(self, op: Any, value: Any) -> Any:
+        """A LIKE pattern is a string, not a list, and must not be re-encoded."""
+        return Text() if isinstance(value, str) else super().coerce_compared_value(op, value)
+
+
+def contains_token(column: Any, token: str) -> Any:
+    """SQL condition: a ``DelimitedList`` column contains exactly ``token``."""
+    delimiter = DelimitedList.DELIMITER
+    return column.like(f"%{delimiter}{token}{delimiter}%")
+
+
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
 
@@ -88,22 +131,33 @@ class TenderRow(Base):
 
     title: Mapped[str] = mapped_column(Text, nullable=False)
     title_language: Mapped[str | None] = mapped_column(String(16))
+    title_native: Mapped[str | None] = mapped_column(Text)
+    title_native_language: Mapped[str | None] = mapped_column(String(16))
     description: Mapped[str | None] = mapped_column(Text)
 
     buyer_name: Mapped[str | None] = mapped_column(Text)
     buyer_country: Mapped[str | None] = mapped_column(String(8))
     place_of_performance: Mapped[str | None] = mapped_column(Text)
+    place_of_performance_country: Mapped[list[str]] = mapped_column(
+        DelimitedList, nullable=False, default=list
+    )
 
     # A calendar date: the source states a day, not a moment.
     published_date: Mapped[date | None] = mapped_column(Date)
+    # Set only when the source gave a time of day as well as a date.
     deadline: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    deadline_date: Mapped[date | None] = mapped_column(Date)
+    deadline_source: Mapped[str | None] = mapped_column(String(64))
+    deadline_type: Mapped[str] = mapped_column(String(32), nullable=False)
 
     notice_stage: Mapped[str] = mapped_column(String(32), nullable=False)
     notice_subtype: Mapped[str | None] = mapped_column(String(64))
     contract_nature: Mapped[str] = mapped_column(String(16), nullable=False)
+    contract_natures: Mapped[list[str]] = mapped_column(DelimitedList, nullable=False, default=list)
 
     cpv_main: Mapped[str | None] = mapped_column(String(16))
     cpv_additional: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    cpv_all: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
 
     estimated_value: Mapped[Decimal | None] = mapped_column(Numeric(20, 2))
     currency: Mapped[str | None] = mapped_column(String(8))
@@ -111,6 +165,11 @@ class TenderRow(Base):
     documents_url: Mapped[str | None] = mapped_column(Text)
     languages: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     multi_lot: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    # The original text the screening reads: [{field, language, text}, ...].
+    screening_blocks: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
 
     first_seen_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
     last_seen_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
@@ -122,6 +181,7 @@ class TenderRow(Base):
         UniqueConstraint("source", "source_id", name="uq_tender_source_source_id"),
         Index("ix_tender_published_date", "published_date"),
         Index("ix_tender_deadline", "deadline"),
+        Index("ix_tender_deadline_date", "deadline_date"),
         Index("ix_tender_buyer_country", "buyer_country"),
     )
 

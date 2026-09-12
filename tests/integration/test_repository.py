@@ -14,6 +14,7 @@ import pytest
 from watchdog.core.enums import (
     Band,
     BidRoute,
+    ContractNature,
     DecisionStage,
     Domain,
     NoticeStage,
@@ -34,6 +35,7 @@ from watchdog.core.models import (
     Tender,
     TenderDetail,
     TenderFilters,
+    TextBlock,
 )
 from watchdog.storage.repository import Repository
 
@@ -241,6 +243,119 @@ def test_text_filter_matches_title_or_description(repository: Repository, make_t
     assert [tender.source_id for tender in page.items] == ["w"]
 
 
+def test_a_services_filter_keeps_a_works_notice_that_also_buys_services(
+    repository: Repository, make_tender
+) -> None:
+    """Modelled on 563282-2026: main nature works, natures [services, works].
+
+    TED's own filter keeps this notice because services appears somewhere on it.
+    Filtering our scalar instead of the list would silently drop it.
+    """
+    mixed = make_tender(
+        "563282-2026",
+        contract_natures=[ContractNature.SERVICES, ContractNature.WORKS],
+    ).model_copy(update={"contract_nature": ContractNature.WORKS})
+    works_only = make_tender("works-only", contract_natures=[ContractNature.WORKS]).model_copy(
+        update={"contract_nature": ContractNature.WORKS}
+    )
+
+    repository.upsert_tenders([mixed, works_only])
+
+    page = repository.list_tenders(TenderFilters(contract_nature=ContractNature.SERVICES))
+
+    assert [tender.source_id for tender in page.items] == ["563282-2026"]
+    assert page.items[0].contract_nature is ContractNature.WORKS
+
+
+def test_a_services_filter_still_excludes_a_notice_with_no_services(
+    repository: Repository, make_tender
+) -> None:
+    repository.upsert_tenders(
+        [
+            make_tender("supplies", contract_natures=[ContractNature.SUPPLIES]),
+            make_tender("services", contract_natures=[ContractNature.SERVICES]),
+        ]
+    )
+
+    page = repository.list_tenders(TenderFilters(contract_nature=ContractNature.SERVICES))
+
+    assert [tender.source_id for tender in page.items] == ["services"]
+
+
+def test_a_nature_filter_cannot_match_a_substring_of_another_value(
+    repository: Repository, make_tender
+) -> None:
+    repository.upsert_tenders([make_tender("w", contract_natures=[ContractNature.WORKS])])
+
+    # "works" must not be found by a filter for "work".
+    page = repository.list_tenders(TenderFilters(contract_nature=ContractNature.WORKS))
+    assert len(page.items) == 1
+
+
+def test_the_text_filter_also_searches_the_buyers_own_title(
+    repository: Repository, make_tender
+) -> None:
+    repository.upsert_tenders(
+        [
+            make_tender(
+                "nl",
+                title="Belgium - Business and management consultancy - STRATEGISCHE ONDERSTEUNING",
+                title_native="STRATEGISCHE, INHOUDELIJKE EN PROJECTMATIGE ONDERSTEUNING",
+                description=None,
+            ),
+            make_tender("other", title="Something else", title_native="Iets anders"),
+        ]
+    )
+
+    page = repository.list_tenders(TenderFilters(text="projectmatige"))
+
+    assert [tender.source_id for tender in page.items] == ["nl"]
+
+
+def test_where_the_work_happens_filters_separately_from_who_is_buying(
+    repository: Repository, make_tender
+) -> None:
+    """Modelled on 619675-2026: a French buyer procuring a study for Angola."""
+    repository.upsert_tenders(
+        [
+            make_tender("angola", buyer_country="FRA", performance_countries=["AGO"]),
+            make_tender("france", buyer_country="FRA", performance_countries=["FRA"]),
+        ]
+    )
+
+    by_buyer = repository.list_tenders(TenderFilters(buyer_country="FRA"))
+    assert {tender.source_id for tender in by_buyer.items} == {"angola", "france"}
+
+    by_place = repository.list_tenders(TenderFilters(place_of_performance_country="AGO"))
+    assert [tender.source_id for tender in by_place.items] == ["angola"]
+
+
+def test_a_notice_spanning_several_countries_is_found_by_any_of_them(
+    repository: Repository, make_tender
+) -> None:
+    repository.upsert_tenders(
+        [
+            make_tender("maghreb", performance_countries=["MAR", "DZA", "TUN"]),
+            make_tender("norway", performance_countries=["NOR"]),
+        ]
+    )
+
+    for code in ("MAR", "DZA", "TUN"):
+        page = repository.list_tenders(TenderFilters(place_of_performance_country=code))
+        assert [tender.source_id for tender in page.items] == ["maghreb"], code
+
+    assert repository.get_tender("ted:maghreb").multi_country is True
+
+
+def test_the_performance_country_survives_a_round_trip(repository: Repository, make_tender) -> None:
+    repository.upsert_tenders([make_tender("a", performance_countries=["AGO", "MAR"])])
+
+    stored = repository.get_tender("ted:a")
+
+    assert stored is not None
+    assert stored.place_of_performance_country == ["AGO", "MAR"]
+
+
 def test_an_unknown_sort_key_is_rejected(repository: Repository) -> None:
     with pytest.raises(ValueError, match="unknown sort key"):
         repository.list_tenders(sort_by="buyer_name; drop table tender")
@@ -341,7 +456,55 @@ def test_a_corrected_notice_needs_re_screening(repository: Repository, make_tend
     repository.upsert_tenders([tender])
     repository.save_screening_result(screening_for(tender))
 
-    repository.upsert_tenders([tender.model_copy(update={"description": "Corrected scope."})])
+    corrected = tender.model_copy(
+        update={
+            "screening_blocks": [
+                TextBlock(field="description-proc", language="eng", text="Corrected scope.")
+            ]
+        }
+    )
+    repository.upsert_tenders([corrected])
+
+    assert repository.ids_needing_screening(VERSIONS, "disabled", None) == [tender.id]
+
+
+def test_a_corrected_language_variant_needs_re_screening(
+    repository: Repository, make_tender
+) -> None:
+    # The hash covers every block, so a correction in any language makes the
+    # existing result stale rather than leaving it looking current.
+    dutch = TextBlock(field="title-proc", language="nld", text="Haalbaarheidsstudie")
+    french = TextBlock(field="title-proc", language="fra", text="Etude de faisabilite")
+
+    tender = make_tender().model_copy(update={"screening_blocks": [dutch, french]})
+    repository.upsert_tenders([tender])
+    repository.save_screening_result(screening_for(tender))
+
+    assert repository.ids_needing_screening(VERSIONS, "disabled", None) == []
+
+    corrected = tender.model_copy(
+        update={
+            "screening_blocks": [
+                dutch,
+                TextBlock(
+                    field="title-proc", language="fra", text="Etude de faisabilite, corrigee"
+                ),
+            ]
+        }
+    )
+    repository.upsert_tenders([corrected])
+
+    assert repository.ids_needing_screening(VERSIONS, "disabled", None) == [tender.id]
+
+
+def test_a_new_cpv_code_needs_re_screening(repository: Repository, make_tender) -> None:
+    tender = make_tender()
+    repository.upsert_tenders([tender])
+    repository.save_screening_result(screening_for(tender))
+
+    repository.upsert_tenders(
+        [tender.model_copy(update={"cpv_all": [*tender.cpv_all, "09330000"]})]
+    )
 
     assert repository.ids_needing_screening(VERSIONS, "disabled", None) == [tender.id]
 

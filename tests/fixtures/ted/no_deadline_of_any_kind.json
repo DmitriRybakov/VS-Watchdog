@@ -1,0 +1,201 @@
+{
+  "notice-type": "pin-rtl",
+  "publication-number": "612645-2026",
+  "main-classification-proc": [
+    "45312000"
+  ],
+  "additional-classification-proc": [
+    "35125300",
+    "45210000",
+    "42961100",
+    "79714000",
+    "45300000",
+    "45310000",
+    "35120000",
+    "50700000"
+  ],
+  "place-of-performance-country-proc": [
+    "BEL"
+  ],
+  "document-url-lot": [
+    "https://www.publicprocurement.be/publication-workspaces/e4ebc34a-3b93-4434-9e67-982a35542417/documents"
+  ],
+  "official-language": [
+    "NLD"
+  ],
+  "notice-subtype": "7",
+  "publication-date": "2026-09-07+02:00",
+  "contract-nature-main-proc": "works",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/612645-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/612645-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/612645-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/612645-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/612645-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/612645-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/612645-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/612645-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/612645-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/612645-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/612645-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/612645-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/612645-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/612645-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/612645-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/612645-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/612645-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/612645-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/612645-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/612645-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/612645-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/612645-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/612645-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/612645-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/612645-2026/pdf"
+    },
+    "pdfs": {
+      "NLD": "https://ted.europa.eu/nl/notice/612645-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/612645-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/612645-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/612645-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/612645-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/612645-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/612645-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/612645-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/612645-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/612645-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/612645-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/612645-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/612645-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/612645-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/612645-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/612645-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/612645-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/612645-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/612645-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/612645-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/612645-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/612645-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/612645-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/612645-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/612645-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/612645-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/612645-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/612645-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/612645-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/612645-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/612645-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/612645-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/612645-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/612645-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/612645-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/612645-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/612645-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/612645-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/612645-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/612645-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/612645-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/612645-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/612645-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/612645-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/612645-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/612645-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/612645-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/612645-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/612645-2026/html"
+    }
+  },
+  "notice-identifier": "0c6c37d4-ab58-4da4-aa4e-c9fb00887e2f",
+  "place-of-performance": [
+    "BEZZZ",
+    "BEL",
+    "BEZZZ",
+    "BEL"
+  ],
+  "title-proc": {
+    "nld": "Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels"
+  },
+  "main-classification-type-proc": "cpv",
+  "buyer-country": [
+    "BEL"
+  ],
+  "description-lot": {
+    "nld": [
+      "Het voorwerp van de opdracht is de installatie en het onderhoud van beveiligingscentrales voor branddetectie, inbraakdetectie, toegangscontrole, camerabewaking, de verledding en andere technische aanpassingen in de dienstgebouwen en dienstkokers, vluchtkokers van de tunnels en vijzelpompstations. De aanneming heeft tot doel de studie van de verschillende deelopdrachten, de levering, het plaatsen, het aansluiten, het testen, het indienststellen en de oplevering van de werken, van alle toestellen, materialen en onderdelen die deel uitmaken van de verschillende technische systemen zoals hierna beschreven voor de verschillende dienstgebouwen op de verschillende sites."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "BEL"
+  ],
+  "classification-cpv": [
+    "45312000",
+    "35125300",
+    "45210000",
+    "42961100",
+    "79714000",
+    "45300000",
+    "45310000",
+    "35120000",
+    "50700000",
+    "45312000",
+    "35125300",
+    "45210000",
+    "42961100",
+    "79714000",
+    "45300000",
+    "45310000",
+    "35120000",
+    "50700000"
+  ],
+  "contract-nature": [
+    "works",
+    "works"
+  ],
+  "buyer-name": {
+    "nld": [
+      "Vlaamse Overheid"
+    ]
+  },
+  "notice-title": {
+    "hun": "Belgium – Riasztórendszer és antennák szerelése – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "lav": "Beļģija – Signalizācijas sistēmu un antenu uzstādīšana – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "swe": "Belgien – Installation av larmsystem och antenner – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "gle": "An Bheilg – Alarm system and antenna installation work – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "ell": "Βέλγιο – Εργασίες εγκατάστασης συστημάτων συναγερμού και κεραιών – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "spa": "Bélgica – Instalación de sistemas de alarma y antenas – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "est": "Belgia – Häiresüsteemi- ja antennipaigaldustööd – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "nld": "België – Installeren van alarmsystemen en antennes – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "fin": "Belgia – Hälytysjärjestelmien ja antennien asennustyöt – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "pol": "Belgia – Instalowanie systemów alarmowych i anten – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "hrv": "Belgija – Radovi ugradnje alarmnog sustava i antene – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "ces": "Belgie – Instalace a montáž poplachových systémů a antén – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "dan": "Belgien – Installation af brand- og tyverialarmer samt antenneanlæg – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "ron": "Belgia – Lucrări de instalare de sisteme de alarmă şi de antene – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "por": "Bélgica – Instalação de sistemas de alarme e de antenas – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "slk": "Belgicko – Inštalovanie poplašných systémov a antén – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "fra": "Belgique – Travaux d'installation de systèmes d'alarme et d'antennes – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "mlt": "Il-Belġju – Xogħol tas-sistema ta’ l-allarm u l-istallazzjoni ta’ l-antenni – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "deu": "Belgien – Installation von Alarmanlagen und Antennen – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "lit": "Belgija – Signalizacijos sistemų ir antenų montavimo darbai – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "ita": "Belgio – Lavori di installazione di sistemi di allarme e di antenne – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "bul": "Бeлгия – Работи по инсталиране на пожаро-, сигнално-охранителни известителни системи и на антени за жилищни сгради – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "slv": "Belgija – Inštalacija alarmnih sistemov in anten – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
+    "eng": "Belgium – Alarm system and antenna installation work – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels"
+  },
+  "title-lot": {
+    "nld": [
+      "TO/INV/2026/2 - 1"
+    ]
+  },
+  "form-type": "planning",
+  "description-proc": {
+    "nld": "Het voorwerp van de opdracht is de installatie en het onderhoud van beveiligingscentrales voor branddetectie, inbraakdetectie, toegangscontrole, camerabewaking, de verledding en andere technische aanpassingen in de dienstgebouwen en dienstkokers, vluchtkokers van de tunnels en vijzelpompstations. De aanneming heeft tot doel de studie van de verschillende deelopdrachten, de levering, het plaatsen, het aansluiten, het testen, het indienststellen en de oplevering van de werken, van alle toestellen, materialen en onderdelen die deel uitmaken van de verschillende technische systemen zoals hierna beschreven voor de verschillende dienstgebouwen op de verschillende sites."
+  }
+}

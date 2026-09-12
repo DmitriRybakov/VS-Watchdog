@@ -1,3 +1,101 @@
-# TED source configuration: endpoint, query, paging and field mapping.
-# Contract lives in docs/TED_API_CONTRACT.md.
-# Placeholder - filled in a later step.
+# TED source configuration: what we ask TED for.
+#
+# The contract this feeds is docs/TED_API_CONTRACT.md. Tune the lists here; no
+# value below is repeated in code.
+#
+# Deliberately absent: Entr keywords. TED titles arrive in every EU language and
+# our vocabulary is English, so a keyword in the query would destroy recall.
+# Keyword work happens locally, on the original text, in the screening stage.
+
+# CPV codes to search for. TED's filter is HIERARCHICAL: a parent code also
+# matches every code beneath it. Verified against notice 597239-2026, which
+# carries only 71318100 and is returned for 71318000, 71310000 and 71000000 but
+# not for 45000000. So 71241000 already covers 71241100, 71241200 and so on.
+#
+# Quoted because a leading zero matters: 09310000 parsed as a number becomes
+# 9310000 and matches nothing ever again.
+cpv_prefixes:
+  - "71241000"   # Feasibility study, advisory service, analysis
+  - "71318000"   # Advisory and consultative engineering services
+  - "71335000"   # Engineering studies
+  - "71313000"   # Environmental engineering consultancy services
+  - "71314000"   # Energy and related services
+  - "71314300"   # Energy-efficiency consultancy services
+  - "71323100"   # Electrical power systems design services
+  - "71356200"   # Technical assistance services
+  - "71356300"   # Technical support services
+  - "73200000"   # Research and development consultancy services
+  - "79400000"   # Business and management consultancy and related services
+  - "79411000"   # General management consultancy services
+  - "09300000"   # Electricity, heating, solar and nuclear energy
+  - "09330000"   # Solar energy
+
+# Where the buying organisation sits. ISO 3166-1 alpha-3, and every code must be
+# one watchdog.core.countries can name, so the register never shows a bare code.
+# EU27 + EEA + UK.
+buyer_countries:
+  - "AUT"
+  - "BEL"
+  - "BGR"
+  - "HRV"
+  - "CYP"
+  - "CZE"
+  - "DNK"
+  - "EST"
+  - "FIN"
+  - "FRA"
+  - "DEU"
+  - "GRC"
+  - "HUN"
+  - "IRL"
+  - "ITA"
+  - "LVA"
+  - "LTU"
+  - "LUX"
+  - "MLT"
+  - "NLD"
+  - "POL"
+  - "PRT"
+  - "ROU"
+  - "SVK"
+  - "SVN"
+  - "ESP"
+  - "SWE"
+  - "ISL"
+  - "LIE"
+  - "NOR"
+  - "GBR"
+
+# Where the work actually happens. A separate question from who is buying: a
+# Brussels institution procuring a feasibility study for a project in Morocco has
+# an EU buyer and a non-EU place of performance, and we probably want it.
+# Empty means anywhere.
+place_of_performance: []
+
+# TED's filter matches if the nature appears ANYWHERE on the notice, not only as
+# the main one, so a works contract with a services component is kept rather than
+# hidden. Measured over 30 days: of 873 notices kept by this filter, 44 were
+# mixed and 34 had a main nature of works or supplies. Of the 508 it excluded,
+# none mentioned services at all.
+contract_natures:
+  - services
+
+# How far along the procurement is. Prior information and market consultation are
+# where early-phase advisory work is visible, so both are in.
+notice_stages:
+  - prior_information     # form-type "planning"      (pin-only, pin-buyer, pin-rtl, pin-tran)
+  - market_consultation   # form-type "consultation"  (pmc)
+  - contract_notice       # form-type "competition"   (cn-standard, cn-desg, qu-sy)
+
+# Extra expert-query text, appended with AND. Leave empty unless you know the
+# syntax; a mistake here fails the run loudly rather than returning nothing.
+extra_query: null
+
+# How far back each run reaches beyond the last successful watermark, so a notice
+# published during a run is not missed. Whole DAYS, not hours: TED's
+# publication-date only accepts YYYYMMDD or today(+/-n), so an hours-based
+# overlap could not be expressed and would be a lie in a file people read.
+overlap_days: 2
+
+# Notices per request. 250 is TED's maximum; anything higher is rejected outright.
+page_size: 250

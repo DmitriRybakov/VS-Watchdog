@@ -41,6 +41,20 @@ class ContractNature(StrEnum):
     UNKNOWN = "unknown"
 
 
+class DeadlineType(StrEnum):
+    """What a deadline is a deadline *for*. Not the same question as when it is.
+
+    A qualification system's only deadline is a participation deadline, not a
+    date to submit a bid by. ``UNKNOWN`` is a real answer: TED's
+    ``deadline-receipt-request`` is a union of all three and does not say which.
+    """
+
+    TENDER_SUBMISSION = "tender_submission"
+    PARTICIPATION_REQUEST = "participation_request"
+    EXPRESSION_OF_INTEREST = "expression_of_interest"
+    UNKNOWN = "unknown"
+
+
 class Domain(StrEnum):
     """Subject matter of the work."""
 

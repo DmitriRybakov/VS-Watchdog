@@ -1,0 +1,207 @@
+{
+  "notice-type": "cn-standard",
+  "publication-number": "612558-2026",
+  "main-classification-proc": [
+    "71541000"
+  ],
+  "additional-classification-proc": [
+    "71530000",
+    "71000000",
+    "71541000",
+    "71244000",
+    "71248000",
+    "71247000",
+    "71300000"
+  ],
+  "place-of-performance-country-proc": [
+    "DEU"
+  ],
+  "document-url-lot": [
+    "https://www.dtvp.de/Satellite/notice/CXP4D6VM8X0/documents"
+  ],
+  "official-language": [
+    "DEU"
+  ],
+  "notice-subtype": "17",
+  "publication-date": "2026-09-07+02:00",
+  "contract-nature-main-proc": "services",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/612558-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/612558-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/612558-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/612558-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/612558-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/612558-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/612558-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/612558-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/612558-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/612558-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/612558-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/612558-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/612558-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/612558-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/612558-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/612558-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/612558-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/612558-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/612558-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/612558-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/612558-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/612558-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/612558-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/612558-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/612558-2026/pdf"
+    },
+    "pdfs": {
+      "DEU": "https://ted.europa.eu/de/notice/612558-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/612558-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/612558-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/612558-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/612558-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/612558-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/612558-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/612558-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/612558-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/612558-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/612558-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/612558-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/612558-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/612558-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/612558-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/612558-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/612558-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/612558-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/612558-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/612558-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/612558-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/612558-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/612558-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/612558-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/612558-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/612558-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/612558-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/612558-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/612558-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/612558-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/612558-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/612558-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/612558-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/612558-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/612558-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/612558-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/612558-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/612558-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/612558-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/612558-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/612558-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/612558-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/612558-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/612558-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/612558-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/612558-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/612558-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/612558-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/612558-2026/html"
+    }
+  },
+  "deadline-receipt-request-date-lot": [
+    "2026-10-05+02:00"
+  ],
+  "notice-identifier": "e6c179f3-8a45-4a47-9ea5-40f9f27653f4",
+  "place-of-performance": [
+    "DEA13",
+    "DEU",
+    "DEA13",
+    "DEU"
+  ],
+  "deadline-receipt-request": [
+    "2026-10-05T12:00:00+02:00"
+  ],
+  "title-proc": {
+    "deu": "Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)"
+  },
+  "main-classification-type-proc": "cpv",
+  "buyer-country": [
+    "DEU"
+  ],
+  "deadline-receipt-request-time-lot": [
+    "12:00:00+02:00"
+  ],
+  "description-lot": {
+    "deu": [
+      "Der Auftraggeber schreibt zum Zwecke der Realisierung des Niedertemperaturwär-menetzes die folgenden fünf Lose aus: - Los 1: Netzkonzept und Wärmenetzoptimierung - Los 2: Technische Due Diligence und Analyse des Bestandnetzes - Los 3: Planung der Energiezentrale (inkl. aller Wärmeerzeuger innerhalb der zu errichtenden Energiezentrale inkl. der gesamten dazugehörigen Anlagentechnik) - Los 4: Planung des Wärmenetzes (zur Verteilung der Wärme zu den zu versorgenden Gebäuden und Anbindung an die Energiezentrale) - Los 5: Projektsteuerung Gegenstand dieser Ausschreibung sind ausschließlich die Leistungen der Projektsteuerung (Los 5). Es wird vollumfänglich auf die Leistungsbeschreibung, die losübergreifende Projektbeschreibung und den Projektsteuerungsvertrag verwiesen. Der Projektsteuerungsvertrag sieht eine stufenweise optionale Beauftragung vor. Es wird auf § 3.3 verwiesen. Zeitgleich mit dieser EU-Bekanntmachung wurden die EU-weiten Bekanntmachungen für Los 1 \"Netzkonzept und Wärmenetzoptimierung\" und Los 2 \"Technische Due Diligence und Analyse des Bestandnetzes\" veröffentlicht. Die Veröffentlichung der Lose 3 und 4 erfolgt ebenfalls zeitgleich, allerdings zeitversetzt später zu den Losen 1, 2 und 5. Über folgenden Link gelangen Sie zu den Vergabeunterlagen für das Vergabeverfahren zu Los 1: https://www.dtvp.de/Satellite/notice/CXP4D6VM8W8 Über folgenden Link gelangen Sie zu den Vergabeunterlagen für das Vergabeverfahren zu Los 2: https://www.dtvp.de/Satellite/notice/CXP4D6VM8WP Sofern die Bieter nach Abschluss des Teilnahmewettbewerbs zur Abgabe von Angeboten für mindestens zwei der fünf Lose aufgefordert werden, gilt Folgendes: Die Einreichung von Angeboten kann in einem oder in mehreren Losen erfolgen. Es gilt jedoch folgende Beschränkung: Die Bieter dürfen entweder Angebote in einem oder mehreren der Lose 1 bis 4 oder ein Angebot auf Los 5 abgeben. Eine gleichzeitige Einreichung von Angeboten in Los 5 und in einem oder mehreren der Lose 1 bis 4 ist unzulässig (Loslimitierung). Bei einem Verstoß gegen die vorstehend dargestellte Loslimitierung werden die den Verstoß betreffenden Angebote von diesen Verfahren ausgeschlossen (Loslimitierung)."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "DEU"
+  ],
+  "classification-cpv": [
+    "71541000",
+    "71530000",
+    "71000000",
+    "71541000",
+    "71244000",
+    "71248000",
+    "71247000",
+    "71300000",
+    "71541000",
+    "71530000",
+    "71000000",
+    "71541000",
+    "71244000",
+    "71248000",
+    "71247000",
+    "71300000"
+  ],
+  "contract-nature": [
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "deu": [
+      "Stadtwerke Essen AG"
+    ]
+  },
+  "notice-title": {
+    "hun": "Németország – Építési projektvezetői szolgáltatások – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "lav": "Vācija – Celtniecības projekta vadības pakalpojumi – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "swe": "Tyskland – Byggteknisk projektledning – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "gle": "An Ghearmáin – Construction project management services – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "ell": "Γερμανία – Υπηρεσίες διαχείρισης κατασκευαστικών έργων – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "spa": "Alemania – Servicios de gestión de proyectos de construcción – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "est": "Saksamaa – Ehitusprojekti juhtimisteenused – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "nld": "Duitsland – Bouwprojectenbeheer – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "fin": "Saksa – Rakennushankkeen johto – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "pol": "Niemcy – Usługi zarządzania projektem budowlanym – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "hrv": "Njemačka – Usluge vođenja projekta u građevinarstvu – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "ces": "Německo – Řízení stavebních projektů – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "dan": "Tyskland – Koordinering af byggeprojekt – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "ron": "Germania – Servicii de gestionare a proiectelor de construcţii – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "por": "Alemanha – Serviços de gestão de projectos de construção – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "slk": "Nemecko – Riadenie projektov výstavby – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "fra": "Allemagne – Services de gestion de projets de construction – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "mlt": "Il-Ġermanja – Servizzi ta' l-amministrazzjoni tal-proġett tal-kostruzzjoni – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "deu": "Deutschland – Projektmanagement im Bauwesen – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "lit": "Vokietija – Statybos projektų valdybos paslaugos – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "ita": "Germania – Servizi di gestione di progetti di costruzione – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "bul": "Гepмaния – Услуги по управление на проекти, свързани със строителството – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "slv": "Nemčija – Storitve projektnega managementa v gradbeništvu – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)",
+    "eng": "Germany – Construction project management services – Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)"
+  },
+  "title-lot": {
+    "deu": [
+      "Stadtwerke Essen AG: EU-weites Vergabeverfahren \"Projektsteuerung\" (Los 5)"
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "deu": "Die Stadt Essen verfolgt das strategische Ziel, bis spätestens 2045 Klimaneutralität zu erreichen. Ein zentraler Baustein dieses Transformationsprozesses ist die Dekarbonisierung der Wärmeversorgung. Im Gebiet Essen-Überruhr/Burgaltendorf bestehen derzeit ungenutzte Potenziale für die Nutzung erneuerbarer Energiequellen. Der aktuelle Wärmebedarf von ca. 98,6 GWh/a verteilt sich auf rund 13.110 Wohneinheiten, wobei Erdgas mit einem Anteil von etwa 58 % gegenwärtig die dominierende Versorgungsart darstellt. Weitere 26 % des Bedarfs sind derzeit nicht eindeutig zugeordnet und entfallen auf nicht leitungsgebundene Energieträger. Um die Klimaziele zu erreichen und eine nachhaltige Wärmeversorgung sicherzustellen, hat die Stadtwerke Essen Machbarkeitsstudien durchgeführt. Diese zeigen, dass die Versorgung der Grund- und Mittellast künftig durch die Nutzung von Grubenwasser, Flusswasser und Klarwasser grundsätzlich gewährleistet werden kann. Im Rahmen der Machbarkeitsstudie wurden darüber hinaus Flusswasser und Klarwasser als potenzielle Wärmequellen untersucht; diese werden im weiteren Projektverlauf jedoch nicht weiterverfolgt. Als einzige natürliche Wärmequelle verbleibt das Grubenwasser der Zeche Heinrich. Die erzeugte Wärmemenge soll über ein neu zu errichtendes Wärmenetz verteilt werden, das im Endausbau rund 4.137 Gebäude versorgen wird. Die Planung und Errichtung des neuen Niedertemperaturwärmenetzes wird im Rahmen des Förderprogramms des Bundesministeriums für Wirtschaft und Klimaschutz \"Bundesförderung für effiziente Wärmenetze (BEW-Modul 1, Leistungsphasen 2-4)\" durchgeführt. Ziel ist die anschließende Umsetzung des Vorhabens im BEW-Modul 2 (Bau). Die Wirksamkeit dieses Vertrages steht unter der aufschiebenden Bedingung, dass ein Fördermittelbescheid über die Bewilligung der beantragten Fördermittel für das BEW1-Modul in einer Höhe erteilt wurde, die nach den verbindlichen Fördermittelbedingungen die Finanzierung des Projektes für das BEW1-Modul einschließlich der hierfür vorgesehenen Projektsteuerungsleistungen sichert. Es wird darauf hingewiesen, dass eine Aufhebung des Vergabeverfahrens erfolgen kann, sofern der Auftraggeber die Fördermittel für die Durchführung des Gesamtprojekts nicht erhalten sollte. Aktuell liegt noch keine Gestattung für die Errichtung des Niedertemperaturwärmenetzes vor. Der Gestattungsantrag wurde eingereicht."
+  }
+}

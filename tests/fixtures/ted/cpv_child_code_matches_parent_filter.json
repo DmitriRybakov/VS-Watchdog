@@ -1,0 +1,206 @@
+{
+  "deadline-receipt-tender-date-lot": [
+    "2026-09-28+02:00"
+  ],
+  "notice-type": "cn-standard",
+  "publication-number": "597239-2026",
+  "main-classification-proc": [
+    "51300000"
+  ],
+  "additional-classification-proc": [
+    "51313000",
+    "51314000",
+    "63100000",
+    "71318100",
+    "92320000",
+    "92370000"
+  ],
+  "place-of-performance-country-proc": [
+    "ESP"
+  ],
+  "document-url-lot": [
+    "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=FDheKYlddWrkY6rls5tG9A%3D%3D"
+  ],
+  "official-language": [
+    "SPA"
+  ],
+  "notice-subtype": "16",
+  "publication-date": "2026-08-31+02:00",
+  "estimated-value-proc": "1495499.49",
+  "contract-nature-main-proc": "services",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/597239-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/597239-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/597239-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/597239-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/597239-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/597239-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/597239-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/597239-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/597239-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/597239-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/597239-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/597239-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/597239-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/597239-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/597239-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/597239-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/597239-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/597239-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/597239-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/597239-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/597239-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/597239-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/597239-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/597239-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/597239-2026/pdf"
+    },
+    "pdfs": {
+      "SPA": "https://ted.europa.eu/es/notice/597239-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/597239-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/597239-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/597239-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/597239-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/597239-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/597239-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/597239-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/597239-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/597239-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/597239-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/597239-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/597239-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/597239-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/597239-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/597239-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/597239-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/597239-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/597239-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/597239-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/597239-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/597239-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/597239-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/597239-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/597239-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/597239-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/597239-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/597239-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/597239-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/597239-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/597239-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/597239-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/597239-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/597239-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/597239-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/597239-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/597239-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/597239-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/597239-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/597239-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/597239-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/597239-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/597239-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/597239-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/597239-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/597239-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/597239-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/597239-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/597239-2026/html"
+    }
+  },
+  "notice-identifier": "d724bb06-82ac-4869-aa77-3f99ead5cb4c",
+  "place-of-performance": [
+    "ES523",
+    "ESP",
+    "ES523",
+    "ESP"
+  ],
+  "deadline-receipt-request": [
+    "2026-09-28T23:59:00+02:00"
+  ],
+  "title-proc": {
+    "spa": "Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant."
+  },
+  "main-classification-type-proc": "cpv",
+  "estimated-value-cur-proc": "EUR",
+  "buyer-country": [
+    "ESP"
+  ],
+  "description-lot": {
+    "spa": [
+      "Es objeto del presente contrato la prestación de los servicios de asistencia técnica de los teatros municipales de gestión directa: el Teatro El Musical y el Auditori La Mutant del Ayuntamiento de València."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "ESP"
+  ],
+  "deadline-receipt-tender-time-lot": [
+    "23:59:00+02:00"
+  ],
+  "classification-cpv": [
+    "51300000",
+    "51313000",
+    "51314000",
+    "63100000",
+    "71318100",
+    "92320000",
+    "92370000",
+    "51300000",
+    "51313000",
+    "51314000",
+    "63100000",
+    "71318100",
+    "92320000",
+    "92370000"
+  ],
+  "contract-nature": [
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "spa": [
+      "Junta de Gobierno del Ajuntament de València"
+    ]
+  },
+  "notice-title": {
+    "hun": "Spanyolország – Hírközlési berendezéssel kapcsolatos szerelési szolgáltatások – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "lav": "Spānija – Sakaru iekārtu uzstādīšanas pakalpojumi – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "swe": "Spanien – Installation av kommunikationsutrustning – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "gle": "An Spáinn – Installation services of communications equipment – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "ell": "Ισπανία – Υπηρεσίες εγκατάστασης εξοπλισμού τηλεπικοινωνιών – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "spa": "España – Servicios de instalación de equipos de comunicaciones – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "est": "Hispaania – Sideseadmete paigaldusteenused – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "nld": "Spanje – Installatie van communicatie-uitrusting – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "fin": "Espanja – Tietoliikennelaitteiden asentaminen – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "pol": "Hiszpania – Usługi instalowania urządzeń komunikacyjnych – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "hrv": "Španjolska – Usluge instaliranja komunikacijske opreme – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "ces": "Španělsko – Instalace a montáž komunikačních zařízení – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "dan": "Spanien – Installation af kommunikationsudstyr – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "ron": "Spania – Servicii de instalare de echipament de comunicaţii – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "por": "Espanha – Serviços de instalação de equipamento para comunicação – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "slk": "Španielsko – Inštalácia komunikačných zariadení – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "fra": "Espagne – Services d'installation de matériel de communications – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "mlt": "Spanja – Servizzi ta’ l-istallazzjoni ta’ l-apparat tal-komunikazzjoni – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "deu": "Spanien – Installation von Kommunikationsgeräten – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "lit": "Ispanija – Ryšių įrangos montavimo paslaugos – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "ita": "Spagna – Servizi di installazione di apparecchiature di comunicazione – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "bul": "Иcпaния – Услуги по инсталиране на радио-, телевизионна и далекосъобщителна техника – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "slv": "Španija – Storitve inštalacije komunikacijske opreme – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
+    "eng": "Spain – Installation services of communications equipment – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant."
+  },
+  "title-lot": {
+    "spa": [
+      "Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant."
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "spa": "Es objeto del presente contrato la prestación de los servicios de asistencia técnica de los teatros municipales de gestión directa: el Teatro El Musical y el Auditori La Mutant del Ayuntamiento de València."
+  }
+}

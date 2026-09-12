@@ -61,6 +61,12 @@ packages = ["watchdog"]
 strict = true
 warn_unused_configs = true
 
+# PyYAML ships no type information and we are not adding a stub package for it.
+# Only sources/ted/config.py imports it, and it validates everything it reads.
+[[tool.mypy.overrides]]
+module = "yaml.*"
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
