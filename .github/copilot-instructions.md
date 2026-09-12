@@ -24,6 +24,7 @@ One Python process: Jinja2 templates + HTMX -> FastAPI routes -> services -> eng
 - Route handlers parse input, call one service function, and render. No business logic and no queries in routes or templates.
 - Every language-model call goes through the `LLMProvider` interface in `llm/provider.py`. A model SDK may be imported only inside its own provider implementation in `llm/` (for example `llm/azure_openai.py`) and nowhere else. The default provider is `disabled` and the entire application must work with it.
 - Do not add libraries unless I ask. Current ones: fastapi, uvicorn, jinja2, httpx, pydantic, pydantic-settings, sqlalchemy, alembic, psycopg, typer, pyyaml, structlog, tenacity.
+- Never install the PyPI package named `watchdog` (the filesystem watcher) into this venv, and tell me before adding any dependency that requires it — it collides with our own import package.
 
 ## The screening policy is authoritative
 

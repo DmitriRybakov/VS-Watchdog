@@ -2,8 +2,10 @@
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+# Distribution name is entr-watchdog because "watchdog" on PyPI is the
+# filesystem-watcher library. The import package stays "watchdog".
 [project]
-name = "watchdog"
+name = "entr-watchdog"
 version = "0.1.0"
 description = "Tender screening service for Entr Advisory & Decision Support"
 readme = "README.md"
