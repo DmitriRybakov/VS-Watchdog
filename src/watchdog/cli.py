@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import textwrap
 from datetime import date
 from typing import Annotated
 
@@ -55,6 +56,28 @@ def config_show() -> None:
         environment=settings.environment,
     )
 
+    config = _load_ted_config()
+    typer.echo("")
+    typer.echo(f"TED source: {len(config.cpv_prefixes)} CPV code(s), searched equally.")
+    typer.echo(f"  {' '.join(config.cpv_prefixes)}")
+
+    if not config.provisional_cpv:
+        typer.echo("  None of them is provisional.")
+        return
+
+    count = len(config.provisional_cpv)
+    label = "1 code is" if count == 1 else f"{count} codes are"
+    typer.secho(
+        f"\n{label} provisional: kept on a stated bet rather than a measured gain, "
+        "and owed an answer by the recall audit.",
+        fg=typer.colors.YELLOW,
+    )
+    for entry in config.provisional_cpv:
+        typer.echo(f"  {entry.code}  provisional since {entry.since.isoformat()}")
+        typer.echo(
+            textwrap.fill(entry.reason, width=88, initial_indent="    ", subsequent_indent="    ")
+        )
+
 
 @config_app.command("validate")
 def config_validate() -> None:
@@ -97,7 +120,9 @@ def config_validate() -> None:
 
 @app.command("ted-probe")
 def ted_probe(
-    days: int = typer.Option(3, "--days", min=0, max=90, help="How many days back to look."),
+    days: int = typer.Option(
+        3, "--days", min=1, max=90, help="How many days back to look, counting today."
+    ),
     limit: int = typer.Option(25, "--limit", min=1, max=250, help="How many notices to print."),
 ) -> None:
     """Call TED live and print what came back. Stores nothing.
@@ -110,29 +135,43 @@ def ted_probe(
 
     config = _load_ted_config()
 
-    typer.echo(f"Searching TED for the last {days} day(s). Nothing will be stored.")
-    typer.echo("")
-
-    printed = 0
     try:
-        for row in ted_service.probe(config, days=days, limit=limit):
-            printed += 1
-            country = country_name(row.buyer_country) or row.buyer_country or "unknown country"
-            where = ", ".join(country_names(row.performance_countries)) or "not stated"
-            typer.secho(f"{row.source_id}  buyer in {country}", fg=typer.colors.CYAN)
-            typer.echo(f"  title    {row.title}")
-            typer.echo(f"  work in  {where}")
-            typer.echo(f"  cpv      {row.cpv_main or 'none'}")
-            typer.echo(f"  all cpv  {', '.join(row.cpv_all) or 'none'}")
-            typer.echo(f"  stage    {row.stage}")
-            typer.echo(f"  deadline {row.deadline}  [{row.deadline_type}]")
-            typer.echo("")
+        result = ted_service.probe(config, days=days, limit=limit)
     except Exception as exc:
         typer.secho(f"TED could not be read: {exc}", fg=typer.colors.RED)
         typer.echo("Nothing was stored. Try again, or run: watchdog config validate")
         raise typer.Exit(code=1) from exc
 
-    typer.echo(f"{printed} notice(s). Nothing was stored.")
+    window = f"{result.window_from.isoformat()} to {result.window_to.isoformat()}"
+    typer.echo(f"Searching TED for {days} day(s), {window}. Nothing will be stored.")
+    typer.secho(_probe_summary(result), fg=typer.colors.YELLOW if result.truncated else None)
+    typer.echo("")
+
+    for row in result.rows:
+        country = country_name(row.buyer_country) or row.buyer_country or "unknown country"
+        where = ", ".join(country_names(row.performance_countries)) or "not stated"
+        typer.secho(f"{row.source_id}  buyer in {country}", fg=typer.colors.CYAN)
+        typer.echo(f"  title    {row.title}")
+        typer.echo(f"  work in  {where}")
+        typer.echo(f"  cpv      {row.cpv_main or 'none'}")
+        typer.echo(f"  all cpv  {', '.join(row.cpv_all) or 'none'}")
+        typer.echo(f"  stage    {row.stage}")
+        typer.echo(f"  deadline {row.deadline}  [{row.deadline_type}]")
+        typer.echo("")
+
+    typer.secho(_probe_summary(result), fg=typer.colors.YELLOW if result.truncated else None)
+    typer.echo("Nothing was stored.")
+
+
+def _probe_summary(result: ted_service.ProbeResult) -> str:
+    """Say what was hidden. A listing that stops at the limit reads as the whole answer."""
+    if not result.truncated:
+        return f"Showing all {result.total} matching notice(s)."
+    return (
+        f"Showing {len(result.rows)} of {result.total} matching notices, "
+        f"lowest publication numbers first. "
+        f"{result.total - len(result.rows)} not shown - raise --limit to see more."
+    )
 
 
 @app.command("ingest")

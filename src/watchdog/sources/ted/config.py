@@ -10,11 +10,12 @@ written as ``09300000`` in YAML survives PyYAML turning it into an integer.
 
 from __future__ import annotations
 
+from datetime import date
 from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from watchdog.core.countries import known_country_codes
 from watchdog.core.cpv import normalise_cpv
@@ -26,12 +27,37 @@ DEFAULT_CONFIG_PATH = Path("config/sources/ted.yaml")
 MAX_PAGE_SIZE = 250
 
 
+class ProvisionalCode(BaseModel):
+    """A CPV code that is in the list on a stated bet rather than a measured gain.
+
+    It is searched for exactly like any other code; nothing in the matcher or the
+    query knows the difference. This exists so the recall audit can report on
+    these codes by name instead of depending on someone rereading a comment.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    code: str
+    reason: str
+    # When it became provisional, so an entry that has quietly outlived its
+    # revisit is visible as a date rather than as a memory.
+    since: date
+
+    @field_validator("code", mode="before")
+    @classmethod
+    def _normalise_code(cls, value: Any) -> Any:
+        return normalise_cpv(value) or value
+
+
 class TedSourceConfig(BaseModel):
     """What to ask TED for. Every field is data from config/sources/ted.yaml."""
 
     model_config = ConfigDict(frozen=True)
 
     cpv_prefixes: list[str] = Field(default_factory=list)
+    # Derived from the cpv_prefixes entries that carry a `provisional:` block, so
+    # the two can never disagree about which codes exist.
+    provisional_cpv: list[ProvisionalCode] = Field(default_factory=list)
     # Where the buying organisation sits, ISO 3166-1 alpha-3.
     buyer_countries: list[str] = Field(default_factory=list)
     # Where the work happens. Empty means anywhere, which is not the same question.
@@ -46,6 +72,47 @@ class TedSourceConfig(BaseModel):
     # How far back the very first run reaches, when there is no watermark yet.
     backfill_days: int = Field(default=30, ge=1, le=365)
     page_size: int = Field(default=MAX_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _split_provisional(cls, data: Any) -> Any:
+        """Flatten the CPV list, keeping any `provisional:` block beside its code.
+
+        An entry is either a bare code or a mapping with `code:` and an optional
+        `provisional:`. Splitting it here means the query, the matcher and every
+        caller keep seeing a plain list of codes.
+        """
+        if not isinstance(data, dict):
+            return data
+
+        entries = data.get("cpv_prefixes")
+        if not isinstance(entries, list):
+            return data
+
+        codes: list[Any] = []
+        provisional: list[dict[str, Any]] = []
+        for entry in entries:
+            if not isinstance(entry, dict):
+                codes.append(entry)
+                continue
+
+            if "code" not in entry:
+                raise ValueError(
+                    f"a CPV entry has no 'code:' key: {entry!r}; write it as a plain code, "
+                    "or as 'code:' with an optional 'provisional:' block"
+                )
+
+            codes.append(entry["code"])
+            note = entry.get("provisional")
+            if note is not None:
+                if not isinstance(note, dict):
+                    raise ValueError(
+                        f"'provisional:' on CPV {entry['code']} must give a 'reason:' and a "
+                        "'since:' date, so the audit can report what the bet was"
+                    )
+                provisional.append({"code": entry["code"], **note})
+
+        return {**data, "cpv_prefixes": codes, "provisional_cpv": provisional}
 
     @field_validator("cpv_prefixes", mode="before")
     @classmethod

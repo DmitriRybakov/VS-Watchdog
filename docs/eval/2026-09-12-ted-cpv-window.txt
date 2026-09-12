@@ -1,0 +1,732 @@
+====================================================================================================
+WINDOW  publication-date 2026-09-05 .. 2026-09-12 inclusive
+ACTIVE CPV LIST (14 codes): 71241000 71318000 71335000 71313000 71314000 71314300 71323100 71356200 71356300 73200000 79400000 79411000 09300000 09330000
+ACTIVE significant prefixes: 71241 71318 71335 71313 71314 713143 713231 713562 713563 732 794 79411 093 0933
+====================================================================================================
+
+--- running A current+services ---
+query: (classification-cpv IN (71241000 71318000 71335000 71313000 71314000 71314300 71323100 71356200 71356300 73200000 79400000 79411000 09300000 09330000)) AND (form-type IN (planning consultation competition)) AND (contract-nature IN (services)) AND (buyer-country IN (AUT BEL BGR HRV CYP CZE DNK EST FIN FRA DEU GRC HUN IRL ITA LVA LTU LUX MLT NLD POL PRT ROU SVK SVN ESP SWE ISL LIE NOR GBR)) AND (publication-date>=20260905 AND publication-date<=20260912)
+returned 212 mapped notices, 0 unmappable
+
+--- running B expanded+services ---
+query: (classification-cpv IN (71241000 71318000 71335000 71313000 71314000 71314300 71323100 71356200 71356300 73200000 79400000 79411000 09300000 09330000 09123000 65400000 71334000 45251000 31121000 76000000)) AND (form-type IN (planning consultation competition)) AND (contract-nature IN (services)) AND (buyer-country IN (AUT BEL BGR HRV CYP CZE DNK EST FIN FRA DEU GRC HUN IRL ITA LVA LTU LUX MLT NLD POL PRT ROU SVK SVN ESP SWE ISL LIE NOR GBR)) AND (publication-date>=20260905 AND publication-date<=20260912)
+returned 224 mapped notices, 0 unmappable
+
+--- running C current+any-nature ---
+query: (classification-cpv IN (71241000 71318000 71335000 71313000 71314000 71314300 71323100 71356200 71356300 73200000 79400000 79411000 09300000 09330000)) AND (form-type IN (planning consultation competition)) AND (buyer-country IN (AUT BEL BGR HRV CYP CZE DNK EST FIN FRA DEU GRC HUN IRL ITA LVA LTU LUX MLT NLD POL PRT ROU SVK SVN ESP SWE ISL LIE NOR GBR)) AND (publication-date>=20260905 AND publication-date<=20260912)
+returned 341 mapped notices, 0 unmappable
+
+--- running D expanded+any-nature ---
+query: (classification-cpv IN (71241000 71318000 71335000 71313000 71314000 71314300 71323100 71356200 71356300 73200000 79400000 79411000 09300000 09330000 09123000 65400000 71334000 45251000 31121000 76000000)) AND (form-type IN (planning consultation competition)) AND (buyer-country IN (AUT BEL BGR HRV CYP CZE DNK EST FIN FRA DEU GRC HUN IRL ITA LVA LTU LUX MLT NLD POL PRT ROU SVK SVN ESP SWE ISL LIE NOR GBR)) AND (publication-date>=20260905 AND publication-date<=20260912)
+returned 386 mapped notices, 0 unmappable
+
+====================================================================================================
+PART 1 - THE COMPLETE CURRENT WINDOW
+====================================================================================================
+total notices returned by the active configuration: 212
+unmappable: 0 []
+
+cpv_main breakdown (92 distinct values):
+    71241000    20
+    71000000     7
+    71356200     7
+    79400000     7
+    71240000     7
+    71314000     6
+    79416000     6
+    71300000     5
+    73200000     5
+    79411000     5
+    79411100     5
+    71314200     5
+    79417000     5
+    71313000     4
+    79410000     4
+    79419000     4
+    79414000     4
+    79412000     3
+    71351810     3
+    71310000     3
+    71318000     3
+    71356300     3
+    71314300     3
+    79415200     3
+    71313450     3
+    79418000     2
+    09310000     2
+    71317200     2
+    79416200     2
+    79421000     2
+    71621000     2
+    71330000     2
+    73000000     2
+    71323100     2
+    71335000     2
+    79340000     2
+    09331200     2
+    72212481     2
+    71247000     2
+    79822500     2
+    71320000     1
+    80532000     1
+    75130000     1
+    48000000     1
+    72210000     1
+    71530000     1
+    73210000     1
+    71356000     1
+    79311000     1
+    71327000     1
+    65400000     1
+    71630000     1
+    72000000     1
+    71313400     1
+    71315410     1
+    79940000     1
+    98133100     1
+    72260000     1
+    71314100     1
+    79956000     1
+    50532400     1
+    71332000     1
+    72600000     1
+    45000000     1
+    90713000     1
+    75123000     1
+    71321000     1
+    71541000     1
+    73220000     1
+    51100000     1
+    71313100     1
+    09300000     1
+    63510000     1
+    50532000     1
+    90712000     1
+    65310000     1
+    64200000     1
+    50710000     1
+    09330000     1
+    79341400     1
+    72267000     1
+    79311400     1
+    79420000     1
+    64214200     1
+    72224000     1
+    45200000     1
+    71632000     1
+    72314000     1
+    79310000     1
+    31682210     1
+    75131000     1
+    50700000     1
+
+every code appearing in cpv_all (308 distinct):
+  09123000  1
+  09300000  1
+  09310000  5
+  09321000  2
+  09324000  2
+  09330000  1
+  09331200  4
+  09332000  3
+  30200000  2
+  31000000  1
+  31155000  1
+  31310000  1
+  31422000  1
+  31430000  1
+  31600000  1
+  31682210  1
+  32500000  1
+  34928500  1
+  38221000  1
+  38420000  1
+  39154000  1
+  39715210  1
+  42131100  1
+  42961100  2
+  44000000  1
+  44322000  1
+  44622000  2
+  44622100  2
+  45000000  4
+  45100000  4
+  45110000  1
+  45111250  1
+  45111291  1
+  45112710  1
+  45113000  1
+  45200000  2
+  45210000  1
+  45220000  2
+  45230000  1
+  45231300  1
+  45231400  1
+  45232130  1
+  45232410  1
+  45233120  1
+  45233200  1
+  45233226  1
+  45233250  1
+  45234000  1
+  45234100  1
+  45234115  1
+  45240000  1
+  45251143  1
+  45252000  1
+  45261215  1
+  45262300  1
+  45300000  3
+  45310000  4
+  45311000  2
+  45312310  1
+  45314000  1
+  45314300  1
+  45314310  1
+  45314320  1
+  45315100  2
+  45315700  1
+  45317200  1
+  45320000  1
+  45330000  1
+  45331000  2
+  45332200  1
+  45332300  1
+  45342000  1
+  45350000  1
+  45351000  2
+  45400000  3
+  45500000  1
+  48000000  2
+  48480000  2
+  48921000  1
+  50230000  1
+  50232100  1
+  50232110  1
+  50330000  1
+  50530000  1
+  50532000  1
+  50532400  1
+  50700000  1
+  50710000  1
+  50720000  1
+  50721000  1
+  50740000  1
+  50750000  1
+  51000000  1
+  51100000  1
+  51112200  1
+  60170000  1
+  63000000  2
+  63500000  1
+  63510000  2
+  64200000  1
+  64214200  1
+  65300000  2
+  65310000  2
+  65400000  2
+  65500000  1
+  66170000  1
+  66171000  1
+  71000000  13
+  71200000  4
+  71220000  2
+  71221000  2
+  71222000  2
+  71240000  17
+  71241000  32
+  71242000  7
+  71243000  2
+  71244000  4
+  71245000  1
+  71246000  1
+  71247000  6
+  71248000  4
+  71300000  21
+  71310000  9
+  71311000  1
+  71311210  1
+  71311300  1
+  71312000  1
+  71313000  15
+  71313100  4
+  71313200  2
+  71313400  5
+  71313440  2
+  71313450  6
+  71314000  12
+  71314100  5
+  71314200  7
+  71314300  8
+  71314310  3
+  71315000  1
+  71315100  1
+  71315200  2
+  71315210  2
+  71315400  1
+  71315410  1
+  71316000  2
+  71317100  1
+  71317200  3
+  71318000  14
+  71319000  2
+  71320000  14
+  71321000  4
+  71321400  1
+  71322000  4
+  71322300  2
+  71322500  3
+  71323100  6
+  71326000  1
+  71327000  3
+  71330000  5
+  71331000  1
+  71332000  3
+  71333000  2
+  71334000  2
+  71335000  11
+  71336000  5
+  71350000  3
+  71351810  4
+  71355000  2
+  71356000  1
+  71356200  12
+  71356300  5
+  71400000  1
+  71410000  4
+  71420000  1
+  71500000  2
+  71520000  3
+  71521000  1
+  71530000  5
+  71540000  1
+  71541000  5
+  71600000  2
+  71620000  1
+  71621000  4
+  71630000  2
+  71632000  2
+  72000000  5
+  72210000  1
+  72211000  2
+  72212100  1
+  72212211  1
+  72212443  1
+  72212481  2
+  72212730  1
+  72212900  1
+  72220000  3
+  72221000  3
+  72222100  1
+  72222300  1
+  72224000  5
+  72242000  1
+  72250000  1
+  72253000  2
+  72260000  1
+  72262000  2
+  72263000  2
+  72267000  1
+  72267100  1
+  72300000  1
+  72314000  1
+  72316000  1
+  72320000  2
+  72511000  1
+  72590000  1
+  72600000  1
+  73000000  7
+  73110000  2
+  73200000  9
+  73210000  3
+  73220000  5
+  73300000  2
+  75100000  1
+  75110000  1
+  75123000  1
+  75130000  4
+  75131000  1
+  77000000  1
+  77211500  1
+  77313000  1
+  79000000  1
+  79100000  2
+  79110000  2
+  79111000  2
+  79130000  1
+  79210000  1
+  79211100  1
+  79300000  2
+  79310000  3
+  79311000  3
+  79311100  1
+  79311200  2
+  79311300  2
+  79311400  2
+  79313000  1
+  79314000  1
+  79315000  1
+  79340000  5
+  79341000  1
+  79341100  1
+  79341200  1
+  79341400  3
+  79342000  2
+  79342200  1
+  79400000  13
+  79410000  9
+  79411000  11
+  79411100  7
+  79412000  4
+  79413000  2
+  79414000  4
+  79415200  5
+  79416000  9
+  79416200  4
+  79417000  7
+  79418000  4
+  79419000  4
+  79420000  3
+  79421000  8
+  79421200  1
+  79430000  2
+  79510000  2
+  79512000  1
+  79540000  1
+  79550000  2
+  79634000  1
+  79800000  1
+  79820000  1
+  79822500  3
+  79900000  1
+  79930000  2
+  79933000  2
+  79940000  1
+  79941000  1
+  79952000  2
+  79956000  1
+  79994000  1
+  80000000  3
+  80500000  2
+  80531200  1
+  80532000  1
+  85310000  1
+  85311100  1
+  85312300  1
+  85321000  1
+  90000000  1
+  90400000  1
+  90492000  1
+  90500000  1
+  90700000  3
+  90710000  2
+  90711000  1
+  90711100  1
+  90711300  1
+  90712000  2
+  90713000  5
+  90713100  2
+  92111250  1
+  92610000  1
+  98133100  2
+
+--- notices flagged by CPV theme (09*, 65*, hydrogen, CCS, wind, solar) ---
+
+[612666-2026] FOURNITURE ET L'ACHEMINEMENT EN ÉLECTRICITÉ ET GAZ NATUREL ET SERVICES ASSOCIÉS
+   cpv_main 71314000   cpv_all 71314000, 09310000, 09123000
+   theme energy div 09: 09310000, 09123000
+
+[613579-2026] Dodávka elektrickej energie 2027 – 2028
+   cpv_main 09310000   cpv_all 09310000, 65300000
+   theme energy div 09: 09310000
+   theme utility div 65: 65300000
+
+[614730-2026] Stadtwerke Essen AG: EU-weites Verfahren "Technische Due Diligence und Analyse des Bestandnetzes" (Los 2)
+   cpv_main 71621000   cpv_all 71621000, 71319000, 44622000, 65400000, 44622100, 71330000, 71318000, 71350000, 71000000, 71241000
+   theme utility div 65: 65400000
+
+[615031-2026] Stadtwerke Essen AG: EU-weites Vergabeverfahren "Netzkonzept und Wärmenetzoptimierung" (Los 1)
+   cpv_main 65400000   cpv_all 65400000, 44622000, 44622100, 71300000, 09321000, 09324000, 71000000, 71318000, 71330000
+   theme wind: 09321000
+   theme energy div 09: 09321000, 09324000
+   theme utility div 65: 65400000
+
+[615780-2026] Landelijk - Meetdiensten facilitaire nutsaansluitingen
+   cpv_main 71314200   cpv_all 71314200, 65500000
+   theme utility div 65: 65500000
+
+[618677-2026] FVE společnosti Slavos Slaný
+   cpv_main 09331200   cpv_all 09331200, 09332000, 71320000
+   theme solar: 09331200, 09332000
+   theme energy div 09: 09331200, 09332000
+
+[618926-2026] Zaprojektowanie i wykonanie robót dla zadania pn.: "Prace na linii kolejowej C–E 20 na odcinku Pilawa - Łuków"
+   cpv_main 45000000   cpv_all 45000000, 71322000, 09331200, 44000000, 77000000, 45100000, 45200000, 45300000, 45400000, 45110000, 45210000, 45230000, 45234000, 45234100, 45314000, 45314300, 45314310, 45234115, 45231400
+   theme solar: 09331200
+   theme energy div 09: 09331200
+
+[621289-2026] Zakup i dostawa energii elektrycznej w ramach usługi kompleksowej dla Miejskich Wodociągów i Kanalizacji w Bydgoszczy - sp. z o.o.
+   cpv_main 09300000   cpv_all 09300000, 09310000, 65310000
+   theme energy div 09: 09300000, 09310000
+   theme utility div 65: 65310000
+
+[623009-2026] Vođenje, nadzor i održavanje primarnog i sekundarnog termo-energetskog kruga KBC-a Zagreb, lokacija Rebro i opskrba energentom
+   cpv_main 50532000   cpv_all 50532000, 09321000
+   theme wind: 09321000
+   theme energy div 09: 09321000
+
+[623847-2026] LA FOURNITURE ET LE RACHAT D’ELECTRICITE 100 % RENOUVELABLE ET DE GAZ NATUREL POUR L’UMONS, L’ASBL MATERIA NOVA ET L’ASBL CUZG
+   cpv_main 65310000   cpv_all 65310000, 71314000
+   theme utility div 65: 65310000
+
+[624145-2026] Dostawa i montaż instalacji OZE dla mieszkańców oraz Budynków Użyteczności Publicznej dla Gminy i Miasta Odolanów
+   cpv_main 09330000   cpv_all 09330000, 45300000, 09331200, 09332000, 45261215, 31155000, 31430000, 31422000, 51112200, 45310000, 71242000, 45000000, 45100000, 45400000, 71200000, 71300000, 71314100, 71320000, 71321000, 71326000, 31600000, 45311000
+   theme solar: 09331200, 09332000, 45261215
+   theme energy div 09: 09330000, 09331200, 09332000
+
+[625113-2026] Dodávka silovej elektriny na roky 2027-2028 priebehové, nepriebehové a nemerané merania
+   cpv_main 09310000   cpv_all 09310000, 65300000
+   theme energy div 09: 09310000
+   theme utility div 65: 65300000
+
+[625777-2026] Budowa instalacji fotowoltaicznych dla obiektów użyteczności publicznej oraz infrastruktury służącej do magazynowania energii na terenie Gminy Sławno
+   cpv_main 09331200   cpv_all 09331200, 31000000, 45100000, 45300000, 45310000, 51000000, 71320000, 71200000, 09332000, 45342000, 45312310
+   theme solar: 09331200, 09332000
+   theme energy div 09: 09331200, 09332000
+
+[626418-2026] Lokale Energie Delen Gooi en Vechtstreek
+   cpv_main 71314000   cpv_all 71314000, 09310000
+   theme energy div 09: 09310000
+
+[627951-2026] Dostosowanie 142 szt. węzłów w Opolu do wymagań Systemu AI
+   cpv_main 31682210   cpv_all 31682210, 32500000, 09324000, 38420000, 42131100, 48921000, 39715210, 72263000, 72222100, 45331000
+   theme energy div 09: 09324000
+
+15 notice(s) flagged by CPV theme.
+
+--- cross-check: theme words in the notice text (not a CPV claim) ---
+
+[617948-2026] Friedrich-Ebert-Schule Tragwerksplanung
+   cpv_all 71240000, 71300000, 73200000, 71320000, 71327000
+   text carbon capture: co2
+
+[618677-2026] FVE společnosti Slavos Slaný
+   cpv_all 09331200, 09332000, 71320000
+   text solar: fotovolta, photovolta, solar
+
+[619162-2026] Dynamisches Beschaffungssystem_BNB- und Nachhaltigkeitskoordination
+   cpv_all 71240000, 71300000, 71318000, 71541000, 90713000, 90710000
+   text carbon capture: co2
+
+[621289-2026] Zakup i dostawa energii elektrycznej w ramach usługi kompleksowej dla Miejskich Wodociągów i Kanalizacji w Bydgoszczy - sp. z o.o.
+   cpv_all 09300000, 09310000, 65310000
+   text solar: solar
+
+[623022-2026] Wissenschaftliche Begleitung des Elektrolyse-Förderprogramms ("ELY") für UM BW
+   cpv_all 71314000, 73000000, 75100000
+   text hydrogen: elektroly, wasserstoff
+
+[624145-2026] Dostawa i montaż instalacji OZE dla mieszkańców oraz Budynków Użyteczności Publicznej dla Gminy i Miasta Odolanów
+   cpv_all 09330000, 45300000, 09331200, 09332000, 45261215, 31155000, 31430000, 31422000, 51112200, 45310000, 71242000, 45000000, 45100000, 45400000, 71200000, 71300000, 71314100, 71320000, 71321000, 71326000, 31600000, 45311000
+   text solar: solar
+
+[625345-2026] Raamovereenkomst Studies
+   cpv_all 71241000, 71310000, 71336000, 71314300, 71600000, 71621000, 71315400
+   text carbon capture: co2
+   text solar: zonne
+
+[625777-2026] Budowa instalacji fotowoltaicznych dla obiektów użyteczności publicznej oraz infrastruktury służącej do magazynowania energii na terenie Gminy Sławno
+   cpv_all 09331200, 31000000, 45100000, 45300000, 45310000, 51000000, 71320000, 71200000, 09332000, 45342000, 45312310
+   text solar: photovolta, pv, solar
+
+[626958-2026] Assistance à maîtrise d'ouvrage pour l'étude de stratégie de solarisation des toitures des écoles de la Ville de Nîmes
+   cpv_all 71241000
+   text solar: photovolta, solar
+
+9 notice(s) flagged by text.
+
+====================================================================================================
+PART 2 - THE EXPANSION, SIDE BY SIDE
+====================================================================================================
+A current  + services filter : 212
+B expanded + services filter : 224
+C current  + any nature      : 341
+D expanded + any nature      : 386
+
+new notices caught by the expansion, WITH the services filter: 12
+new notices caught by the expansion, with NO nature filter:     45
+of those, removed by the services filter:                       33
+notices in A that are not in B (should be 0): 0 []
+
+--- the difference, notice by notice (services filter applied) ---
+
+[612982-2026]  DNK  contract_notice  natures: works, services
+  title       Drift og vedligeholdelse af afvandings- og geotekniske anlæg
+  title (en)  Denmark – Drainage works – Drift og vedligeholdelse af afvandings- og geotekniske anlæg
+  cpv_main    45232452
+  cpv_all     45232452, 45111240, 45232450, 76600000, 90912000
+  caught by   76000000 services related to the oil and gas industry
+  buyer       Banedanmark
+  description Udbuddet omfatter drift og vedligehold af jernbanens afvandingsanlæg, som består af åbne og lukkede grøfter, dræn, brønde og gennemløb under og langs jernbanen samt mindre konstruktioner i tilknytning hertil fordelt på norm-, tilstand- og fejlretning. Udbuddet er opdelt i 7 delaftaler. Delaftalerne 1-5 er løbende vedligeholdelse og mindre vandafvandingsopgaver. Delaftalerne 1-5 er opdelt i geografiske områder. Delaftale 6 indeholder geotekniske opgaver med kompetencekrav. Delaftalen er landsdækkende. Delaftale 7 omfatter større samt rektangulære strømpeforringer. Delaftalen er landsdækkende.
+
+[614418-2026]  ESP  contract_notice  natures: services
+  title       Trabajos de mejora eléctrica en el ciclo integral de Torrelavega, para la empresa Aguas Torrelavega S.A.
+  title (en)  Spain – Installation services of electrical equipment – Trabajos de mejora eléctrica en el ciclo integral de Torrelavega, para la empresa Aguas Torrelavega S.A.
+  cpv_main    51110000
+  cpv_all     51110000, 31121000, 31170000, 31200000, 31214000, 31214500, 45000000, 45223100, 45311100, 45315600, 45317000
+  caught by   31121000 generating sets
+  buyer       Consejo de Administración de Aguas de Torrelavega
+  description Trabajos de mejorad de garantía de suministro eléctrico a la ETAP de Los Corrales, para la empresa Aguas Torrelavega S.A.
+
+[615077-2026]  DEU  contract_notice  natures: services
+  title       Neubau Feuerwehrhaus Westendorf (Ostallgäu) - Leistungen der Technischen Ausrüstung ALG 4, 5, 6 (ELT) gem. §§ 53 ff HOAI 2021, LPH 1-9, bei stufenweiser Beauftragung.
+  title (en)  Germany – Architectural, construction, engineering and inspection services – Neubau Feuerwehrhaus Westendorf (Ostallgäu) - Leistungen der Technischen Ausrüstung ALG 4, 5, 6 (ELT) gem. §§ 53 ff HOAI 2021, LPH 1-9, bei stufenweiser Beauftragung.
+  cpv_main    71000000
+  cpv_all     71000000, 71300000, 71320000, 71321000, 71322000, 71334000
+  caught by   71334000 mechanical and electrical engineering services
+  buyer       Gemeinde Westendorf
+  description Gegenstand des Auftrags sind Leistungen der Technischen Ausrüstung ALG 4, 5, 6 (ELT) gem. §§ 53 ff HOAI 2021, Leistungsphasen 1 bis 9, bei stufenweiser Beauftragung. Gegebenenfalls werden auch verschiedene Besondere Leistungen beauftragt. Die Gemeinde Westendorf (Landkreis Ostallgäu) plant den Neubau eines Feuerwehrhauses. Das Gebäude ist für rund 80 aktive Feuerwehrangehörige ausgelegt und umfasst eine Fahrzeughalle mit drei Stellplätzen sowie eine integrierte Waschhalle. Die Fahrzeughalle ist mit lichten Abmessungen von ca. 15,80 × 14,00 m vorgesehen, die Waschhalle mit ca. 6,00 × 11,00 m. Das abgestimmte Raumprogramm umfasst darüber hinaus Lager- und Werkstattflächen, Umkleide-, Sanitär- und Einsatzbereiche, Schulungs- und Verwaltungsräume sowie die erforderlichen Außenanlagen. Insgesamt ergibt sich eine Gesamtnutzfläche von rund 950 m².
+
+[615124-2026]  POL  contract_notice  natures: supplies, services
+  title       Wykonanie tymczasowej stacji regazyfikacji gazu LNG ze zbiornikiem do jego magazynowania i obsługą oraz dostawą ciekłego LNG dla Polskiej Grupy Górniczej S.A. Oddział KWK ROW Ruch Marcel
+  title (en)  Poland – Natural gas – Wykonanie tymczasowej stacji regazyfikacji gazu LNG ze zbiornikiem do jego magazynowania i obsługą oraz dostawą ciekłego LNG dla Polskiej Grupy Górniczej S.A. Oddział KWK ROW Ruch Marcel
+  cpv_main    09123000
+  cpv_all     09123000, 65210000, 76111000
+  caught by   09123000 natural gas; 76000000 services related to the oil and gas industry
+  buyer       Polska Grupa Górnicza S.A.
+  description Wykonanie tymczasowej stacji regazyfikacji gazu LNG ze zbiornikiem do jego magazynowania i obsługą oraz dostawą ciekłego LNG dla Polskiej Grupy Górniczej S.A. Oddział KWK ROW Ruch Marcel
+
+[616527-2026]  NLD  contract_notice  natures: services
+  title       DPS for Coring Services
+  title (en)  Netherlands – Services related to the oil and gas industry – DPS for Coring Services
+  cpv_main    76000000
+  cpv_all     76000000, 76300000
+  caught by   76000000 services related to the oil and gas industry
+  buyer       EBN B.V.
+  description The purpose of this DPS is to establish a framework for assignments relating to coring services.
+
+[617173-2026]  DEU  contract_notice  natures: services
+  title       Erstsicherung und Entstörbereitschaft (TEO)
+  title (en)  Germany – Pipeline-inspection services – Erstsicherung und Entstörbereitschaft (TEO)
+  cpv_main    76600000
+  cpv_all     76600000, 45259000
+  caught by   76000000 services related to the oil and gas industry
+  buyer       GASCADE Gastransport GmbH
+  description Die GASCADE Gastransport GmbH ("GASCADE") betreibet als deutscher Fernleitungsnetzbetreiber ein Gashochdrucknetz von 3.700 km für Erdgas und Wasserstoff in Dimensionen von DN 150 bis DN 1400 im Geltungsbereich der Gashochdruckleitungsverordnung (GasHDrLtgV). Die NEL Gastransport GmbH ("NGT") betreibt als deutscher Fernleitungsnetzbetreiber ein Gashochdrucknetz von 440 km für Erdgas in Dimensionen von DN 150 bis DN 1400 im Geltungsbereich der Gashochdruckleitungsverordnung (GasHDrLtgV). Gemäß des Regelwerkes der DVGW sind GASCADE und NGT nach dem Arbeitsblatt GW 1200 jeweils verpflichtet, einen Bereitschaftsdienst zu organisieren. Außerdem vergeben GASCADE und NGT mit dieser Ausschreibung jeweils Leistungen zur Beseitigung von Störungen im Bereitschaftsfall für das Netz der von ihnen betriebenen Erdgas-Hochdruckleitungen.
+
+[623910-2026]  AUT  contract_notice  natures: services
+  title       S18 Bodensee Schnellstraße
+  title (en)  Austria – Mechanical and electrical engineering services – S18 Bodensee Schnellstraße
+  cpv_main    71334000
+  cpv_all     71334000
+  caught by   71334000 mechanical and electrical engineering services
+  buyer       Autobahnen- und Schnellstraßen- Finanzierungs-Aktiengesellschaft
+  description S18 Bodensee Schnellstraße - Planung EM inkl. BuS und Tunnellüftung
+
+[626032-2026]  IRL  contract_notice  natures: services
+  title       Architect and Building (M and E) Services Engineer Led Design Team Consultancy Services for SEAI Local Authority Energy Pathfinder Programme 2 - Galway County Council
+  title (en)  Ireland – Architectural design services – Architect and Building (M and E) Services Engineer Led Design Team Consultancy Services for SEAI Local Authority Energy Pathfinder Programme 2 - Galway County Council
+  cpv_main    71220000
+  cpv_all     71220000, 71200000, 71221000, 71334000, 71324000
+  caught by   71334000 mechanical and electrical engineering services
+  buyer       Galway County Council
+  description The services contract is to provide an Architect and Building (M and E) Services Engineering Led Integrated Design Team Consultancy Services for: The Sustainable Energy Authority of Ireland (SEAI) and the Local Authority have agreed to collaborate on the delivery of an Energy Efficiency and Decarbonisation Pathfinder Programme for the Local Authority sector (the 'Pathfinder'). The shared objective of SEAI and Local Authority is to implement a range of energy efficiency and decarbonisation measures in a small number of typical Local Authority buildings, to test a variety of approaches with a view to developing a scalable model for decarbonisation of the Local Authority building stock going forward should funding become available.
+
+[626128-2026]  HUN  contract_notice  natures: services
+  title       A pécsi vásártér - tervezés
+  title (en)  Hungary – Architectural, engineering and planning services – A pécsi vásártér - tervezés
+  cpv_main    71240000
+  cpv_all     71240000, 71220000, 71322000, 71334000
+  caught by   71334000 mechanical and electrical engineering services
+  buyer       Pécs Megyei Jogú Város Önkormányzata
+  description „TOP_Plusz-6.2.1-23 - Fenntartható versenyképesvárosfejlesztés” program keretében megvalósítani kívánt „A pécsi Vásártér funkcióbővítő rekonstrukciója, fejlesztése projekttel kapcsolatos tervezői program” Tervezés és tervkészítés során az alábbi jogszabályokat/szabványokat/felhívásokat kell alkalmazni: • a magyar építészetről szóló 2023. évi C. törvény • 2023. évi LXIX. törvény az állami építési beruházások rendjéről • 190/2009. (IX. 15.) Korm. rendelet a főépítészi tevékenységről • 191/2009. (IX. 15.) Korm. rendelet az építőipari kivitelezési tevékenységről • 237/2024. (VIII. 8.) Korm. rendelet az építésügyi hatóságok kijelöléséről és működési feltételeiről • 280/2024. (IX. 30.) Korm. rendelet a településrendezési és építési követelmények alapszabályzatáról • 281/2024. (IX. 30.) szóló Korm. rendelet az építésügyi hatósági eljárásokról és ellenőrzésekről • 283/2024. (IX. 30.) Korm. rendelet az építészeti és településrendezési tervtanácsokról • 176/2008. (VI. 30.) Korm. rendelet az épületek energetikai jellemzőinek tanúsításáról • 9/2023. (V. 25.) ÉKM rendelet az épületek energetikai jellemzőinek meghatározásáról • 54/2014. (XII. 5.) BM rendelet az Országos Tűzvédelmi Szabályzatról  ...
+
+[626265-2026]  NOR  prior_information  natures: services
+  title       Request for Information (RFI) - CCS as a service
+  title (en)  Norway – Environmental services – Request for Information (RFI) - CCS as a service
+  cpv_main    90700000
+  cpv_all     90700000, 24311800, 45000000, 45251250, 45252300, 71000000, 73100000
+  caught by   45251000 works for power plants
+  buyer       Eidsiva Bioenergi AS
+  description Eidsiva Bioenergi AS is a wholly owned company in the Eidsiva group and was established in 2007. The company operates, designs and constructs fully-owned and partially owned bioenergy installations, mainly in Innlandet County. The company is currently Norway's third largest district heating producer and produces approx. 475 GWh per annum. Eidsiva has set ambitious targets for sustainability and by 2030 shall have 100% renewable district heating production, without the use of fossil oil and gas, as well as reduce their own emissions by 60%. As a part of this work, carbon capture and storage (CCS) at Eidsiva Bioenergis waste incineration plant at Trehørningen energy centre outside Hamar. Eidsiva Bioenergi wants to map the market to identify suppliers who can offer carbon capture and permanent storage of CO2 as a service (CCS as a service). The deadline for input is 30 September 2026. In this context, "CCS as a service" refers to the business model in which the supplier assumes responsibility for establishing, financing, and operating carbon capture facilities, as well as managing the transport and permanent storage of captured CO2 from the Trehørningen energy center. Eidsiva Bioenerg ...
+
+[627158-2026]  DNK  contract_notice  natures: services
+  title       Supplementary information regarding use of Achilles Utilities Nordics & Central Europe qualification system by Ørsted and Ørsted Group including the entities mentioned in section 1 and 2.1.4 General information
+  title (en)  Denmark, Germany, Poland – Repair and maintenance services – Supplementary information regarding use of Achilles Utilities Nordics & Central Europe qualification system by Ørsted and Ørsted Group including the entities mentioned in section 1 and 2.1.4 General information
+  cpv_main    50000000
+  cpv_all     50000000, 51000000, 55000000, 60000000, 63000000, 64000000, 65000000, 66000000, 70000000, 71000000, 72000000, 73000000, 75000000, 76000000, 77000000, 79000000, 80000000, 85000000, 90000000, 92000000, 98000000
+  caught by   76000000 services related to the oil and gas industry
+  buyer       Ørsted Services A/S
+  description ACHILLES UTILITIES NCE is a joint qualification system for suppliers and contractors to utilities in Nordics and Central Europe. It's operated by Achilles under Article 77 of Directive 2014/25/EU. The subscribing utilities will use ACHILLES UTILITIES NCE for tenderer selection for contracts and framework agreements subject to EU procurement rules, but reserve the right to publish individual notices for specific requirements where they deem it necessary, even though they relate to the product and service categories covered by ACHILLES UTILITIES NCE. The qualification system may be used for contracts not subject to EU procurement rules at each subscriber's discretion. An overview of products and services acquired through ACHILLES UTILITIES NCE is available here https://www.achilles.com/wp/wp-content/uploads/2023/05/Product-and-Service-Code-Guide-EN.pdf
+
+[628612-2026]  NLD  contract_notice  natures: services
+  title       Gemeente Woudenberg en Scherpenzeel - Onderhoud Pompen en Gemalen
+  title (en)  Netherlands – Repair and maintenance services of pumps – Gemeente Woudenberg en Scherpenzeel - Onderhoud Pompen en Gemalen
+  cpv_main    50511000
+  cpv_all     50511000, 71334000
+  caught by   71334000 mechanical and electrical engineering services
+  buyer       Stichting Inkoopbureau Midden Nederland
+  description De Aanbestedende dienst wenst een Ondernemer te contracteren voor het uitvoeren van het preventief en correctief onderhoud aan pompen, gemalen en randvoorzieningen in de gemeenten Woudenberg en Scherpenzeel. De werkzaamheden bestaan in hoofdzaak uit: Onderdeel 1 – Preventief onderhoud Onderdeel 2 – Correctief onderhoud Onderdeel 3 – Leveren en vervangen onderdelen en/of pompen -
+
+--- extras that the services filter REMOVES (present only with no nature filter) ---
+[613084-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Kompleksowa dostawa paliwa gazowego w postaci gazu ziemnego wysokometanowego typu E (GZ-50) do Opolskiego Centrum Rehabilitacji w Korfantowie Sp. z o.o. w okresie od 01.01.2027r. do 31.12.2029r.
+[613271-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Lieferung von Erdgas für die Ammerland-Klinik GmbH in 2028ff
+[614850-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Framework agreement biogas 2026
+[614922-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Zakup, dostawa i przesył gazu ziemnego do celów grzewczych na rok 2027
+[614927-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Erdgaslieferung an die Stadt Bad Soden LZ 01.01.27 bis 01.01.30
+[615312-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Lieferung von Gas Gemeinde Birkenwerder
+[616093-2026] natures: works | cpv_main 45000000 | caught by 76000000 | Einrichtung eines Qualifizierungssystems für das 110 kV-Projekt der Energienetze Offenbach GmbH
+[616143-2026] natures: works | cpv_main 45251000 | caught by 45251000 | Budowa nowych jednostek wytwórczych wraz z akumulatorem ciepła w EC Zawidawie
+[617320-2026] natures: works | cpv_main 45251200 | caught by 45251000 | Petrašiūnų elektrinės elektrifikacija, įrengiant elektros energijos kaupimo įrenginius, dyzelinį generatorių ir rekonstruojant 6 kV skirstyklą (projektavimas ir rangos darbai)
+[617406-2026] natures: supplies, works | cpv_main 42160000 | caught by 45251000 | Modernizace výroby tepla – ENERGIE Holding – Litoměřice“
+[617868-2026] natures: supplies | cpv_main 31000000 | caught by 31121000 | Dostawa sprzętu niezbędnego do realizacji zadań Ochrony Ludności i Obrony Cywilnej w Gminie Ożarów Mazowiecki
+[618093-2026] natures: supplies | cpv_main 42416100 | caught by 31121000 | Maintenance technique des équipements et installations pour les établissements adhérents au GCS Achats du Centre
+[619013-2026] natures: works | cpv_main 45200000 | caught by 45251000 | Zaprojektowanie, wybudowanie i uruchomienie Instalacji Termicznego Przekształcania Odpadów pochodzenia komunalnego z wysokosprawnym odzyskiem energii (ITPO) w Wysokiem Mazowieckiem
+[619753-2026] natures: works | cpv_main 45200000 | caught by 45251000 | SC 07/25 - Open Cycle Gas Turbine (OCGT) and Combined Cycle Gas Turbine (CCGT) Qualification System
+[621010-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Dodávka zemného plynu – PSO – Mesto Trstená 2026/ZP
+[622059-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Lieferung von Erdgas zur Heizungs- und Warmwasserversorgung für die Stadt Falkensee
+[622127-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | “SIA “Daugavpils satiksme” piederošo autobusu uzpilde ar CNG, piegādājot CNG”
+[622382-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Raamovereenkomst voor de levering van aardgas 2029-2030
+[624909-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Sukcesywna dostawa wraz z dystrybucją gazu ziemnego na potrzeby ogrzewania budynków Uniwersytetu Rzeszowskiego
+[625941-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Marché subséquent pour la fourniture et l’acheminement de Gaz Naturel en contrat unique et les services obligatoires et optionnels associés pour les points de livraison sur le territoire de GRDF des adhérents de la Centrale d’Achats HABITAT REUNI
+[626048-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | „Kompleksowa dostawa gazu ziemnego obejmująca sprzedaż i dystrybucję gazu na potrzeby Gminnego Ośrodka Kultury Perła w Nowinach” – II postępowanie
+[626098-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Lieferung von Erdgas
+[626259-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Suministro sucesivo y por precio unitario de gas natural a los diferentes puntos de consumo del Ayuntamiento de Colindres (CON/14/2026)
+[626464-2026] natures: works | cpv_main 45251100 | caught by 45251000 | BR - Kleinwindkraftanlagen DIN 18382 VE 4-06.3 - Vergabe 20/2026
+[626556-2026] natures: supplies | cpv_main 31121000 | caught by 31121000 | Suministro de generadores, en régimen de alquiler, para los actos organizados y/o con el soporte del Ayuntamiento de Cerdanyola del Vallès
+[626828-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Dabasgāzes piegāde
+[626870-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Földgáz DBR 2027-2030.
+[626966-2026] natures: works | cpv_main 45311200 | caught by 31121000 | 2026-0557 Durchführung von Bauleistungen für das Projekt "2. BA Stadtpark Hochheide - Windanlagen"
+[626996-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Kompleksowa dostawa paliwa gazowego – gazu ziemnego wysokometanowego (E) do obiektów Zarządu Zieleni Miejskiej w Łodzi
+[628173-2026] natures: supplies | cpv_main 09123000 | caught by 09123000 | Erdgas für die Kliniken der Stadt Köln gGmbH
+[628626-2026] natures: works | cpv_main 45251250 | caught by 45251000 | Etablering af akkumuleringstank
+[628628-2026] natures: works | cpv_main 45231220 | caught by 76000000 | Gázelosztó vezeték (gerinc és leágazó) létesítése
+[628971-2026] natures: supplies | cpv_main 35110000 | caught by 31121000 | Lieferung einer Drehleiter vom Typ DLK 23/12 inkl. Beladung für die Freiwillige Feuerwehr Bornheim
+
+--- how many extras each added code contributes (services filter applied) ---
+  09123000  natural gas                                      1
+  65400000  other sources of energy supply                   0
+  71334000  mechanical and electrical engineering services   5
+  45251000  works for power plants                           1
+  31121000  generating sets                                  1
+  76000000  services related to the oil and gas industry     5
+
+====================================================================================================
+PART 3 - ARE THE DROPPED CHILDREN REALLY COVERED?
+====================================================================================================
+local matcher, against the ACTIVE configured list:
+  09310000: covered by configured ['09300000'] (claimed parent 09300000, configured: True)
+  09320000: covered by configured ['09300000'] (claimed parent 09300000, configured: True)
+  09330000: covered by configured ['09300000', '09330000'] (claimed parent 09300000, configured: True)
+  09331000: covered by configured ['09300000', '09330000'] (claimed parent 09330000, configured: True)
+  71314100: covered by configured ['71314000'] (claimed parent 71314000, configured: True)
+  71314200: covered by configured ['71314000'] (claimed parent 71314000, configured: True)
+
+live check: query TED for the child code alone, same window/stages/nature/countries.
+If the parent really covers it, every id must already be in A.
+  09310000 (parent 09300000): 5 notice(s); 0 NOT in A []
+  09320000 (parent 09300000): 3 notice(s); 0 NOT in A []
+  09330000 (parent 09300000): 4 notice(s); 0 NOT in A []
+  09331000 (parent 09330000): 4 notice(s); 0 NOT in A []
+  71314100 (parent 71314000): 5 notice(s); 0 NOT in A []
+  71314200 (parent 71314000): 7 notice(s); 0 NOT in A []

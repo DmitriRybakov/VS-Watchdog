@@ -41,6 +41,16 @@ ignorable`), not a silent ignore. That is useful: a typo in a request key cannot
 Over a 60-day window: 131,681 notices with it, 145,374 without. About 9% of rows are superseded
 versions of notices we would otherwise ingest twice.
 
+**`totalNoticeCount` obeys it too, and that is a trap.** The same query over 5-12 September 2026
+reports **217** without `onlyLatestVersions` and **212** with it, and 212 is what iterating actually
+yields. `count_notices` therefore sends the same flag the caller will iterate with; a count taken
+under different terms looks authoritative and is wrong by the number of superseded versions.
+
+### Counting without reading
+
+One request with `limit: 1` and `page: 1` returns the full `totalNoticeCount` for the query. That is
+how `watchdog ted-probe` can say "showing 60 of 212" instead of stopping at the limit in silence.
+
 ### `checkQuerySyntax` is a validate-only mode
 
 With it set, a valid request answers 200 with `notices: []` and `totalNoticeCount: null`. It does
@@ -117,6 +127,12 @@ its branch. Our local matcher has to reproduce this, and `startswith` on the pad
 `"71318100".startswith("71318000")` is `False`. `watchdog.core.cpv` strips the trailing zeros to get
 the significant prefix (`71318000` -> `71318`), with a floor of two digits so that `70000000` becomes
 `70` and not `7`.
+
+Re-verified 12 September 2026 over 5-12 September, by querying each child code alone and checking its
+results against the parent's: `09310000`, `09320000`, `09330000` (under `09300000`), `09331000`
+(under `09330000`), `71314100` and `71314200` (under `71314000`) each returned notices that were
+**all** already in the parent's result set. `09330000` was dropped from the configured list on the
+strength of it.
 
 ### `contract-nature` is an ANY match over the list - this surprised us too
 

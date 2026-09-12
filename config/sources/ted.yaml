@@ -12,6 +12,14 @@
 # carries only 71318100 and is returned for 71318000, 71310000 and 71000000 but
 # not for 45000000. So 71241000 already covers 71241100, 71241200 and so on.
 #
+# Three codes were removed as redundant on 2026-09-12 - 09330000, 71314300 and
+# 79411000 - because every notice each of them returned over 5-12 September was
+# already returned by a parent that is still listed. Checked both ways: the local
+# matcher, and a live query for the child code alone compared against the parent.
+# Zero notices lost in every case. The same holds for 09310000, 09320000,
+# 09331000, 71314100 and 71314200, which is why none of those is listed either.
+# A code whose parent is in this list buys nothing and hides the ones that do.
+#
 # Quoted because a leading zero matters: 09310000 parsed as a number becomes
 # 9310000 and matches nothing ever again.
 cpv_prefixes:
@@ -20,15 +28,49 @@ cpv_prefixes:
   - "71335000"   # Engineering studies
   - "71313000"   # Environmental engineering consultancy services
   - "71314000"   # Energy and related services
-  - "71314300"   # Energy-efficiency consultancy services
   - "71323100"   # Electrical power systems design services
   - "71356200"   # Technical assistance services
   - "71356300"   # Technical support services
   - "73200000"   # Research and development consultancy services
   - "79400000"   # Business and management consultancy and related services
-  - "79411000"   # General management consultancy services
   - "09300000"   # Electricity, heating, solar and nuclear energy
-  - "09330000"   # Solar energy
+  # Added 2026-09-12 after measuring the complete 5-12 September window (212
+  # notices, not the 60 a probe had printed). 45251000 alone caught 626265-2026,
+  # Eidsiva Bioenergi's "CCS as a service" RFI - the best match to our mandate in
+  # the whole week, invisible to the list above. 76000000 is where subsurface and
+  # gas-infrastructure services are classified, including hydrogen transport, and
+  # we had no coverage of it at all.
+  - "45251000"   # Works for power plants
+  - "76000000"   # Services related to the oil and gas industry
+  # The next two are PROVISIONAL: in the list on a stated bet rather than on a
+  # measured gain. They are searched for exactly like every other code - nothing
+  # in the matcher or the query treats them differently - and the block below is
+  # machine-readable so `watchdog config show` lists them and the step 10 audit
+  # reports on them by name instead of on someone remembering.
+  - code: "71334000"   # Mechanical and electrical engineering services
+    provisional:
+      since: 2026-09-12
+      reason: >-
+        Caught 5 notices over 5-12 September 2026, of which 1 was an opportunity
+        (626032-2026, Galway County Council's design-team consultancy for the SEAI
+        local-authority decarbonisation Pathfinder) and 4 were ordinary building
+        services design. Kept because excluding a demonstrated opportunity at
+        collection loses it permanently and invisibly, while a weak notice only
+        has to be sorted downwards. Revisit against a month of human review
+        decisions, not against one week of judgement.
+  - code: "09123000"   # Natural gas
+    provisional:
+      since: 2026-09-12
+      reason: >-
+        Measured contribution over 5-12 September 2026 was zero: its only notice,
+        615124-2026, also arrives via 76000000. It is here on the wager that
+        hydrogen blending and CCS retrofit work gets classified as natural gas.
+        One line is a cheap wager; the audit settles it.
+  # Considered and rejected 2026-09-12: 31121000 generating sets. Marginal, but
+  # its one notice was an electrical supply upgrade at a water treatment plant.
+  # Generating sets are equipment, and equipment is what the contract-nature
+  # filter below exists to remove - a forward-coverage argument that runs against
+  # another filter is not an argument.
 
 # Where the buying organisation sits. ISO 3166-1 alpha-3, and every code must be
 # one watchdog.core.countries can name, so the register never shows a bare code.
@@ -77,6 +119,12 @@ place_of_performance: []
 # hidden. Measured over 30 days: of 873 notices kept by this filter, 44 were
 # mixed and 34 had a main nature of works or supplies. Of the 508 it excluded,
 # none mentioned services at all.
+#
+# It is not free, and the cost is accepted knowingly. Over 5-12 September the
+# filter removed 33 of the 45 notices the widened CPV list reaches - mostly gas
+# purchasing, but also a waste-to-energy plant, an OCGT/CCGT qualification system
+# and two wind works notices. Those are project intelligence, not opportunities
+# for us. The step 10 recall audit revisits this with a month of data.
 contract_natures:
   - services
 

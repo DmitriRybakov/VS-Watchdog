@@ -7,6 +7,7 @@ from datetime import date
 import pytest
 from pydantic import ValidationError
 
+from watchdog.core.cpv import cpv_matches
 from watchdog.core.enums import ContractNature, NoticeStage
 from watchdog.sources.ted.config import load_ted_config, parse_ted_config
 from watchdog.sources.ted.query import QueryProfile, build_query
@@ -159,6 +160,11 @@ def test_the_shipped_configuration_loads_and_builds_a_query() -> None:
 
     assert "71241000" in shipped.cpv_prefixes
     assert "09300000" in shipped.cpv_prefixes
+    # Added after measuring 5-12 September: 45251000 was the only code that
+    # reached the Eidsiva CCS-as-a-service RFI, and 76000000 was our only gap in
+    # subsurface and gas-infrastructure services. See docs/decisions/0004.
+    assert "45251000" in shipped.cpv_prefixes
+    assert "76000000" in shipped.cpv_prefixes
     assert shipped.contract_natures == [ContractNature.SERVICES]
     assert NoticeStage.MARKET_CONSULTATION in shipped.notice_stages
     assert NoticeStage.PRIOR_INFORMATION in shipped.notice_stages
@@ -169,3 +175,83 @@ def test_the_shipped_configuration_loads_and_builds_a_query() -> None:
 
     query = build_query(shipped, WINDOW_FROM, WINDOW_TO)
     assert query.startswith("(classification-cpv IN (")
+
+
+def test_no_shipped_cpv_code_is_redundant_under_another() -> None:
+    # TED's filter is hierarchical, so a code whose parent is also configured
+    # can never return anything of its own. Three such entries were removed on
+    # 2026-09-12; this stops the next one being added unnoticed.
+    shipped = load_ted_config("config/sources/ted.yaml")
+
+    redundant = [
+        (child, parent)
+        for parent in shipped.cpv_prefixes
+        for child in shipped.cpv_prefixes
+        if child != parent and cpv_matches(parent, child)
+    ]
+
+    assert redundant == []
+
+
+# ------------------------------------------------------- provisional codes
+
+
+def test_a_provisional_code_is_searched_for_like_any_other() -> None:
+    parsed = parse_ted_config(
+        {
+            "cpv_prefixes": [
+                "71241000",
+                {
+                    "code": "09123000",
+                    "provisional": {"since": "2026-09-12", "reason": "a bet on hydrogen blending"},
+                },
+            ]
+        }
+    )
+
+    assert parsed.cpv_prefixes == ["71241000", "09123000"]
+    assert "09123000" in build_query(parsed, WINDOW_FROM, WINDOW_TO)
+
+
+def test_a_provisional_code_keeps_its_reason_and_the_date_it_went_on_trial() -> None:
+    parsed = parse_ted_config(
+        {
+            "cpv_prefixes": [
+                {
+                    "code": "09123000",
+                    "provisional": {"since": "2026-09-12", "reason": "a bet on hydrogen blending"},
+                }
+            ]
+        }
+    )
+
+    assert len(parsed.provisional_cpv) == 1
+    assert parsed.provisional_cpv[0].code == "09123000"
+    assert parsed.provisional_cpv[0].since == date(2026, 9, 12)
+    assert parsed.provisional_cpv[0].reason == "a bet on hydrogen blending"
+
+
+def test_a_provisional_block_without_a_reason_is_refused() -> None:
+    # A bet nobody wrote down cannot be settled, so it is not accepted.
+    with pytest.raises(ValidationError):
+        parse_ted_config(
+            {"cpv_prefixes": [{"code": "09123000", "provisional": {"since": "2026-09-12"}}]}
+        )
+
+
+def test_a_cpv_entry_without_a_code_is_refused() -> None:
+    with pytest.raises(ValidationError):
+        parse_ted_config(
+            {"cpv_prefixes": [{"provisional": {"reason": "x", "since": "2026-09-12"}}]}
+        )
+
+
+def test_the_shipped_provisional_codes_are_the_two_that_were_measured_as_bets() -> None:
+    shipped = load_ted_config("config/sources/ted.yaml")
+
+    provisional = {entry.code for entry in shipped.provisional_cpv}
+
+    assert provisional == {"71334000", "09123000"}
+    # Provisional is a label for the audit, not a different kind of search.
+    assert provisional <= set(shipped.cpv_prefixes)
+    assert all(entry.reason.strip() for entry in shipped.provisional_cpv)

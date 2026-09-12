@@ -95,6 +95,32 @@ def test_only_latest_versions_is_requested(client: TedClient) -> None:
 
 
 @respx.mock
+def test_counting_asks_for_the_same_result_set_it_will_be_compared_against(
+    client: TedClient,
+) -> None:
+    # Without onlyLatestVersions the count includes superseded versions: 217
+    # against 212 over 5-12 September 2026. A count of a different result set is
+    # worse than no count, because it looks authoritative.
+    respx.post(TED_SEARCH_URL).mock(return_value=httpx.Response(200, json=page([], None, 212)))
+
+    assert client.count_notices("q", FIELDS) == 212
+
+    body = respx.calls[0].request.read().decode()
+    assert "onlyLatestVersions" in body
+    assert "true" in body.split("onlyLatestVersions")[1][:10]
+
+
+@respx.mock
+def test_a_count_that_is_not_a_number_is_refused(client: TedClient) -> None:
+    respx.post(TED_SEARCH_URL).mock(
+        return_value=httpx.Response(200, json={"notices": [], "totalNoticeCount": None})
+    )
+
+    with pytest.raises(InvalidPayloadError):
+        client.count_notices("q", FIELDS)
+
+
+@respx.mock
 def test_a_final_empty_page_with_a_token_still_terminates(client: TedClient) -> None:
     # The live API does this: the last page is empty but still carries a token.
     respx.post(TED_SEARCH_URL).mock(

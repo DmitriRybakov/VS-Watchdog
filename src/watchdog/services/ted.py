@@ -8,7 +8,6 @@ active source, only this module changes.
 from __future__ import annotations
 
 import uuid
-from collections.abc import Iterator
 from dataclasses import dataclass
 from datetime import date, timedelta
 from pathlib import Path
@@ -57,14 +56,39 @@ class ProbeRow:
     performance_countries: tuple[str, ...] = ()
 
 
+@dataclass(frozen=True)
+class ProbeResult:
+    """What `watchdog ted-probe` found, and what it did not show.
+
+    ``total`` is the whole window; ``rows`` is the part the limit allowed through.
+    Keeping both is the point: a listing that silently stops at the limit reads as
+    the complete answer, and a conclusion drawn from it is a conclusion about the
+    start of the window rather than the window.
+    """
+
+    rows: tuple[ProbeRow, ...]
+    total: int
+    limit: int
+    window_from: date
+    window_to: date
+
+    @property
+    def truncated(self) -> bool:
+        return self.total > len(self.rows)
+
+
 def get_config(path: Path | str = DEFAULT_CONFIG_PATH) -> TedSourceConfig:
     return load_ted_config(path)
 
 
 def window_for(days: int, *, today: date | None = None) -> tuple[date, date]:
-    """The publication-date window for a run reaching ``days`` back, inclusive."""
+    """The publication-date window covering ``days`` calendar days up to today.
+
+    Inclusive at both ends, so ``days=7`` is seven days and ``days=1`` is today
+    alone. TED compares with ``>=`` and ``<=``, so the end day counts as one.
+    """
     end = today or utc_now().date()
-    return (end - timedelta(days=max(0, days)), end)
+    return (end - timedelta(days=max(1, days) - 1), end)
 
 
 def build_probe_query(config: TedSourceConfig, days: int, *, today: date | None = None) -> str:
@@ -119,8 +143,21 @@ def probe(
     days: int = 3,
     limit: int = 25,
     client: TedClient | None = None,
-) -> Iterator[ProbeRow]:
-    """Call TED live and yield what came back. Reads only; stores nothing."""
+) -> ProbeResult:
+    """Call TED live and return what came back. Reads only; stores nothing.
+
+    The count is asked for separately, before the rows, so that stopping at the
+    limit can be reported rather than hidden. Rows arrive in TED's own result
+    order, which is publication number ascending.
+
+    Two ways the count and the listing can disagree, neither of them visible in
+    the printed line. They are two requests a second apart, so a notice published
+    between them shifts the total by one. And the count is what TED matched, while
+    the rows are what we could map: a notice that fails mapping still produces a
+    row here, which is what keeps the arithmetic honest. If that ever changes to
+    dropping unmappable notices instead, this listing starts understating the
+    window silently - the exact failure the count was added to prevent.
+    """
     window_from, window_to = window_for(days)
     run_id = uuid.uuid4().hex
     owned = client is None
@@ -128,22 +165,37 @@ def probe(
 
     try:
         source = TedSource(ted, config, run_id=run_id)
-        for index, raw in enumerate(source.discover(window_from, window_to)):
-            if index >= limit:
+        total = ted.count_notices(
+            source.query_for(window_from, window_to), REQUESTED_FIELDS, run_id=run_id
+        )
+
+        rows: list[ProbeRow] = []
+        for raw in source.discover(window_from, window_to):
+            if len(rows) >= limit:
                 break
             try:
-                yield _to_row(source.to_tender(raw))
+                rows.append(_to_row(source.to_tender(raw)))
             except MappingError as exc:
-                yield ProbeRow(
-                    source_id=exc.source_id or raw.source_id,
-                    title=f"could not be mapped: {exc}",
-                    cpv_main=None,
-                    cpv_all=(),
-                    stage="-",
-                    deadline="-",
-                    deadline_type="-",
-                    buyer_country=None,
+                rows.append(
+                    ProbeRow(
+                        source_id=exc.source_id or raw.source_id,
+                        title=f"could not be mapped: {exc}",
+                        cpv_main=None,
+                        cpv_all=(),
+                        stage="-",
+                        deadline="-",
+                        deadline_type="-",
+                        buyer_country=None,
+                    )
                 )
+
+        return ProbeResult(
+            rows=tuple(rows),
+            total=total,
+            limit=limit,
+            window_from=window_from,
+            window_to=window_to,
+        )
     finally:
         if owned:
             ted.close()
@@ -173,6 +225,7 @@ def _to_row(tender: Tender) -> ProbeRow:
 __all__ = [
     "REQUESTED_FIELDS",
     "FieldCheck",
+    "ProbeResult",
     "ProbeRow",
     "QueryProfile",
     "TedSourceConfig",

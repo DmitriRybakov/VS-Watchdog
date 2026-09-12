@@ -160,6 +160,40 @@ class TedClient:
             purpose="validate_query",
         )
 
+    def count_notices(
+        self,
+        query: str,
+        fields: Sequence[str],
+        *,
+        run_id: str | None = None,
+        only_latest_versions: bool = True,
+    ) -> int:
+        """How many notices the query matches, without reading them.
+
+        One request with ``limit: 1``: the envelope's ``totalNoticeCount`` is the
+        whole result set, not the page. This is what lets a truncated listing say
+        what it left out instead of looking like the complete answer.
+
+        ``onlyLatestVersions`` must match what the caller then iterates, or the
+        count describes a different result set. Measured 5-12 September 2026: 217
+        without it against 212 with it, the difference being superseded versions.
+        """
+        envelope = self._request(
+            {
+                "query": query,
+                "fields": list(fields),
+                "limit": 1,
+                "page": 1,
+                "onlyLatestVersions": only_latest_versions,
+            },
+            run_id=run_id,
+            purpose="count",
+        )
+        total = envelope.get("totalNoticeCount")
+        if not isinstance(total, int):
+            raise InvalidPayloadError(f"expected 'totalNoticeCount' to be a number, got {total!r}")
+        return total
+
     def unknown_fields(self, fields: Sequence[str], *, run_id: str | None = None) -> list[str]:
         """Which of ``fields`` TED does not recognise. Empty means all are valid.
 
