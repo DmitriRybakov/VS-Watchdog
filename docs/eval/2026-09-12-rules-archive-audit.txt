@@ -1,0 +1,450 @@
+====================================================================================================
+RULES ARCHIVE AUDIT - rules.yaml version 1 against 2158 notices
+corpus: every TED notice ingested for publication dates 2026-07-01 .. 2026-09-11
+measured against the rule set AS SEEDED, before every change this audit caused. Version 2
+of config/rules.yaml is what ships; what changed and what each change moved is in
+2026-09-12-rules-archive.md, section 6. This file is the measurement that argued for them.
+====================================================================================================
+
+routes: assess 1922, archive_candidate 236
+
+====================================================================================================
+PART 1 - DOES A SINGLE TERM ARCHIVE ON ITS OWN?
+'alone' means: the notice is archived, and this alias is the only exclusion alias
+that matched anywhere in it. Remove the alias and the notice routes to ASSESS.
+====================================================================================================
+
+--- HOAI ---
+  notices containing it            : 82
+  of those, archived               : 26
+  archived with NO other exclusion : 7
+
+  [612617-2026] Germany – Engineering services – Neubau Hochwasserrückhaltebecken Gonna - Fachbaubegleitungen Los 1 - 4
+     evidence [description-proc/deu] ...+ Los 1 - Örtliche Bauüberwachung, Grundleistungen HOAI und besondere Leistungen gemäß Aufgabenstellung + Los 2 - SiGeKo gemäß Aufgabenstellung +...
+     domains=[] cpv_match=False
+     description: + Los 1 - Örtliche Bauüberwachung, Grundleistungen HOAI und besondere Leistungen gemäß Aufgabenstellung + Los 2 - SiGeKo gemäß Aufgabenstellung + Los 3 - Umweltbaubegleitung gemäß Aufgabenstellung + Los 4 - Kontrollmessungen und Bau-Überwachungsmessungen gemäß Aufgabenstellung
+
+  [616339-2026] Germany – Architectural, engineering and planning services – Medizintechnik- und Med-IT-Planung
+     evidence [description-lot/deu] ...Benötigt werden Leistungen in zwei Stufen: - Stufe I Planung LPH 1-2 (HOAI) - Stufe II Ausschreibung und Vergabe Baupartner - Stufe III Qualitätssicherung LPH 3-8 (...
+     domains=[] cpv_match=False
+     description: Gegenstand der Ausschreibung sind Leistungen zur Erstellung eines Logistikkonzepts für den Krankenhausneubau am Standort Nordstadt Singen (kurz: Krankenhausneubau GLKN). Das Klinikum soll als Neubau mit allen Stationsbereichen, den notwendigen stationsnahen Funktionen sowie den weiteren Bereichen auf einem festgelegten Areal am Standort Nordstadt Singen entstehen. Im Neubau sollen auf insgesamt rund 44.000 m² Nutzfläche etwa 450 stationäre Betten und aktuell mindestens neun festgelegte Fachrichtungen abgebildet werden. Näheres zum Projekt finden Sie in der beigefügten Projektbeschreibung.
+
+  [453426-2026] Germany – Engineering services – Fachplanung Bau- und Raumakustik
+     evidence [description-proc/deu] ...Vergabe von Grundleistungen auf Basis der Honorarordnung für Architekten und Ingenieure - HOAI in der jeweils gültigen Fassung für folgende Leistungsbilder: Ausschreibung: Vergabe von...
+     domains=[] cpv_match=False
+     description: Fachplanung - Bau- und Raumakustik - Horterweiterungsbau an der Grund- und Oberschule Herzberg Vergabe von Grundleistungen auf Basis der Honorarordnung für Architekten und Ingenieure - HOAI in der jeweils gültigen Fassung für folgende Leistungsbilder: Ausschreibung: Vergabe von Los 4 Bau- und Raumakustik
+
+  [494737-2026] Germany – Architectural, construction, engineering and inspection services – HWSB Deich Kirchfährendorf km 0,71 - 1,466, Fachbaube
+     evidence [description-lot/deu] ...Los 1: Örtliche Bauüberwachung Leistungen gemäß HOAI 2021 Anlage 12 Nummer 12.1 LPH 8 Besondere Leistungen Punkt 5 Örtliche Bauüberwachung: -...
+     domains=[] cpv_match=False
+     description: Baubegleitende Ingenieurleistungen als Fremdüberwachung der Baumaßnahme: Sanierung Bestandsdeich in 4 Sanierungsabschnitten (SA1-4), aufgrund örtlicher Gegebenheiten - in SA1-2 Deicherhöhung durch Aufsetzen HW-Schutzwand auf vorhandene Innendichtung (Spundwand), in Teilabschnitten Abfangen der landseitigen Böschung durch Winkelstützwand, Böschungsanpassung beidseitig, begehbarer Kontrollweg auf Deichkrone - in SA3 Deicherhöhung durch Einbau HW-Schutzwand (L-Profile) in Deichkrone, Anpassen und Abdichten wasserseitiger Böschung, begehbarer Kontrollweg - in SA4 Erhöhung Bestandsdeich (Erddeich),
+
+  [544012-2026] Germany – Architectural, construction, engineering and inspection services – Errichtung einer offenen Ganztagsschule und Erweiteru
+     evidence [title-proc/deu] ...assenzimmern, Planungsleistungen Technische Ausrüstung ALG 4, 5 und 6 (ELT) gem. §§ 53 ff HOAI 2021...
+     domains=[] cpv_match=False
+     description: Der Schulverband Oettingen, vertreten durch die Stadt Oettingen, plant einen Erweiterungsbau für die bestehende Grund- u. Mittelschule (GMS). Ziel d. Maßnahme ist die Schaffung zusätzlicher Unterrichts- u. Betreuungsräume in einer modernen, funktionalen u. pädagogisch geeigneten Infrastruktur. Gegenstand des Verfahrens sind die Planungsleistungen der Technischen Ausrüstung ALG 4, 5 und 6 (ELT) gem. §§ 53 ff HOAI 2021, LPH 1-9, bei stufenweiser Beauftragung.
+
+  [562156-2026] Germany – Bridge-design services – Ersatzneubau Brücke PW Wansleben - Planungsleistungen
+     evidence [description-proc/deu] ...Planungsleistungen gem. HOAI 2021 für + Ingenieurbauwerke LPh 1 bis 8, + Tagwerksplanung LPh 2 bis 6, + planungsbeglei...
+     domains=[] cpv_match=False
+     description: Planungsleistungen gem. HOAI 2021 für + Ingenieurbauwerke LPh 1 bis 8, + Tagwerksplanung LPh 2 bis 6, + planungsbegleitende Vermessung, + Baugrundbeurteilung, + Erstellung landschaftspflegerischer Begleitplanung sowie Besondere Leistungen, wie + örtliche Bauüberwachnung, + Nachtragsprüfung, + Kostenkontrolle, + H1 Prüfung, + Prüfingenieur (Brückenprüfung).
+
+  [562239-2026] Germany – Engineering services – Technischen Ausrüstung für die Anlagengruppen 4 und 5 gem. Paragraph 53 ff HOAI, Lph. 6-9_fre
+     evidence [title-proc/deu] ...Technischen Ausrüstung für die Anlagengruppen 4 und 5 gem. Paragraph 53 ff HOAI, Lph. 6-9_fre...
+     domains=[] cpv_match=False
+     description: Technischen Ausrüstung für die Anlagengruppen 4 und 5 gem. Paragraph 53 ff HOAI, Lph. 6-9 für die Errichtung eines Neubaus inkl. ca. 205 Wohneinheiten, mit integrierter Kindertagesstätte und einer Tiefgarage mit 103 Stellplätzen
+
+--- leistungsphasen ---
+  notices containing it            : 63
+  of those, archived               : 17
+  archived with NO other exclusion : 3
+
+  [620271-2026] Germany – Construction project management services – Gesamtsanierung uPVA-Hauptwache; Hier: Projektsteuerungsleistungen LPH0-2
+     evidence [description-proc/deu] ...Projektsteuerungsleistungen Leistungsphasen 0 bis 2 für die Gesamtsanierung der unteriridische Stadtbahnstation Hauptwache in Frankfu...
+     domains=[] cpv_match=False
+     description: Projektsteuerungsleistungen Leistungsphasen 0 bis 2 für die Gesamtsanierung der unteriridische Stadtbahnstation Hauptwache in Frankfurt am Main. Förderprojekt nach kommunaler Richtlinie mit einem Schwerpunkt zur Treibhausgasminimierung.
+
+  [458799-2026] Germany – Engineering services – Neubau einer Mensa im Schulpark Senden - TECHNISCHE GEBÄUDEAUSRÜSTUNG ELT, Mess- und Regeltechnik
+     evidence [description-proc/deu] ...it Teilnahmewettbewerb vergeben werden. Die Vergabe erfolgt in folgenden Stufen: Stufe 1: Leistungsphasen 1 bis 3 Stufe 2: Leistungsphase 4 Stufe 3: Leistungsphasen 5 bis 9...
+     domains=[] cpv_match=False
+     description: Die Gemeinde Senden beabsichtigt den Neubau einer Mensa auf dem Schulcampus Senden. Insgesamt werden drei Schulen unterschiedlicher Typen von der geplanten Mensa versorgt. Das Architekturbüro Herrmann & Bosch aus Stuttgart hat sich in einem hochbaulichen Realisierungswettbewerb mit seinem Entwurf, der von einer durchgängigen Holzbauweise gekennzeichnet ist, durchgesetzt. Eine Besonderheit stellt hierbei die auf Schraubfundamenten gegründete Holzkonstruktion dar, die die Bodenplatte des Gebäudes bildet. Der klare, gut ablesbare Entwurf mit seinen längs gerichteten Raumproportionen auf einem dur
+
+  [569711-2026] Germany – Construction project management services – Wiederaufbau des Schulzentrums Rankestraße: Planungsprüfung und Ausführungsüb
+     evidence [description-lot/deu] ...e Beauftragung der Leistungen erfolgt stufenweise. Stufe 1 umfasst die Leistungen für die Leistungsphasen 2 bis 4, Stufe 2 umfasst die Leistungen für die Leistungsphasen 5 und 8. Mit Vertragsschl..
+     domains=[] cpv_match=False
+     description: Planungsprüfung und Ausführungsüberwachung des Totalunternehmers für den Wiederaufbau des Schulzentrums an der Rankestraße in Erkrath
+
+--- capacity building ---
+  notices containing it            : 21
+  of those, archived               : 16
+  archived with NO other exclusion : 6
+
+  [464762-2026] Belgium – Business and management consultancy and related services – Administrative Capacity Building for Future Cohesion Policy: 
+     evidence [title-proc/eng] ...Administrative Capacity Building for Future Cohesion Policy: tackling errors, implementation challenges and emerging capac...
+     domains=[] cpv_match=False
+     description: Necessity to enhance DG REGIO’s capacity-building offer by building on lessons learned from audits and implementation practice, and by responding to evolving administrative capacity needs.
+
+  [514037-2026] Greece – Research and development services and related consultancy services – Services for the Design, Development and Analysis of
+     evidence [description-proc/eng] .... The domains to be monitored and measured include, but are not limited to, cybersecurity capacity building, training and education, cybersecurity policy implementation, cyber risk management pract
+     domains=[] cpv_match=False
+     description: The purpose of this tender is to provide ENISA with support services for the design, development and analysis of cybersecurity indexes across the EU Member States (MS) and other countries or partners. Such services are intended to generate evidence-based insights for the cybersecurity posture and maturity level of EU MS, the European Union as a whole or other designated partners. The domains to be monitored and measured include, but are not limited to, cybersecurity capacity building, training and education, cybersecurity policy implementation, cyber risk management practices, national cyberse
+
+  [541108-2026] Italy – General management consultancy services – Programma Nazionale Capacità per la Coesione 2021-2027 — Priorità 1 — Azione 1.1
+     evidence [title-proc/ita] ...PRigA” (Fondo FESR). APPALTO DEI SERVIZI DI SUPPORTO SPECIALISTICO, ASSISTENZA TECNICA E CAPACITY BUILDING PER L’ATTUAZIONE DELL’OPERAZIONE “PRIGA” (PIANO DI RIGENERAZIONE AMMINISTRATIVA) 2021-202.
+     domains=[] cpv_match=False
+     description: Programma Nazionale Capacità per la Coesione 2021-2027 Priorità 1 Azione 1.1 Operazione 1.1.4 Sostegno ai progetti di rafforzamento amministrativo PRigA (Fondo FESR) GARA EUROPEA A PROCEDURA APERTA PER L'APPALTO DEI SERVIZI DI SUPPORTO SPECIALISTICO, ASSISTENZA TECNICA E CAPACITY BUILDING PER L'ATTUAZIONE DELL'OPERAZIONE PRIGA (PIANO DI RIGENERAZIONE AMMINISTRATIVA) 2021-2027. L’appalto ha per oggetto l’affidamento del servizio di supporto tecnico-specialistico ed assistenza tecnica alle strutture del Comune di Taranto, finalizzato a rafforzare le competenze della tecnostruttura comunale media
+
+  [568800-2026] Finland – Training and entertainment software development services – HAUS DPS 2026–2030 for Digital Transformation, Innovation and
+     evidence [description-proc/eng] ...al development cooperation projects, technical assistance assignments, advisory services, capacity building initiatives, studies, evaluations and other expert services implemented globally. Assignm
+     domains=[] cpv_match=False
+     description: HAUS Finnish Institute of Public Management Ltd (HAUS) is establishing a Dynamic Purchasing System (DPS) for the period 2026–2030 for the procurement of expert services related to digital transformation, innovation, governance, institutional development and public sector development. The estimated total value of procurements conducted under the DPS during its validity period is approximately EUR 40 million (excluding VAT). The DPS will be used to procure expertise for international development cooperation projects, technical assistance assignments, advisory services, capacity building initiati
+
+  [600667-2026] Belgium – Business and management consultancy and related services – Creation and dissemination of a Toolkit for Local and Regiona
+     evidence [description-proc/eng] ...isting EU instruments that support social economy policies and could be complemented with capacity building actions, such as peer learning or training. The contract aims to cover the creation/desig
+     domains=[] cpv_match=False
+     description: The regions and the cities are where social economy policies matter most, yet the capacity and the practice vary widely across regional and local authorities. The call for tenders aims to develop a modular, ‘off the shelf’ toolkit that local and regional authorities can use to design, fund and deliver credible social economy strategies and policies. This toolkit should include several elements, such as a strategy template with good-practice sidebars, a self-diagnostic tool with ‘maturity tracks’ and light KPIs, a stakeholder-ecosystem mapping and engagement kit, a funding navigator, communicat
+
+  [602152-2026] Germany – Research and development consultancy services – 10028448-Strengthening data methodologies and monitoring systems for Gen
+     evidence [description-proc/eng] ...strengthen inclusive urban mobility planning, with a focus on the target group. - Deliver capacity-building activities for partners and strategic actors through training activities, including cours
+     domains=[] cpv_match=False
+     description: Brazil's public transport systems are currently facing a structural crisis, with ridership falling by more than 30% since 2019. This situation disproportionately affects women and people of color, who are the primary users of the system and depend on it for access to basic rights such as health, education, and employment. Insufficient spatial coverage and low service quality reinforce a downward spiral of declining revenue and social exclusion. The "Just Transition in Urban Mobility in Brazil" project, implemented by GIZ in partnership with the Ministry of Cities (MCid), aims to create the con
+
+
+====================================================================================================
+PART 2 - RULE HISTOGRAM OVER ALL 2158 NOTICES
+'archived alone' = notices archived where this was the only exclusion RULE matching.
+====================================================================================================
+
+rule                                      signal   notices archived alone
+domain_hydrogen                           domain        15              -
+domain_renewable_fuels                    domain         3              -
+domain_renewable_fuels_saf                domain         1              -
+domain_ccs                                domain         2              -
+domain_ccs_co2                            domain         3              -
+domain_offshore_wind                      domain         2              -
+domain_offshore_wind_acronyms             domain         0              -
+domain_onshore_renewables                 domain        22              -
+domain_grid_transmission                  domain        11              -
+domain_grid_hvac                          domain         0              -
+domain_grid_hv                            domain         0              -
+domain_energy_storage                     domain         5              -
+domain_energy_storage_ess                 domain         0              -
+domain_low_carbon_industry                domain         3              -
+domain_low_carbon_industry_dri            domain         0              -
+domain_energy_transition                  domain        23              -
+domain_industrial_heat                    domain         9              -
+domain_energy_system                      domain        23              -
+domain_supporting_terms                   domain       180              -
+activity_advisory                        activit       194              -
+activity_early_phase_study               activit        51              -
+activity_techno_economic                 activit         5              -
+activity_energy_modelling                activit         0              -
+activity_dispatch_modelling              activit         0              -
+activity_due_diligence                   activit         3              -
+activity_market_assessment               activit         7              -
+activity_technical_assistance            activit         6              -
+activity_esg_lca                         activit         3              -
+activity_esg_lca_acronym                 activit         0              -
+activity_project_framing                 activit         3              -
+activity_delivery_strategy               activit         4              -
+stage_concept_option                       stage         2              -
+stage_pre_feed_feasibility                 stage         3              -
+stage_feed_definition                      stage         1              -
+stage_feed_acronym                         stage         1              -
+stage_execution                            stage        24              -
+stage_operations                           stage         5              -
+exclusion_building_design                exclusi       134             51
+exclusion_urban_planning                 exclusi        24             17
+exclusion_roads_transport_works          exclusi        19             11
+exclusion_water_wastewater               exclusi        61             33
+exclusion_general_it                     exclusi        37             24
+exclusion_public_admin_digitisation      exclusi         1              0
+exclusion_communications_pr              exclusi        46             33
+exclusion_capacity_building              exclusi        29             10
+exclusion_health                         exclusi         2              2
+exclusion_education_training             exclusi         6              3
+exclusion_social_welfare                 exclusi         2              1
+exclusion_finance_banking                exclusi         6              4
+exclusion_defence                        exclusi         1              0
+exclusion_agriculture                    exclusi        23             12
+exclusion_facilities_management          exclusi         5              4
+
+
+====================================================================================================
+PART 3 - RANDOM SAMPLE OF ARCHIVE CANDIDATES WITH NO ENERGY SIGNAL AT ALL
+population: archived notices with no domain match of any strength, not even supporting.
+====================================================================================================
+
+population size: 213 of 236 archived
+
+----------------------------------------------------------------------------------------------------
+ 1. [451888-2026] Norway – Architectural, construction, engineering and inspection services – Nye Modumheimen - Procurement of architect, landscape architect, interior architect and responsible applicant.
+    caught by exclusion_building_design on 'architect' in [title-proc]
+    evidence: Nye Modumheimen - Procurement of architect, landscape architect, interior architect and responsible ap…
+    all exclusion aliases matched: ['architect']
+    cpv_all: ['71000000', '45215210', '71200000', '71210000', '71240000', '71241000', '71242000', '71300000']  cpv_match=False
+    description: Nye Modumheimen comprises a new extension to the welfare centre Modumheimen in Modum municipality. The building shall house a short-term department for rehabilitation, observation, respite care, municipal emergency 24 hour units and palliative care, day activity offer for persons with dementia, café and meeting place, "one door in" for preventive services, central kitchen and competence and training areas. In addition 16 to 24 residential units shall be co-located for elderly persons with connection to manpower. This procurement concerns architect services within architecture, landscape architecture and interior architecture, as well as responsible applicant, for the concept phase. The conce
+
+----------------------------------------------------------------------------------------------------
+ 2. [468655-2026] France – Engineering services – CONTRÔLE TECHNIQUE DU DISPOSITIF D’AUTOSURVEILLANCE réglementaire DU SYSTÈME DE COLLECTE DU DÉPARTEMENT DU VAL-DE-MARNE
+    caught by exclusion_water_wastewater on 'assainissement' in [description-proc]
+    evidence: …donnée, documents réglementaires, procédures) du système d'assainissement du Département du Val-de-Marne tel qu'il est défini dans l'…
+    all exclusion aliases matched: ['assainissement']
+    cpv_all: ['71300000', '71335000']  cpv_match=False
+    description: Le marché a pour objet la réalisation de contrôles techniques du dispositif d'autosurveillance règlementaire (appareils de métrologie, validité de la donnée, documents réglementaires, procédures) du système d'assainissement du Département du Val-de-Marne tel qu'il est défini dans l'arrêté du 21 juillet 2015 relatif aux systèmes d'assainissement collectif, modifié par l'arrêté du 10 juillet 2024 et complété le cas échéant des exigences de suivi imposées par l'arrêté préfectoral en date du 16 novembre 2018, au regard des objectifs environnementaux et usages sensibles des masses d'eau réceptrices et des masses d'eau aval. Ce contrôle permettra de vérifier la conformité des dispositifs vis-à-vis
+
+----------------------------------------------------------------------------------------------------
+ 3. [469466-2026] Ireland – Research consultancy services – Galway City Council : Galway City Surface Water Network – Provision of Consultancy Services for Drainage Assessment and Modelling
+    caught by exclusion_water_wastewater on 'drainage' in [title-proc]
+    evidence: …rface Water Network – Provision of Consultancy Services for Drainage Assessment and Modelling
+    all exclusion aliases matched: ['drainage']
+    cpv_all: ['73210000', '44163112', '90733400', '71353000']  cpv_match=False
+    description: Galway City Surface Water Network – Provision of Consultancy Services for Drainage Assessment and Modelling
+
+----------------------------------------------------------------------------------------------------
+ 4. [527525-2026] Ireland – Financial management consultancy services – The Provision of Training Services for Local Enterprise Office Longford
+    caught by exclusion_education_training on 'training services' in [title-proc]
+    evidence: The Provision of Training Services for Local Enterprise Office Longford
+    all exclusion aliases matched: ['training services']
+    cpv_all: ['79412000', '79413000', '79414000', '79415200', '71317210', '79420000', '79418000', '79416200']  cpv_match=False
+    description: Local Enterprise Office Longford invites applications from suitably qualified and experienced training providers to join a panel of trainers for the delivery of future training programmes, workshops, seminars, mentoring and business development supports to clients of Local Enterprise Office Longford. The panel will operate for a two-year period from 1 January 2027 to 31 December 2028. Training requirements may cover a broad range of business topics, including start-up support, business growth, management development, digitalisation, sustainability, sales and marketing, financial management, innovation and other areas relevant to the needs of small businesses and entrepreneurs. The current Fr
+
+----------------------------------------------------------------------------------------------------
+ 5. [531965-2026] France – Survey services – Missions de maîtrise d'oeuvre pour diverses opérations de création ou d'aménagements de voirie sur le périmètre des voiries d'intérêt communautaire de la CCLLA
+    caught by exclusion_roads_transport_works on 'voirie' in [title-proc]
+    evidence: …e pour diverses opérations de création ou d'aménagements de voirie sur le périmètre des voiries d'intérêt communautaire de la…
+    all exclusion aliases matched: ['voirie']
+    cpv_all: ['79311000', '71241000', '71300000']  cpv_match=False
+    description: Le présent marché est un accord-cadre pour des missions de maîtrise d’œuvre pour diverses opérations d’infrastructures sur le domaine public d’intérêt communautaire de la Communauté de Commune Loire Layon Aubance (désignée CCLLA). La CCLLA envisage diverses opérations de réfection, réhabilitation et requalification de voiries, trottoirs et chaussées existants mais aussi d’aménagements neufs sur son territoire. Les objectifs principaux sont les suivants : • Réhabiliter la voirie ; • Embellir l’espace public et améliorer le cadre de vie des usagers ; • Améliorer les conditions de sécurité ; • Reprendre/réadapter ou créer des réseaux (principalement d’eaux pluviales) ; • Promouvoir l'accessibil
+
+----------------------------------------------------------------------------------------------------
+ 6. [537465-2026] France – Engineering services – ACCORD-CADRE D’ÉLABORATION DES SCHÉMAS DIRECTEURS D'ASSAINISSEMENT ET DE GESTION DES EAUX PLUVIALES ET ZONAGES DE VALENCIENNES MÉTROPOLE
+    caught by exclusion_water_wastewater on 'assainissement' in [title-proc]
+    evidence: ACCORD-CADRE D’ÉLABORATION DES SCHÉMAS DIRECTEURS D'ASSAINISSEMENT ET DE GESTION DES EAUX PLUVIALES ET ZONAGES DE VALENCIENNES…
+    all exclusion aliases matched: ['assainissement']
+    cpv_all: ['71300000', '71241000', '71313000']  cpv_match=False
+    description: Le présent accord-cadre a pour objet la réalisation d'études stratégiques, diagnostiques et réglementaires relatives au petit cycle de l'eau sur le territoire de la Communauté d'Agglomération Valenciennes Métropole (CAVM). Cette mission consiste principalement en l'élaboration et la mise à jour des Schémas Directeurs d'Assainissement (SDA), ainsi que des Zonages d’Assainissement et de Gestion des Eaux Pluviales. Elle vise également à initier ou compléter le dispositif d’autosurveillance et de diagnostic permanent du système d’assainissement, ainsi que sa gestion patrimoniale.
+
+----------------------------------------------------------------------------------------------------
+ 7. [538537-2026] France – Engineering studies – Nantes - CLOS TOREAU - Mission de Maitrise d'oeuvre pour les travaux de réfection des réseaux de chauffage et d'eau chaude collective
+    caught by exclusion_building_design on 'architecte' in [description-proc]
+    evidence: …pe de maitrise d'oeuvre (possibilité d'une groupement BET / architecte) ayant à minima les compétences suivantes : Fluides/thermiq…
+    all exclusion aliases matched: ['architecte']
+    cpv_all: ['71335000', '71315210', '71321200']  cpv_match=False
+    description: Le détail des missions confiées au titulaire figure au cahier des charges. Les prestations sont réglées par des prix forfaitaires. Recrutement d'une équipe de maitrise d'oeuvre (possibilité d'une groupement BET / architecte) ayant à minima les compétences suivantes : Fluides/thermique, VRD, Economie de la construction, et Architecture (architecte ou cabinet d'architectes). Etant donné la nature des travaux, le mandataire du groupement sera le BET Fluides et non pas l'architecte. Le mandataire ne pourra pas répondre avec plusieurs groupements
+
+----------------------------------------------------------------------------------------------------
+ 8. [557170-2026] Germany – Public relations services – Rahmenvereinbarung zur Planung und Umsetzung von Kommunikationsmaßnahmen für das Bundesministerium für Forschung, Technologie und Raumfahrt
+    caught by exclusion_communications_pr on 'öffentlichkeitsarbeit' in [description-proc]
+    evidence: …rmations- und Industriegesellschaft. Die regierungsamtliche Öffentlichkeitsarbeit und Fachinformation des BMFTR ist im Rahmen ihres verfassun…
+    all exclusion aliases matched: ['öffentlichkeitsarbeit']
+    cpv_all: ['79416000']  cpv_match=False
+    description: Das Bundesministerium für Forschung, Technologie und Raumfahrt fördert Forschung, Technologie und Raumfahrt in Deutschland. Wissenschaft und Forschung, Innovationen und neue Technologien sind die Basis künftigen Wohlstands. Gemeinsam bilden sie die Grundlage für wirtschaftlichen Erfolg und Fortschritt, für Wachstum und Beschäftigung. Raumfahrttechnologien und ihre Anwendungen sind wichtige Instrumente der modernen Informations- und Industriegesellschaft. Die regierungsamtliche Öffentlichkeitsarbeit und Fachinformation des BMFTR ist im Rahmen ihres verfassungsrechtlich anerkannten Auftrags auf eine gezielte und verständliche Information über die Arbeit, Vorhaben und Ziele des Ministeriums aus
+
+----------------------------------------------------------------------------------------------------
+ 9. [558691-2026] France – Technical testing, analysis and consultancy services – REPERAGE AVANT TRAVAUX (Amiante Ciment / HAP &amp;amp; ETUDES GEOTECHNIQUES)
+    caught by exclusion_water_wastewater on 'assainissement' in [description-lot]
+    evidence: …des opérations sur les réseaux et ouvrages d'eau potable, d'assainissement, d'eaux pluviales et d'eau brute
+    all exclusion aliases matched: ['assainissement']
+    cpv_all: ['71600000', '71335000']  cpv_match=False
+    description: L'accord-cadre sera exécuté par l'émission de bons de commande. Chaque lot fera l'objet d'une attribution séparée. Les prestations sont réglées par des prix unitaires
+
+----------------------------------------------------------------------------------------------------
+10. [561383-2026] Germany – Provision of services to the community – 10030171-Appui à la gouvernance environnementale décentralisée dans les zones d'intervention du programme PADDI+
+    caught by exclusion_agriculture on 'forestry' in [description-lot]
+    evidence: …national parks; - increasing the application of sustainable forestry and agricultural practices around PA. More specifically, th…
+    all exclusion aliases matched: ['agricultural', 'forestry']
+    cpv_all: ['75200000', '79411100', '90710000']  cpv_match=False
+    description: The "Programme d'appui au développement durable et intégré en périphérie des aires protégées" (PADDI+) is cofunded by the European Union and the German Federal Ministry of Economic Cooperation and Development (BMZ) and implemented by the Deutsche Gesellschaft für Internationale Zusammenarbeit GmbH (GIZ), in collaboration with the Ministère de l'Environnement et du Développement Durable (MEDD). The program aims to reduce the pressures on protected areas by promoting the sustainable and integrated development of communities living around national parks, as an alternative to the illegal exploitation of natural resources in protected areas. The program is implemented in close collaboration with
+
+----------------------------------------------------------------------------------------------------
+11. [563649-2026] France – Feasibility study, advisory service, analysis – CHANTEAU (45) – Rénovation des réseaux AEP, EP et EU - AMO pour la réalisation de diagnostics et d’un schéma directeur d’assainissement et d’alimentation en eau potable (AEP) - 463563
+    caught by exclusion_water_wastewater on 'assainissement' in [title-proc]
+    evidence: …ur la réalisation de diagnostics et d’un schéma directeur d’assainissement et d’alimentation en eau potable (AEP) - 463563
+    all exclusion aliases matched: ['assainissement']
+    cpv_all: ['71241000']  cpv_match=False
+    description: CHANTEAU (45) – Rénovation des réseaux AEP, EP et EU - AMO pour la réalisation de diagnostics et d’un schéma directeur d’assainissement et d’alimentation en eau potable (AEP) - 463563
+
+----------------------------------------------------------------------------------------------------
+12. [566443-2026] France – Feasibility study, advisory service, analysis – Accord-cadre d’Assistance à Maîtrise d’Ouvrage relevant des domaines de compétences du petit cycle de l’eau (eau potable, assainissement, gestion des eaux pluviales urbaines).
+    caught by exclusion_water_wastewater on 'assainissement' in [title-proc]
+    evidence: …maines de compétences du petit cycle de l’eau (eau potable, assainissement, gestion des eaux pluviales urbaines).
+    all exclusion aliases matched: ['assainissement']
+    cpv_all: ['71241000']  cpv_match=False
+    description: La présente consultation a pour objet un accord-cadre d'Assistance à Maîtrise d'Ouvrage relevant des domaines de compétences du petit cycle de l'eau (eau potable, assainissement, gestion des eaux pluviales urbaines). Cet accord-cadre est exécuté au fur et à mesure de l'émission de bons de commande émis par le pouvoir adjudicateur. Il est décomposé en 5 lots. Chaque lot fait l'objet d'un accord-cadre attribué à trois (3) opérateurs économiques (sous réserve d'un nombre suffisant d'offres). Les bons de commande seront attribués aux titulaires dans l'ordre du classement à tour de rôles pendant toute la durée de l'accord cadre (périodes de reconduction comprises) au fur et à mesure de la survena
+
+----------------------------------------------------------------------------------------------------
+13. [572082-2026] Ireland – Financial consultancy services – PBF144F Multi Supplier Framework Agreement for the Provision of Accounting, Audit and Financial Advisory Services to the Irish Public Sector
+    caught by exclusion_finance_banking on 'accounting services' in [description-proc]
+    evidence: …ent (the “Services”). In summary, the Services comprise: 1. Accounting Services, 2. Audit Services, 3. Financial Advisory Services, 4. Actu…
+    all exclusion aliases matched: ['accounting services']
+    cpv_all: ['66171000', '66519600', '66523000', '66520000', '66523100', '72221000', '72810000', '79210000']  cpv_match=False
+    description: PBF144F - The Contracting Authority invites tenders (“Tenders”) from economic operators (“Tenderers”) for appointment to a multi-supplier framework agreement for the provision of the services as described in Appendix 1 of the RFT document (the “Services”). In summary, the Services comprise: 1. Accounting Services, 2. Audit Services, 3. Financial Advisory Services, 4. Actuarial and Pension Advisory Services The full scope of services is outlined in Appendix 1, Part 2 of the RFT document.
+
+----------------------------------------------------------------------------------------------------
+14. [580280-2026] France – Feasibility study, advisory service, analysis – Mission de suivi-animation d’une Opération Programmée d’Amélioration de l’Habitat Renouvellement Urbain
+    caught by exclusion_urban_planning on 'renouvellement urbain' in [title-proc]
+    evidence: …tion d’une Opération Programmée d’Amélioration de l’Habitat Renouvellement Urbain
+    all exclusion aliases matched: ['renouvellement urbain']
+    cpv_all: ['71241000', '79421000', '71318000']  cpv_match=False
+    description: Mission de suivi-animation d’une Opération Programmée d’Amélioration de l’Habitat Renouvellement Urbain
+
+----------------------------------------------------------------------------------------------------
+15. [584826-2026] Germany – Advisory and consultative engineering services – Erstellung eine Regenwasserkonzepts
+    caught by exclusion_general_it on 'software' in [description-proc]
+    evidence: …in Austauschformaten zur Auswertung in einer Kanalkataster-Software – Zustandsbewertung und abschließende Auswertung der Daten…
+    all exclusion aliases matched: ['software']
+    cpv_all: ['71318000', '71250000', '71240000', '71355000', '71300000']  cpv_match=False
+    description: Erarbeitung eines Konzeptes zur Steuerung der Regenwasserleitung in der Hansestadt Seehausen. Dies impliziert die Vermessung und Kanalbefahrung, die hydraulische Bemessung des vorhandenen Systems, sowie die Hochwasser- und Starkregenvorsorge. Vermessung und Kanalbefahrung: o Zustandsermittlung der Regenwasserkanäle und der Schächte o Aufnahme der Lage und Höhe der Schächte sowie die Anschlusshöhen und Dimensionen für die anschließenden Leistungen o Datenübergabe aus der Kanalbefahrung erfolgt in Austauschformaten zur Auswertung in einer Kanalkataster-Software – Zustandsbewertung und abschließende Auswertung der Daten zur Festlegung von Schadensklassen Hydraulische Bemessung der vorhandenen S
+
+----------------------------------------------------------------------------------------------------
+16. [584846-2026] Germany – Engineering design services for mechanical and electrical installations for buildings – 409 HB GSA TGA - Technische Gebäudeausrüstung
+    caught by exclusion_building_design on 'HOAI' in [description-proc]
+    evidence: …4 sowie die vollständigen Leistungen der LPH 5 bis 9 gemäß HOAI. Aufgrund der noch nicht vollständig integrierten TGA-Planu…
+    all exclusion aliases matched: ['HOAI', 'leistungsphasen']
+    cpv_all: ['71321000', '71334000']  cpv_match=False
+    description: Gegenstand der Vergabe sind Fachplanungsleistungen der Technischen Gebäudeausrüstung für den Neubau der Grundschule und Kita Aurikelstieg einschließlich Dreifeld-Sporthalle in Norderstedt. Beauftragt werden Teilleistungen der LPH 3, gegebenenfalls Teilleistungen der LPH 4 sowie die vollständigen Leistungen der LPH 5 bis 9 gemäß HOAI. Aufgrund der noch nicht vollständig integrierten TGA-Planung kann eine Tektur erforderlich werden.
+
+----------------------------------------------------------------------------------------------------
+17. [586974-2026] France – Survey services – Missions d’accompagnement d’études pour la révision du Plan Local d’Urbanisme (PLU) et du Site Patrimonial Remarquable (SPR)
+    caught by exclusion_urban_planning on "plan local d'urbanisme" in [title-proc]
+    evidence: Missions d’accompagnement d’études pour la révision du Plan Local d’Urbanisme (PLU) et du Site Patrimonial Remarquable (SPR)
+    all exclusion aliases matched: ["plan local d'urbanisme", 'urbanisme']
+    cpv_all: ['79311000', '90712100', '71313000', '71410000']  cpv_match=False
+    description: Réalisation d'études pour accompagner la Ville d'Antibes Juan-les-Pins dans la révision n°2 de son Plan Local d'Urbanisme (PLU) et de son Site Patrimonial Remarquable (SPR), intégrant une démarche de concertation et de participation forte du public et une stratégie de communication tout au long de la démarche. Ces différentes composantes présentent un caractère fortement interdépendant et nécessitent une coordination permanente tout au long de la mission.
+
+----------------------------------------------------------------------------------------------------
+18. [591337-2026] France – Architectural, engineering and surveying services – Marché de Maîtrise d'oeuvre pour la réalisation des études et travaux pour la DECONSTRUCTION, REHABILITATION &amp;amp; EXTENSIONS NEUVES DU BATIMENT &amp;quot;LAÏPE&amp;quot; A TROIS BASSINS. Phase 1 CANDIDATURE : sélection de 5 candidats. La phase 2 de la procédure &amp;quot;OFFRE&amp;quot; est renseignée au règlement de la consultation
+    caught by exclusion_building_design on 'architecte' in [description-proc]
+    evidence: …ne offre. Le mandataire du groupement est obligatoirement l'architecte. La consultation s'adresse à des équipes de maîtrise d'oeuv…
+    all exclusion aliases matched: ['architecte']
+    cpv_all: ['71250000', '71240000', '71241000', '71300000']  cpv_match=False
+    description: La procédure avec négociation se déroulera en 2 phases : une phase CANDIDATURE au terme de laquelle seront sélectionnés les candidats admis à soumissionner et une phase OFFRE au cours de laquelle le maître d'ouvrage négociera avec les candidats admis à présenter une offre. Le mandataire du groupement est obligatoirement l'architecte. La consultation s'adresse à des équipes de maîtrise d'oeuvre pluridisciplinaires dans les domaines: Architecture avec compétences complémentaires ou accompagnement attendus dans les domaines : conception des bâtiments en milieu tropical, acoustique, aménagements paysagers, Economie de la construction, entretien maintenance/coût global, démolition avec/sans amian
+
+----------------------------------------------------------------------------------------------------
+19. [605981-2026] France – Highways engineering services – Etudes approfondies de vulnérabilité du réseau autoroutier COFIROUTE aux risques crue et inondation
+    caught by exclusion_roads_transport_works on 'autoroute' in [description-lot]
+    evidence: …ement et les prestations associées. Lot n° 1 — Zones 1 à 3, autoroute A10, départements du Loiret (45) et d'Indre-et-Loire (37),…
+    all exclusion aliases matched: ['autoroute']
+    cpv_all: ['71311220', '72242000', '71322000', '71241000', '45246000', '45246400']  cpv_match=False
+    description: Le marché porte sur la réalisation d'études de vulnérabilité de l’infrastructure autoroutière et de ses ouvrages aux risques de crue et d'inondation, sur environ 118 km du réseau COFIROUTE répartis en douze zones d'étude. Les prestations comprennent la réalisation de modélisations hydrologiques et hydrauliques, et de missions de maîtrise d’œuvre de niveau « diagnostic » et « études préliminaires » de solutions d’aménagement permettant de limiter les impacts des crues et inondations sur l’infrastructure autoroutière, ainsi que le pilotage de prestations accessoires participant à la réalisation de l’étude de vulnérabilité. Le présent marché est décomposé en douze (12) zones géographiques techn
+
+----------------------------------------------------------------------------------------------------
+20. [606711-2026] France – Consulting services for water-supply and waste-water other than for construction – 26031PRP - Diagnostic et schéma directeur d'assainissement collectif
+    caught by exclusion_water_wastewater on 'assainissement' in [title-proc]
+    evidence: 26031PRP - Diagnostic et schéma directeur d'assainissement collectif
+    all exclusion aliases matched: ['assainissement']
+    cpv_all: ['90713100', '71330000', '71335000', '90492000']  cpv_match=False
+    description: 26031PRP - Diagnostic et schéma directeur d'assainissement collectif
+
+----------------------------------------------------------------------------------------------------
+21. [615656-2026] Germany – Public relations services – Internet-Rahmenagentur für die Unabhängige Bundesbeauftragte gegen sexuellen Missbrauch von Kindern und Jugendlichen (UBSKM) und die Unabhängige Kommission des Bundes zur Aufarbeitung sexuellen Kindesmissbrauchs (Aufarbeitungskommission)
+    caught by exclusion_general_it on 'website' in [description-proc]
+    evidence: …eams (Abnahmemenge: ca. ein- bis zweimal pro Jahr auf einer Website) • Implementierung und Hosting von Umfragetools wie LimeSur…
+    caught by exclusion_communications_pr on 'social media' in [description-proc]
+    evidence: …fungen unter Einbindung von Online-Features, Bewegtbild und Social Media (Abnahmemenge: ca. neun Websites) • Ggf. Erstellung neuer W…
+    all exclusion aliases matched: ['social media', 'website']
+    cpv_all: ['79416000']  cpv_match=False
+    description: Gesucht wird/werden ein oder mehrere Unternehmen (Bietergemeinschaften), die vor dem Hintergrund tagesaktueller gesellschaftlicher und politischer Diskussionen in der Lage ist/sind, die UBSKM und die Aufarbeitungskommission in allen ihren Themenfeldern kommunikativ sensibel und effektiv zu beraten und zu unterstützen. Der Auftragsbeginn ist ab 01. Juli 2027 geplant. Die Rahmenvereinbarung soll zunächst bis 30. Juni 2029 geschlossen werden. Es besteht - vorbehaltlich der Verfügbarkeit entsprechender Haushaltsmittel - die Option, die Vereinbarung maximal bis zum 30. Juni 2031 zu verlängern. Der Budgetrahmen beträgt ca. 400.000 Euro jährlich brutto, dementsprechend beträgt die geschätzte Abnahm
+
+----------------------------------------------------------------------------------------------------
+22. [618852-2026] Belgium – Consultative engineering and construction services – Groundwater Modelling Study Assignment
+    caught by exclusion_roads_transport_works on 'viaduct' in [description-proc]
+    evidence: …ter modelling services for the "Complex Project" Gentbrugge Viaduct
+    all exclusion aliases matched: ['viaduct']
+    cpv_all: ['71310000', '71300000', '71313440', '90700000', '71313000', '90000000']  cpv_match=False
+    description: Groundwater modelling services for the "Complex Project" Gentbrugge Viaduct
+
+----------------------------------------------------------------------------------------------------
+23. [619918-2026] Germany – Architectural, engineering and planning services – VgV BNB_Literaturarchiv Marbach_Bewerbungsphase
+    caught by exclusion_building_design on 'architekt' in [description-proc]
+    evidence: …chließenden Vergabeverfahren ist das Büro von Gustav Düsing Architekt aus Berlin in Zusammenarbeit mit mahl gebhard konzepte aus…
+    all exclusion aliases matched: ['HOAI', 'architekt']
+    cpv_all: ['71240000', '71315200', '71313000']  cpv_match=False
+    description: Anlass für das Vergabeverfahren sind die Koordinations- und Beratungsleistungen für den geplanten Neubau eines Forschungsarchivs unter dem Titel "Tor zur Literatur". Der bestehende Literaturcampus des Deutschen Literaturarchivs auf der Schillerhöhe mit Schiller-Nationalmuseum, Archivgebäude einschließlich Erweiterungs-bau, Literaturmuseum der Moderne und Collegienhaus wird durch ein neues Forschungsarchiv ergänzt. Der Neubau soll die Bereiche Forschungsarchiv und Magazine, Digitalisierung, Benutzer- und Lesebereiche, Konferenz- und Veranstaltungsräume, Ausstellungs- und Vermittlungsflächen sowie Büro- und Nebenräume aufnehmen. Darüber hinaus soll er als offenes Entree zwischen der Stadt, dem
+
+----------------------------------------------------------------------------------------------------
+24. [620225-2026] France – Feasibility study, advisory service, analysis – Réalisation de schémas directeurs d’assainissement des eaux usées et d’alimentation d’eau potable
+    caught by exclusion_water_wastewater on 'assainissement' in [title-proc]
+    evidence: Réalisation de schémas directeurs d’assainissement des eaux usées et d’alimentation d’eau potable
+    all exclusion aliases matched: ['assainissement', 'eaux usées']
+    cpv_all: ['71241000', '90492000', '90713100']  cpv_match=False
+    description: Réalisation de schémas directeurs d'assainissement des eaux usées et d'alimentation d'eau potable
+
+----------------------------------------------------------------------------------------------------
+25. [622496-2026] Belgium – Human resources management consultancy services – Feedback à 360°
+    caught by exclusion_general_it on 'website' in [description-proc]
+    evidence: …rechtzettingen zullen ook gepubliceerd worden op diezelfde website. Gelieve dus deze aankondiging van opdracht regelmatig te c…
+    all exclusion aliases matched: ['website']
+    cpv_all: ['79414000']  cpv_match=False
+    description: Cet accord-cadre a pour but de désigner un partenaire qui permettra à des responsables d'équipe de recevoir, via un outil web, du feedback de la part de leur propre responsable d'équipe, des membres de leur équipe et/ou de leurs collègues/pairs. Par « feedback à 360° », on entend : un processus de feedback structuré dans lequel un responsable d'équipe reçoit du feedback sur base de son auto-évaluation, mais aussi du feedback de son propre responsable d'équipe, des membres de son équipe et de ses pairs. C’est la Loterie Nationale qui détermine quels groupes de répondants sont interrogés par cycle de feedback. Voir documents du marché à télécharger sur la plateforme e-Procurement. La sélection
+
+
+====================================================================================================
+PART 4 - DID WE ARCHIVE ANYTHING THAT READS AS ENERGY WORK IN ITS OWN LANGUAGE?
+Substring scan, not token matching, so a German compound such as
+Bestandsumspannwerken or Treibhausgasminimierung is caught. Run over every archived
+notice's blocks after casefolding and stripping accents.
+====================================================================================================
+
+[620271-2026] Germany – Construction project management services – Gesamtsanierung uPVA-Hauptwache; Hier: Projektsteuerungsleistungen 
+    stems: ['treibhausgas']
+    archived by: ['exclusion_building_design']
+    description: Projektsteuerungsleistungen Leistungsphasen 0 bis 2 für die Gesamtsanierung der unteriridische Stadtbahnstation Hauptwache in Frankfurt am Main. Förderprojekt nach kommunaler Richtlinie mit einem Schwerpunkt zur Treibhausgasminimierung.
+
+[451704-2026] Germany – Advertising, propaganda and information film and video-tape production – Rahmenvereinbarung zur Erstellung von
+    stems: ['klimaschutz']
+    archived by: ['exclusion_general_it', 'exclusion_communications_pr']
+    description: Das Bundesministerium für Umwelt, Klimaschutz, Naturschutz und nukleare Sicherheit (BMUKN) mit seinen Standorten in Bonn und Berlin verfolgt mit seiner Öffentlichkeitsarbeit das Ziel, das gesamte Themenspektrum des Ministeriums einer breiten Öffentlichkeit sowie der Presse aktuell und zielgruppengerecht zu präsentieren und entsprechende Informationen zugänglich zu machen. Um die Attraktivität des
+
+[456280-2026] Luxembourg – Technical assistance services – Mission d'assistance technique à exécuter dans l'intérêt du Lycée des Arts 
+    stems: ['energetique']
+    archived by: ['exclusion_water_wastewater']
+    description: Assistance technique au maître d’ouvrage pour assurer le suivi et le contrôle des travaux d’assainissement énergétique et de la mise en conformité du Lycée des Arts et Métiers La durée des services est de 42 mois, à débuter fin 2026. Les services sont adjugés à prix unitaires.
+
+[481233-2026] Germany – Architectural, construction, engineering and inspection services – Neubau Feuerwehrgerätehaus in Rohrenfels, O
+    stems: ['warmenetz']
+    archived by: ['exclusion_building_design']
+    description: Die Gemeinde Rohrenfels plant den Neubau eines Feuerwehrgerätehauses im OT Wagenhofen. Gegenstand des Auftrags sind Planungsleistungen der Technischen Ausrüstung, ALG 4, 5 und 6 (ELT) gem. §53 ff HOAI 2021, LPH 1-9, bei stufenweiser Beauftragung. Ggf. werden auch verschiedene besondere Leistungen beauftragt.
+
+[544012-2026] Germany – Architectural, construction, engineering and inspection services – Errichtung einer offenen Ganztagsschule und
+    stems: ['klimaschutz']
+    archived by: ['exclusion_building_design']
+    description: Der Schulverband Oettingen, vertreten durch die Stadt Oettingen, plant einen Erweiterungsbau für die bestehende Grund- u. Mittelschule (GMS). Ziel d. Maßnahme ist die Schaffung zusätzlicher Unterrichts- u. Betreuungsräume in einer modernen, funktionalen u. pädagogisch geeigneten Infrastruktur. Gegenstand des Verfahrens sind die Planungsleistungen der Technischen Ausrüstung ALG 4, 5 und 6 (ELT) gem
+
+[591337-2026] France – Architectural, engineering and surveying services – Marché de Maîtrise d'oeuvre pour la réalisation des études 
+    stems: ['energetique']
+    archived by: ['exclusion_building_design']
+    description: La procédure avec négociation se déroulera en 2 phases : une phase CANDIDATURE au terme de laquelle seront sélectionnés les candidats admis à soumissionner et une phase OFFRE au cours de laquelle le maître d'ouvrage négociera avec les candidats admis à présenter une offre. Le mandataire du groupement est obligatoirement l'architecte. La consultation s'adresse à des équipes de maîtrise d'oeuvre plu
+
+[606105-2026] Germany – Engineering design services – Schöpfwerk Niendorf - Ersatzneubau
+    stems: ['klimaschutz']
+    archived by: ['exclusion_building_design']
+    description: Der NLWKN möchte die Planungsleistungen für den Ersatzneubau des Schöpfwerks Niendorf (Amt Neuhaus) mit den Losen 1 "Umweltplanung" und 2 "Ingenieurbauwerk" vergeben. Nähere Informationen entnehmen sie bitte den beiliegenden Bewerbungsbedingungen mit Anlagen sowie der Leistungsbeschreibung. Das Vergabeverfahren wird als "Verhandlungsverfahren mit Teilnahmewettbewerb" nach § 17 Vergabeverordnung (V
+
+[610924-2026] Germany – Architectural, construction, engineering and inspection services – Kulturforum Witten AöR - Planungsleistungen
+    stems: ['klimaschutz']
+    archived by: ['exclusion_building_design', 'exclusion_water_wastewater']
+    description: Das Kulturforum Witten plant die energetische Sanierung des Saalbau Witten, um das Gebäude als lebendiges Theater und Kulturzentrum zu erhalten und einen Beitrag zum Klimaschutz zu leisten. Zur Übernahme der erforderlichen Architekten- und Ingenieurleistungen sucht die Auftraggeberin mehrere geeignete Auftragnehmer. Die erforderlichen Leistungen werden in folgende Lose aufgeteilt Los 1: Objektplan
+
+8 of 236 archived notices contain any native-language energy stem.
+
+
+====================================================================================================
+PART 5 - WHICH ALIAS DID THE ARCHIVING, FOR THE RULES THAT ARCHIVE MOST
+Counted where the rule was the only exclusion rule matching the notice.
+====================================================================================================
+
+exclusion_building_design            {'HOAI': 24, 'leistungsphasen': 16, 'objektplanung': 12, 'tragwerksplanung': 12, 'architect': 5, 'architecte': 3, 'architectural': 3, 'generalplaner': 2, 'bauleitung': 2, 'architekt': 1}
+exclusion_urban_planning             {'urbanisme': 10, 'renouvellement urbain': 7, "plan local d'urbanisme": 5}
+exclusion_roads_transport_works      {'voirie': 4, 'tunnel': 3, 'bridge': 2, 'viaduct': 1, 'railway': 1, 'autoroute': 1}
+exclusion_water_wastewater           {'assainissement': 27, 'eaux usées': 11, 'drainage': 2, 'wastewater': 1}
+exclusion_general_it                 {'software': 10, 'website': 7, 'helpdesk': 4, 'informatique': 2, 'CRM': 1, 'software development': 1}
+exclusion_communications_pr          {'öffentlichkeitsarbeit': 19, 'social media': 10, 'branding': 3, 'public relations': 3, 'marketing services': 2, 'media agency': 1, 'graphic design': 1}
+exclusion_capacity_building          {'capacity building': 8, 'capacity development': 4, 'institutional capacity': 2}
+exclusion_health                     {'nursing': 1, 'clinical trial': 1}
+exclusion_education_training         {'training services': 2, 'e-learning': 1}
+exclusion_social_welfare             {'welfare aziendale': 1}
+exclusion_finance_banking            {'payroll': 2, 'tax advisory': 1, 'accounting services': 1}
+exclusion_agriculture                {'agricultural': 6, 'agriculture': 5, 'agroforestry': 1, 'rural development': 1, 'fisheries': 1, 'livestock': 1, 'forestry': 1, 'farming': 1}
+exclusion_facilities_management      {'nettoyage': 3, 'facility management': 1}

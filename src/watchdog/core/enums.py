@@ -63,6 +63,9 @@ class Domain(StrEnum):
     OFFSHORE_WIND = "offshore_wind"
     ONSHORE_RENEWABLES = "onshore_renewables"
     GRID_TRANSMISSION = "grid_transmission"
+    # Batteries and grid-scale storage, which config/profile.yaml names as a core
+    # domain of its own. Without it a BESS notice reads as "energy, unclassified".
+    ENERGY_STORAGE = "energy_storage"
     INDUSTRIAL_DECARB = "industrial_decarb"
     RENEWABLE_FUELS = "renewable_fuels"
     ENERGY_OTHER = "energy_other"
@@ -75,6 +78,9 @@ class ServiceType(StrEnum):
 
     ADVISORY = "advisory"
     EARLY_PHASE_STUDY = "early_phase_study"
+    # Sizing, dispatch simulation and optimisation of an integrated energy system,
+    # a named service category in config/profile.yaml and not a kind of costing.
+    ENERGY_MODELLING = "energy_modelling"
     TECHNO_ECONOMIC = "techno_economic"
     DUE_DILIGENCE = "due_diligence"
     TECHNICAL_ASSISTANCE = "technical_assistance"
@@ -131,6 +137,18 @@ class RuleSignal(StrEnum):
     ACTIVITY = "activity"
     STAGE = "stage"
     EXCLUSION = "exclusion"
+
+
+class RuleStrength(StrEnum):
+    """How much weight one rule's evidence can carry.
+
+    ``SUPPORTING`` is the important one: a supporting term such as "energy" or
+    "cable" is recorded as evidence but can never establish a domain on its own.
+    """
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    SUPPORTING = "supporting"
 
 
 class Polarity(StrEnum):

@@ -1,2 +1,1211 @@
-# Deterministic screening rules: vocabulary, aliases, required context words, CPV lists.
-# Placeholder - filled in a later step. Seeds the config_version table.
+# Deterministic screening rules: vocabulary, aliases, required context words, CPV codes.
+# Seeds the config_version table.
+#
+# READ THIS BEFORE EDITING.
+#
+# A rule is one canonical concept with its aliases, not a flat keyword list. Aliases are
+# matched on the buyer's own words - every language variant of title-proc, description-proc
+# and description-lot - never on TED's composed notice-title, which carries TED's own CPV
+# label and would make an activity rule fire on every notice (docs/decisions/0002).
+#
+# KEYWORDS ARE EVIDENCE, NOT A VERDICT. Nothing here rejects a tender. A notice with no
+# match at all routes to ASSESS: our vocabulary is English and TED titles arrive in every EU
+# language. An exclusion routes to ARCHIVE_CANDIDATE only when no domain rule matched and no
+# CPV code matched, and ARCHIVE_CANDIDATE means "skip the model call", not "drop it".
+#
+# Matching normalises for comparison only and never alters stored text: case, accents,
+# hyphen-versus-space, subscript CO2 and H2. Matches are on token boundaries, so ECO2000
+# does not match CO2. There is no stemming: write the forms you want, including
+# native-language ones where they earn their place.
+#
+# strength: high | medium | supporting. A supporting term such as "energy" or "cable" is
+# recorded as evidence but can never establish a domain on its own.
+#
+# requires_context: an ambiguous alias counts only when one of these words appears within
+# matching.context_window characters of it IN THE SAME BLOCK. Never across blocks: two
+# independent texts joined end to end create an adjacency that means nothing. The list
+# applies to every alias in its rule, which is why an ambiguous acronym gets a rule of its
+# own beside the plain-language rule it belongs to.
+#
+# note: is data, not a comment, so a justification survives the settings page rewriting this
+# file. Corpus figures in the notes are counts of notices, from the 2,158 TED notices
+# ingested for 1 July - 11 September 2026, measured on the screening blocks.
+#
+# A trailing * on a DOMAIN alias matches any word starting with it: umspannwerk* finds
+# Umspannwerke and Umspannwerksanierung. It does NOT find Bestandsumspannwerken - a prefix
+# still has to start a word - so German compounds with the head noun at the end stay out of
+# reach. Use it where inflection is predictable - plurals, case endings, head-initial
+# compounds - and not by default. It is rejected on an exclusion alias and on a context or
+# companion word: a prefix widens recall on a domain term and widens archiving everywhere
+# else, and those are opposite risks. See docs/decisions/0006.
+
+version: 2
+updated: 2026-09-12
+owner: Entr Advisory & Decision Support
+
+matching:
+  # Characters either side of an alias, within one block, in which a required context word
+  # must appear. A title is shorter than this, so on a title it means "in the same title".
+  context_window: 300
+  # Roughly how much surrounding source text to keep as the evidence quote for a match.
+  evidence_chars: 120
+
+cpv:
+  # ARCHIVE GUARD ONLY. Per docs/decisions/0004 a CPV code is never evidence of relevance;
+  # these codes only stop an exclusion from archiving a notice whose subject matter is
+  # energy. Matched hierarchically against cpv_all - procedure and lot level - so 09300000
+  # covers 09331200, exactly as TED's own filter does.
+  #
+  # Deliberately NOT the collection list in config/sources/ted.yaml. Every notice we hold
+  # matched that list by construction, so reusing it here would make cpv_match true for
+  # everything and ARCHIVE_CANDIDATE unreachable. These are subject-matter energy codes.
+  archive_guard:
+    - "09123000"   # Natural gas
+    - "09300000"   # Electricity, heating, solar and nuclear energy (covers 0931-0933)
+    - "45251000"   # Works for power plants
+    - "65400000"   # Other sources of energy supply
+    - "71314000"   # Energy and related services (covers 71314100/200/300)
+    - "71323100"   # Electrical power systems design services
+    - "76000000"   # Services related to the oil and gas industry
+
+rules:
+
+  # =========================================================================
+  # DOMAIN - what the procured work is about. The primary filter.
+  # =========================================================================
+
+  - id: domain_hydrogen
+    signal: domain
+    label: hydrogen
+    strength: high
+    aliases:
+      - hydrogen
+      - green hydrogen
+      - blue hydrogen
+      - H2
+      - electrolyser
+      - electrolyzer
+      - electrolysis
+      - électrolyse*
+      - elektrolyse*
+      - wasserstoff*
+      - hydrogène
+      - waterstof*
+      - idrogeno
+      - hidrógeno
+      - power-to-x
+      - PtX
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      H2 is safe on a token boundary: it does not fire inside H2O or H2G. The native forms
+      earn their place - 623022-2026, the Baden-Wuerttemberg electrolysis funding programme,
+      says "Elektrolyse" and "Wasserstoff" and no English word for either. power-to-x sits
+      here rather than among the medium terms because a PtX notice is a hydrogen notice.
+      The prefixes cover Wasserstoffinfrastruktur and Elektrolyseanlage, not Gruenwasserstoff.
+
+  - id: domain_renewable_fuels
+    signal: domain
+    label: renewable_fuels
+    strength: high
+    aliases:
+      - ammonia
+      - green ammonia
+      - ammoniak*
+      - methanol
+      - e-methanol
+      - e-fuel
+      - e-fuels
+      - synthetic fuel
+      - biofuel
+      - biodiesel
+      - biogas*
+      - biomethane
+      - bioenergy
+      - sustainable aviation fuel
+      - renewable fuel
+      - low-carbon fuel
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Core in its own right, not adjacent to hydrogen: profile.yaml says these value chains
+      usually embed hydrogen production and CO2 streams, so a biofuel notice is core.
+
+  - id: domain_renewable_fuels_saf
+    signal: domain
+    label: renewable_fuels
+    strength: high
+    aliases:
+      - SAF
+    requires_context: [aviation, fuel, jet]
+    fields: [title, description]
+    active: true
+    note: >-
+      Sustainable aviation fuel, but only where the notice says so. Three letters that are
+      also a surname, a Nordic word and an abbreviation for half a dozen other things.
+
+  - id: domain_ccs
+    signal: domain
+    label: ccs_co2
+    strength: high
+    aliases:
+      - carbon capture
+      - carbon capture and storage
+      - carbon storage
+      - carbon dioxide
+      - CCS
+      - CCUS
+      - kohlendioxid*
+      - koldioxid*
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      626265-2026, Eidsiva Bioenergi's "CCS as a service" RFI, is the notice this rule exists
+      for. It is also the notice the CPV list could not see until 45251000 was added.
+
+  - id: domain_ccs_co2
+    signal: domain
+    label: ccs_co2
+    strength: high
+    aliases:
+      - CO2
+    requires_context: [capture, storage, transport, emission, carbon]
+    fields: [title, description]
+    active: true
+    note: >-
+      Unqualified CO2 is building-energy boilerplate: it appears in 617948-2026, a school
+      structural-design job, and 619162-2026, a sustainability-coordination framework.
+      Token-boundary matching also keeps it out of ECO2000 and similar product codes.
+
+  - id: domain_offshore_wind
+    signal: domain
+    label: offshore_wind
+    strength: high
+    aliases:
+      - offshore wind
+      - floating wind
+      - offshore windfarm
+      - offshore wind farm
+      - offshore windpark
+      - havvind*
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: domain_offshore_wind_acronyms
+    signal: domain
+    label: offshore_wind
+    strength: medium
+    aliases:
+      - IAC
+      - OSS
+    requires_context: [offshore, wind, cable, substation]
+    fields: [title, description]
+    active: true
+    note: >-
+      Inter-array cable and offshore substation. Both acronyms are ordinary words elsewhere -
+      OSS is open-source software and a one-stop shop - so neither counts alone.
+
+  - id: domain_onshore_renewables
+    signal: domain
+    label: onshore_renewables
+    strength: medium
+    aliases:
+      - renewable energy
+      - renewables
+      - solar
+      - solar PV
+      - solar park
+      - solar farm
+      - solarisation
+      - photovolta*
+      - fotovolta*
+      - fotowolta*
+      - zonnepane*
+      - onshore wind
+      - wind farm
+      - wind turbine
+      - windpark*
+      - éolien*
+      - eolic*
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      626958-2026, the Ville de Nimes roof-solarisation strategy study, carries no energy CPV
+      at all - only 71241000, feasibility study. Text is the only thing that finds it.
+
+  - id: domain_grid_transmission
+    signal: domain
+    label: grid_transmission
+    strength: medium
+    aliases:
+      - power transmission
+      - transmission network
+      - transmission grid
+      - HVDC
+      - high voltage
+      - substation
+      - umspannwerk*
+      - grid connection
+      - grid reinforcement
+      - electricity grid
+      - power grid
+      - interconnector
+      - subsea power
+      - submarine cable
+      - electrification
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      "umspannwerk*" is a prefix because German inflects: 614160-2026, a Frankfurt substation
+      refurbishment qualification system, says "Umspannwerke" and matched nothing, and only
+      its CPV codes kept it out of the archive. The prefix catches that and
+      Umspannwerksanierung; it does not catch "Bestandsumspannwerken", where the head noun is
+      at the end of the compound. That limit is deliberate and is measured in
+      docs/decisions/0006.
+
+  - id: domain_grid_hvac
+    signal: domain
+    label: grid_transmission
+    strength: medium
+    aliases:
+      - HVAC
+    requires_context: [electrical, transmission, converter, grid, substation, cable]
+    fields: [title, description]
+    active: true
+    note: >-
+      Unqualified, HVAC means heating, ventilation and air conditioning - a building services
+      contract, and the single most common false positive in the old keyword sheet. It counts
+      as high-voltage alternating current only beside electrical transmission words.
+
+  - id: domain_grid_hv
+    signal: domain
+    label: grid_transmission
+    strength: medium
+    aliases:
+      - HV
+    requires_context: [substation, cable, transmission, grid]
+    fields: [title, description]
+    active: true
+
+  - id: domain_energy_storage
+    signal: domain
+    label: energy_storage
+    strength: high
+    aliases:
+      - energy storage
+      - battery energy storage
+      - battery storage
+      - grid-scale storage
+      - BESS
+      - energilager*
+      - batterilager*
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: domain_energy_storage_ess
+    signal: domain
+    label: energy_storage
+    strength: medium
+    aliases:
+      - ESS
+    requires_context: [energy, storage, battery, grid]
+    fields: [title, description]
+    active: true
+
+  - id: domain_low_carbon_industry
+    signal: domain
+    label: industrial_decarb
+    strength: high
+    aliases:
+      - direct reduced iron
+      - green steel
+      - low-carbon steel
+      - electric arc furnace
+      - industrial decarbonisation
+      - industrial decarbonization
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: domain_low_carbon_industry_dri
+    signal: domain
+    label: industrial_decarb
+    strength: high
+    aliases:
+      - DRI
+    requires_context: [iron, steel, hydrogen, direct reduced, reduction]
+    fields: [title, description]
+    active: true
+
+  - id: domain_energy_transition
+    signal: domain
+    label: industrial_decarb
+    strength: medium
+    aliases:
+      - decarbonisation
+      - decarbonization
+      - dekarbonisierung*
+      - décarbonation*
+      - energy transition
+      - energiewende*
+      - transition énergétique
+      - low-carbon
+      - emissions reduction
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      626032-2026, the Galway County Council SEAI Pathfinder design-team consultancy, reaches
+      us on this vocabulary: "energy efficiency and decarbonisation measures".
+
+  - id: domain_industrial_heat
+    signal: domain
+    label: energy_other
+    strength: medium
+    aliases:
+      - industrial heat
+      - process heat
+      - waste heat
+      - heat recovery
+      - district heating
+      - heat network
+      - wärmenetz*
+      - fjernvarme*
+      - réseau de chaleur
+      - réseau de chauffage
+      - réseaux de chauffage
+      - chauffage urbain
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      The French terms were added after the 2026-09-12 archive audit: 538537-2026, design
+      supervision for refurbishing an estate's communal heating networks in Nantes, matched no
+      domain rule at all and was archived on the word "architecte".
+
+  - id: domain_energy_system
+    signal: domain
+    label: energy_other
+    strength: medium
+    aliases:
+      - energy system
+      - integrated energy system
+      - hybrid energy system
+      - microgrid
+      - off-grid
+      - off-grid power supply
+      - islanded
+      - energy master plan
+      - energy strategy
+      - energy efficiency
+      - energieeffizienz*
+      - energetische sanierung
+      - efficacité énergétique
+      - rénovation énergétique
+      - assainissement énergétique
+      - audit énergétique
+      - energy management
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      profile.yaml settles this as core: a study sizing or optimising an energy system for an
+      industrial site is our work whatever the output is called. "energy efficiency" is here
+      so that 521603-2026, an energy-efficient design framework for healthcare estates, is
+      not archived by the health exclusion. The French and German retrofit terms were added
+      on 2026-09-12: "assainissement energetique" is an energy retrofit and not sewerage, and
+      456280-2026 was archived by the water exclusion for saying it.
+
+  - id: domain_supporting_terms
+    signal: domain
+    label: energy_other
+    strength: supporting
+    aliases:
+      - energy
+      - energi*
+      - power
+      - carbon
+      - cable
+      - fuel
+      - climate
+      - environment
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Supporting only, and deliberately so: these words are in procurement boilerplate all
+      week. They are useful evidence beside a real match and establish nothing on their own,
+      which is also why a supporting match does not stop an exclusion from archiving.
+      "energi*" covers energie, energia, energi and their compounds in one line.
+
+  # =========================================================================
+  # ACTIVITY - what the buyer is asking someone to do.
+  # =========================================================================
+
+  - id: activity_advisory
+    signal: activity
+    label: advisory
+    strength: medium
+    aliases:
+      - advisory
+      - advisory services
+      - consultancy
+      - consulting
+      - technical advisor
+      - technical adviser
+      - independent review
+      - independent assurance
+      - independent expert
+      - decision support
+      - owner's engineer
+      - assistance à maîtrise d'ouvrage
+      - maîtrise d'ouvrage
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: activity_early_phase_study
+    signal: activity
+    label: early_phase_study
+    strength: medium
+    aliases:
+      - feasibility
+      - feasibility study
+      - pre-feasibility
+      - concept study
+      - option study
+      - optioneering
+      - option selection
+      - concept screening
+      - pre-FEED
+      - machbarkeitsstudie
+      - étude de faisabilité
+      - studio di fattibilità
+      - studiu de fezabilitate
+      - studium wykonalności
+      - mulighetsstudie
+      - forstudie
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: activity_techno_economic
+    signal: activity
+    label: techno_economic
+    strength: medium
+    aliases:
+      - techno-economic
+      - technoeconomic
+      - business case
+      - cost-benefit analysis
+      - levelised cost
+      - LCOE
+      - LCOH
+      - breakeven
+      - sensitivity analysis
+      - CAPEX
+      - OPEX
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: activity_energy_modelling
+    signal: activity
+    label: energy_modelling
+    strength: medium
+    aliases:
+      - energy system modelling
+      - energy modelling
+      - energy modeling
+      - system sizing
+      - sizing
+      - capacity optimisation
+      - capacity optimization
+      - production profile
+      - load profile
+      - capacity factor
+      - curtailment
+      - yield assessment
+      - energy balance
+      - grid connection capacity
+      - offtake
+      - power system study
+      - load flow
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Not decoration. Sizing and optimising an integrated wind, solar, storage and grid
+      system, and modelling the production profile of hydrogen, ammonia, biofuel or direct
+      reduced iron from an intermittent supply, is a named service category in profile.yaml.
+
+  - id: activity_dispatch_modelling
+    signal: activity
+    label: energy_modelling
+    strength: medium
+    aliases:
+      - dispatch
+    requires_context: [energy, power, load, generation, production, grid, simulation, profile]
+    fields: [title, description]
+    active: true
+    note: >-
+      In procurement, dispatch usually means sending goods out. It is our vocabulary only
+      beside a generation or load word.
+
+  - id: activity_due_diligence
+    signal: activity
+    label: due_diligence
+    strength: medium
+    aliases:
+      - due diligence
+      - technical due diligence
+      - technische due diligence
+      - red flag review
+      - independent technical review
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      614730-2026, Stadtwerke Essen's "Technische Due Diligence und Analyse des
+      Bestandnetzes", is the shape of this: a German notice using the English term.
+
+  - id: activity_market_assessment
+    signal: activity
+    label: market_assessment
+    strength: medium
+    aliases:
+      - market assessment
+      - market study
+      - market analysis
+      - market sounding
+      - roadmap
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: activity_technical_assistance
+    signal: activity
+    label: technical_assistance
+    strength: supporting
+    aliases:
+      - technical assistance
+      - assistance technique
+    requires_context: [advisory, study, assessment, feasibility, strategy, review]
+    fields: [title, description]
+    active: true
+    note: >-
+      A trap word, and the context requirement is the whole point. On TED "technical
+      assistance" is mostly EU-development-programme vocabulary for embedded personnel,
+      procurement administration and institutional capacity building: 20 notices in the
+      corpus use the phrase and 21 use "capacity building", heavily overlapping.
+      profile.yaml counts it only where it is outcome-based advisory or decision support.
+
+  - id: activity_esg_lca
+    signal: activity
+    label: esg_lca
+    strength: medium
+    aliases:
+      - life cycle assessment
+      - lifecycle assessment
+      - carbon footprint
+      - ESG
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: activity_esg_lca_acronym
+    signal: activity
+    label: esg_lca
+    strength: medium
+    aliases:
+      - LCA
+    requires_context: [life cycle, carbon, footprint, environmental, emission]
+    fields: [title, description]
+    active: true
+
+  - id: activity_project_framing
+    signal: activity
+    label: advisory
+    strength: medium
+    aliases:
+      - opportunity framing
+      - business case development
+      - project development strategy
+      - development roadmap
+      - decision gate
+      - investment readiness
+      - value assurance
+      - value improvement
+      - go/no-go
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      profile.yaml names project and opportunity framing, and project development and
+      strategy, as core service categories in their own right.
+
+  - id: activity_delivery_strategy
+    signal: activity
+    label: advisory
+    strength: medium
+    aliases:
+      - contracting strategy
+      - delivery strategy
+      - execution strategy
+      - procurement strategy
+      - permitting strategy
+      - consenting strategy
+      - risk allocation
+      - interface strategy
+      - constructability
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Execution and delivery strategy, and permitting and procurement strategy, are named
+      service categories in profile.yaml. Setting a procurement strategy is ours; running the
+      procurement is not, which is what the capacity-building exclusion is for.
+
+  # =========================================================================
+  # STAGE - how far the buyer's own project has travelled.
+  # =========================================================================
+
+  - id: stage_concept_option
+    signal: stage
+    label: concept_option
+    strength: medium
+    aliases:
+      - concept selection
+      - option selection
+      - optioneering
+      - concept study
+      - concept phase
+      - konzeptstudie
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: stage_pre_feed_feasibility
+    signal: stage
+    label: pre_feed_feasibility
+    strength: medium
+    aliases:
+      - pre-feasibility
+      - feasibility study
+      - pre-FEED
+      - prefeed
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: stage_feed_definition
+    signal: stage
+    label: feed_definition
+    strength: medium
+    aliases:
+      - front end engineering design
+      - FEED study
+      - FEED phase
+      - FEED package
+      - FEED contract
+      - FEED design
+      - FEED engineering
+      - project definition
+    requires_context: []
+    requires_companion: []
+    fields: [title, description]
+    active: true
+    note: >-
+      FEED is only ever matched with a qualifier beside it. A bare four-letter alias cannot
+      be made safe with required context words, because the things it collides with are
+      themselves energy notices: "feed-in tariff design" satisfies any context list that
+      contains "design" or "study". Animal feed, feedstock and boiler feed water go the same
+      way. Token boundaries already keep FEED out of "feedback" - that was never the problem.
+      The stage axis is an input to the score in the policy step, so a wrong stage label is a
+      wrong input, not a cosmetic one.
+
+  - id: stage_execution
+    signal: stage
+    label: execution
+    strength: medium
+    aliases:
+      - detailed design
+      - construction works
+      - commissioning
+      - installation works
+      - ausführungsplanung
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: stage_operations
+    signal: stage
+    label: operations
+    strength: medium
+    aliases:
+      - operations and maintenance
+      - O&M
+      - asset management
+      - drift og vedlikehold
+      - betrieb und wartung
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  # =========================================================================
+  # EXCLUSION - the recurring noise. An exclusion NEVER rejects on its own: it routes to
+  # ARCHIVE_CANDIDATE only when no domain rule matched and no CPV code matched, and the
+  # tender still goes on to be scored.
+  #
+  # Seeded from the corpus rather than from a guess, and every note names notices that are
+  # actually in it. Where a word is frequent but also appears inside real energy work, the
+  # narrower multi-word form is used instead - see the communications and health rules.
+  # =========================================================================
+
+  - id: exclusion_building_design
+    signal: exclusion
+    strength: high
+    aliases:
+      - tragwerksplanung
+      - objektplanung
+      - generalplaner
+      - bauleitung
+      - building services design
+      - interior design
+    requires_context: []
+    requires_companion: []
+    fields: [title, description]
+    active: true
+    note: >-
+      German building-design vocabulary that names the object, not the profession:
+      Tragwerksplanung in 41 notices, Objektplanung in 36. Examples - 617948-2026
+      Friedrich-Ebert-Schule Tragwerksplanung, 624151-2026 HOEP Ubstadt-Weiher. The terms
+      that name a fee schedule or a profession moved to exclusion_building_profession on
+      2026-09-12, because they say how a service is priced and not what it is for.
+
+  - id: exclusion_building_profession
+    signal: exclusion
+    strength: high
+    aliases:
+      - HOAI
+      - leistungsphasen
+      - architect
+      - architectural
+      - architectural design
+      - architekt
+      - architecte
+    requires_context: []
+    requires_companion:
+      # German
+      - neubau
+      - gebäude
+      - gebäudes
+      - hochbau
+      - umbau
+      - anbau
+      - erweiterungsbau
+      - bauvorhaben
+      - baumassnahme
+      - raumprogramm
+      - fassade
+      - schule
+      - grundschule
+      - schulzentrum
+      - kita
+      - kindertagesstätte
+      - sporthalle
+      - mensa
+      - rathaus
+      - museum
+      - bibliothek
+      - klinikum
+      - krankenhaus
+      - wohngebäude
+      - wohneinheiten
+      - wohnungsbau
+      - feuerwehrhaus
+      - feuerwehrgerätehaus
+      # French
+      - bâtiment
+      - bâtiments
+      - école
+      - écoles
+      - collège
+      - lycée
+      - immeuble
+      - logements
+      - gymnase
+      - mairie
+      - crèche
+      # English and others
+      - building
+      - buildings
+      - school
+      - hospital
+      - library
+      - housing
+      - campus
+      - classroom
+      - kindergarten
+      - gebouw
+      - edificio
+      - byggnad
+    fields: [title, description]
+    active: true
+    note: >-
+      HOAI is the German fee schedule for architects AND ENGINEERS, and it covers electrical
+      and building-services engineering; Leistungsphasen are its work stages; an architect is
+      a profession a grid project can also hire. None of them says what the work is about, so
+      none of them archives on its own: the notice has to name a building, a school or an
+      estate somewhere in its text as well. The case that forced this, 614160-2026, is a
+      substation refurbishment whose only exclusion evidence was the word HOAI and which was
+      held out of the archive by two CPV codes rather than by anything in its text.
+      Companion terms are exact, never prefixes: a prefix here would widen archiving.
+
+  - id: exclusion_urban_planning
+    signal: exclusion
+    strength: high
+    aliases:
+      - urbanisme
+      - renouvellement urbain
+      - urban renewal
+      - urban planning
+      - town planning
+      - plan local d'urbanisme
+      - stadtplanung
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      urbanisme in 15 notices, renouvellement urbain in 7 - 612884-2026, 613959-2026 and
+      625697-2026 are all assistance a maitrise d'ouvrage for urban-regeneration programmes.
+      Deliberately excludes "masterplan" and "landscape", which also appear in energy work
+      such as 459160-2026, an Energy Master Plan.
+
+  - id: exclusion_roads_transport_works
+    signal: exclusion
+    strength: high
+    aliases:
+      - voirie
+      - roadworks
+      - road maintenance
+      - road network
+      - highway
+      - motorway
+      - autoroute
+      - strassenbau
+      - bridge
+      - viaduct
+      - tunnel
+      - railway
+      - rolling stock
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      voirie in 8 notices, tunnel in 4, bridge in 4 - 503118-2026 E39 Rogfast contract
+      engineer, 568700-2026 Tunnel Tiergarten Spreebogen, 508338-2026 Celbridge mobility
+      corridor, 623910-2026 S18 tunnel ventilation planning. Bare "road" is not an alias: it
+      also appears inside road maps and facilities frameworks.
+
+  - id: exclusion_water_wastewater
+    signal: exclusion
+    strength: high
+    aliases:
+      - assainissement
+      - eaux usées
+      - station d'épuration
+      - abwasser
+      - kläranlage
+      - wastewater
+      - waste water
+      - sewerage
+      - sewage
+      - drinking water
+      - potable water
+      - drainage
+      - hydrotechnical
+      - kanalizacja
+      - oczyszczalnia
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      assainissement in 28 notices, abwasser in 19 - 615985-2026 wastewater and stormwater
+      master plan, 620225-2026 sewerage master plans, 622210-2026 Vadso water and wastewater.
+      "water supply" is not an alias: it appears in combined power-and-water scopes. Known
+      weakness: "assainissement energetique" is French for an energy retrofit, not sewerage,
+      and 456280-2026 - construction supervision of a school energy retrofit - is archived on
+      it. Out of scope anyway as works supervision, but the quoted evidence is wrong.
+
+  - id: exclusion_general_it
+    signal: exclusion
+    strength: high
+    aliases:
+      - software development
+      - software licence
+      - software licences
+      - software maintenance
+      - software package
+      - web portal
+      - website development
+      - ERP
+      - CRM
+      - helpdesk
+      - help desk
+      - service desk
+      - informatique
+      - application maintenance
+      - IT infrastructure
+    requires_context: []
+    requires_companion: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Narrowed on 2026-09-12. Bare "software" and "website" were the sole reason for 17
+      archivings and at least two of those were procurement boilerplate - 622496-2026 matched
+      on "corrigenda will be published on the same website", and 584826-2026, a stormwater
+      concept, matched on "Kanalkataster-Software". The route was right in both, but a
+      register that tells a colleague "archived because it says website" about a notice that
+      is not about websites teaches them to stop reading the evidence column. The lower
+      archive rate is the price.
+
+  - id: exclusion_public_admin_digitisation
+    signal: exclusion
+    strength: high
+    aliases:
+      - e-government
+      - digital public infrastructure
+      - digitisation of administrative
+      - dematerialisation
+      - dématérialisation
+      - records management
+      - process digitalisation
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      539478-2026, "Technical Assistance for Digital Public Infrastructure", and 453075-2026,
+      an Innovation and Digitalisation Advisory Programme, are the shape of this: public
+      administration modernisation run as a development programme.
+
+  - id: exclusion_communications_pr
+    signal: exclusion
+    strength: high
+    aliases:
+      - public relations
+      - press release
+      - press trip
+      - media agency
+      - mediaagentur
+      - advertising campaign
+      - marketing services
+      - marketing strategy
+      - branding
+      - graphic design
+      - öffentlichkeitsarbeit
+      - communications agency
+      - social media
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      524352-2026 and 536621-2026 are public relations agency frameworks, 616953-2026 is
+      branding and performance marketing, 627043-2026 is graphic design. Bare "communication"
+      and "kommunikation" are deliberately not aliases even though they appear in 56 and 30
+      notices: a communications workstream inside an energy advisory contract is common, and
+      a Danish or German notice with no English domain word would then be archived.
+
+  - id: exclusion_capacity_building
+    signal: exclusion
+    strength: high
+    aliases:
+      - institutional strengthening
+      - institutional capacity
+      - appui institutionnel
+      - embedded expert
+      - staff augmentation
+      - body leasing
+      - pool of experts
+      - secondment
+    requires_context: []
+    requires_companion: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Terms that name the thing itself. 463505-2026 a technical assistance framework,
+      539735-2026 a pool of experts. profile.yaml rules all of it out regardless of sector.
+
+  - id: exclusion_capacity_building_generic
+    signal: exclusion
+    strength: high
+    aliases:
+      - capacity building
+      - capacity development
+    requires_context: []
+    requires_companion:
+      - ministry
+      - ministère
+      - ministerium
+      - government
+      - governance
+      - gouvernance
+      - public administration
+      - administrative
+      - amministrativa
+      - civil service
+      - public sector
+      - beneficiary
+      - beneficiaries
+      - partner country
+      - partner countries
+      - development cooperation
+      - cohesion policy
+      - municipality
+      - institutional
+      - institutions
+      - training
+    fields: [title, description]
+    active: true
+    note: >-
+      "Capacity building" describes how a programme is organised, not what it is about: an
+      offshore wind authority could procure capacity building for its own permitting staff.
+      It archives only beside an administration or development subject. 21 notices use the
+      phrase, 16 were archived and 6 on it alone - DG REGIO 464762-2026, ENISA 514037-2026,
+      the Italian PRigA programme 541108-2026 - and all six name a ministry, an
+      administration or a cohesion programme, so the companion costs nothing there.
+
+  - id: exclusion_health
+    signal: exclusion
+    strength: high
+    aliases:
+      - medical equipment
+      - medical device
+      - pharmaceutical
+      - clinical trial
+      - patient care
+      - healthcare services
+      - hospital catering
+      - nursing
+      - medizinprodukte
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Narrow on purpose. profile.yaml settles that a hospital procuring a decarbonisation
+      study is in domain, so "hospital", "Krankenhaus" and "Klinikum" are not aliases - in
+      this corpus they appear in 521603-2026, an energy-efficient design framework, and in
+      589120-2026, a hospital new-build already caught by the building-design exclusion.
+
+  - id: exclusion_education_training
+    signal: exclusion
+    strength: high
+    aliases:
+      - school furniture
+      - curriculum
+      - vocational training
+      - training services
+      - e-learning
+      - formation professionnelle
+      - teaching materials
+      - uniforms
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      514280-2026 is procurement training for a business school. School buildings are not
+      covered here: they arrive as building design and the building-design rule takes them.
+
+  - id: exclusion_social_welfare
+    signal: exclusion
+    strength: high
+    aliases:
+      - social services
+      - social welfare
+      - social inclusion
+      - childcare
+      - elderly care
+      - welfare aziendale
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: exclusion_finance_banking
+    signal: exclusion
+    strength: high
+    aliases:
+      - retail banking
+      - banking services
+      - microfinance
+      - insurance brokerage
+      - payroll
+      - accounting services
+      - tax consultancy
+      - tax advisory
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      payroll in 4 notices - 454438-2026 social secretariat and HRIS, 565025-2026 tax and
+      payroll services, 598410-2026 employer of record.
+
+  - id: exclusion_defence
+    signal: exclusion
+    strength: high
+    aliases:
+      - military
+      - armed forces
+      - defence forces
+      - ammunition
+      - barracks
+    requires_context: []
+    fields: [title, description]
+    active: true
+
+  - id: exclusion_agriculture
+    signal: exclusion
+    strength: high
+    aliases:
+      - agriculture
+      - agricultural
+      - agroforestry
+      - farming
+      - livestock
+      - forestry
+      - rural development
+      - fisheries
+      - aquaculture
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      agriculture and agricultural in 10 notices each, most of them development-programme
+      work - 507459-2026 human-wildlife conflict mitigation, 516239-2026 an agricultural
+      supply chain, 518689-2026 economic modelling of agriculture and rural development.
+
+  - id: exclusion_facilities_management
+    signal: exclusion
+    strength: high
+    aliases:
+      - facilities management
+      - facility management
+      - cleaning services
+      - nettoyage
+      - gebäudereinigung
+      - catering services
+      - security guarding
+      - waste collection
+      - grounds maintenance
+    requires_context: []
+    fields: [title, description]
+    active: true
+    note: >-
+      485123-2026 is integrated facilities management including cleaning; 603310-2026 is an
+      IT facility-management qualification system.

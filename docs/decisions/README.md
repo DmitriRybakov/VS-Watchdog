@@ -5,6 +5,12 @@ consequence - especially decisions that become expensive to reverse.
 
 ## Outstanding
 
+- **The step 10 recall audit must report recall BY LANGUAGE, not as one figure.** The rules vocabulary
+  is English-seeded and the corpus is 24 languages, so the stage under-fires on non-English notices by
+  construction (0006). A single overall recall number will be dominated by English and Irish notices
+  and will look healthy while Polish or Greek recall is half of it. The measurement can only come from
+  human review decisions - the register itself is blind to this, because everything in it already
+  passed our own vocabulary.
 - Ingestion reads `config/sources/ted.yaml`, which is the configuration **seed**, not the active
   configuration. The `config_version` table arrives with the settings page, and ingestion must be
   switched to read the active version at that point, or a colleague's edit in the browser will have

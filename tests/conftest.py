@@ -11,12 +11,16 @@ from fastapi.testclient import TestClient
 
 from watchdog.core.enums import ContractNature, DeadlineType, NoticeStage, SourcePlatform
 from watchdog.core.models import Tender, TextBlock
+from watchdog.screening import RuleEngine, RulesConfig, load_rules_config
 from watchdog.storage.db import SessionFactory, create_db_engine, create_session_factory
 from watchdog.storage.repository import Repository
 from watchdog.storage.tables import Base
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
 TED_FIXTURES_DIR = FIXTURES_DIR / "ted"
+# The shipped configuration, found from the repository root rather than the
+# working directory, so a test run from anywhere reads the same files.
+CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
 
 
 def load_ted_fixture(name: str) -> dict:
@@ -32,6 +36,17 @@ def ted_fixture_names() -> list[str]:
 def ted_fixture_name(request: pytest.FixtureRequest) -> str:
     """Every recorded notice in turn, so a new fixture is exercised automatically."""
     return str(request.param)
+
+
+@pytest.fixture(scope="session")
+def rules_config() -> RulesConfig:
+    """The seeded rule set as shipped. Tests read the real vocabulary, not a mock."""
+    return load_rules_config(CONFIG_DIR / "rules.yaml")
+
+
+@pytest.fixture(scope="session")
+def rule_engine(rules_config: RulesConfig) -> RuleEngine:
+    return RuleEngine(rules_config)
 
 
 @pytest.fixture
