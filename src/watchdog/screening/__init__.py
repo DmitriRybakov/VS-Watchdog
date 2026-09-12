@@ -19,6 +19,16 @@ from watchdog.screening.config import (
     parse_rules_config,
     save_rules_config,
 )
+from watchdog.screening.policy import (
+    Decision,
+    PolicyConfig,
+    RulesEvidence,
+    decide,
+    load_policy,
+    parse_policy,
+    ranking_key,
+    rules_only_grade,
+)
 from watchdog.screening.profile import Profile, load_profile, parse_profile
 from watchdog.screening.prompts import DEFAULT_PROMPT_VERSION, render_system_prompt
 from watchdog.screening.rules import RuleEngine, normalise
@@ -28,18 +38,26 @@ __all__ = [
     "AssessRun",
     "AssessmentOutcome",
     "Candidate",
+    "Decision",
+    "PolicyConfig",
     "Profile",
     "Rule",
     "RuleEngine",
     "RulesConfig",
+    "RulesEvidence",
     "assess",
     "build_notice_text",
+    "decide",
+    "load_policy",
     "load_profile",
     "load_rules_config",
     "next_version",
     "normalise",
+    "parse_policy",
     "parse_profile",
     "parse_rules_config",
+    "ranking_key",
     "render_system_prompt",
+    "rules_only_grade",
     "save_rules_config",
 ]

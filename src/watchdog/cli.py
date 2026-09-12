@@ -249,9 +249,14 @@ def ingest(
 @app.command("screen")
 def screen(
     stage: int = typer.Option(
-        2, "--stage", help="Which screening stage to run. Only stage 2 exists so far."
+        3, "--stage", help="3 screens and stores. 2 assesses a sample and stores nothing."
     ),
-    limit: int = typer.Option(20, "--limit", min=1, max=100, help="How many notices to assess."),
+    limit: int = typer.Option(
+        0, "--limit", min=0, help="How many notices to handle. 0 means every one that needs it."
+    ),
+    rescreen: bool = typer.Option(
+        False, "--rescreen", help="Screen every notice again, not only the ones that are stale."
+    ),
     explain: bool = typer.Option(
         False,
         "--explain",
@@ -261,25 +266,50 @@ def screen(
         False, "--no-cache", help="Ignore stored answers and call the model again."
     ),
 ) -> None:
-    """Assess a sample of the register with the configured model.
+    """Screen the register: the rules, the model where there is one, then the score.
 
-    Stage 2 is the model's three judgements - domain, service and decision stage -
-    with the quotes behind each one. It stores no score and no band: combining the
-    axes is stage 3, which does not exist yet. Reading twenty of these with
-    --explain is how the first real model run gets checked.
+    Stage 3 is the whole thing and it stores one screening result per notice. Only
+    notices whose current result no longer reflects how we screen today are done,
+    so running it twice in a row is cheap; --rescreen does the lot.
+
+    Stage 2 assesses a sample and stores nothing. It exists so a person can read
+    twenty assessments with --explain before anything is banded on them.
     """
     settings = get_settings()
     configure_logging(settings.log_level, json_output=not settings.is_dev)
 
-    if stage != 2:
+    if stage not in (2, 3):
         typer.secho(f"There is no screening stage {stage}.", fg=typer.colors.RED)
         typer.echo(
-            "Stage 1 is the deterministic rules and runs as part of this command. "
-            "Stage 2 is the model assessment. Stage 3, the score and the band, is not "
-            "built yet. Nothing was changed."
+            "Stage 1 is the deterministic rules and runs as part of both. Stage 2 is the "
+            "model assessment on a sample. Stage 3 is the score and the band, stored. "
+            "Nothing was changed."
         )
         raise typer.Exit(code=1)
 
+    if stage == 2:
+        _screen_sample(limit=limit or 20, explain=explain, no_cache=no_cache)
+        return
+
+    try:
+        outcome = screen_service.screen_register(
+            limit=limit or None,
+            rescreen=rescreen,
+            use_cache=not no_cache,
+            on_progress=_screening_progress,
+        )
+    except ingest_service.DatabaseNotReady as exc:
+        _report_schema_problem(exc.check)
+        raise typer.Exit(code=1) from exc
+    except screen_service.LLMError as exc:
+        typer.secho(f"The model could not be used: {exc}", fg=typer.colors.RED)
+        typer.echo("Check LLM_PROVIDER and its settings, then try again.")
+        raise typer.Exit(code=1) from exc
+
+    _report_screening(outcome)
+
+
+def _screen_sample(*, limit: int, explain: bool, no_cache: bool) -> None:
     try:
         outcome = screen_service.assess_sample(limit=limit, use_cache=not no_cache)
     except ingest_service.DatabaseNotReady as exc:
@@ -581,7 +611,10 @@ def _report_assessment(outcome: screen_service.SampleOutcome, *, explain: bool) 
         f"  {run.tokens_in} token(s) in, {run.tokens_out} out, "
         f"{run.latency_ms / 1000:.1f}s waiting for the model."
     )
-    typer.secho("  No score and no band were stored: that is stage 3.", fg=typer.colors.CYAN)
+    typer.secho(
+        "  Nothing was stored: this is the sample. Run `watchdog screen` to score and store.",
+        fg=typer.colors.CYAN,
+    )
 
     if explain:
         for item in run.results:
@@ -592,6 +625,87 @@ def _report_assessment(outcome: screen_service.SampleOutcome, *, explain: bool) 
 
     if run.failed:
         typer.echo("  Those notices are left unassessed and a later run will try them again.")
+
+
+def _screening_progress(done: int, total: int) -> None:
+    typer.echo(f"  screened {done} of {total}...")
+
+
+def _report_screening(outcome: screen_service.ScreenOutcome) -> None:
+    """What one full screening run did, in the order a person wants to read it."""
+    typer.echo("")
+    typer.echo(
+        f"Provider {outcome.provider}, model {outcome.model or 'not named'}, "
+        f"rules v{outcome.versions.rules_version}, policy v{outcome.versions.policy_version}, "
+        f"profile v{outcome.versions.profile_version}."
+    )
+
+    if outcome.screened == 0:
+        typer.secho(
+            "Every notice in the register is already screened at these versions. "
+            "Nothing was changed.",
+            fg=typer.colors.GREEN,
+        )
+        typer.echo("  To screen them all again: watchdog screen --rescreen")
+        return
+
+    typer.echo(
+        f"Screened {outcome.screened} notice(s); "
+        f"{outcome.already_current} were already current and were not touched."
+    )
+
+    if not outcome.ai_enabled:
+        typer.secho(
+            "No model is configured, so these were screened on the keyword rules alone.",
+            fg=typer.colors.YELLOW,
+        )
+        typer.echo(
+            "  Nothing is shortlisted in this mode: a shortlist claims a judgement that "
+            "nothing has made. Switch a model on with LLM_PROVIDER and every result here "
+            "is re-screened on the next run."
+        )
+    else:
+        typer.echo(
+            f"  {outcome.tokens_in} token(s) in, {outcome.tokens_out} out. "
+            f"{outcome.to_retry} notice(s) could not be assessed and will be tried again."
+        )
+
+    typer.echo("")
+    typer.secho("By band", bold=True)
+    for band in ("shortlist", "review", "archive"):
+        typer.echo(f"  {band:<12} {outcome.by_band.get(band, 0)}")
+
+    typer.echo("")
+    typer.secho("By score", bold=True)
+    for score, count in outcome.by_score.items():
+        typer.echo(f"  {score:<12} {count}")
+
+    if outcome.by_rules_only_score:
+        typer.echo("")
+        typer.secho("By rules priority", bold=True)
+        typer.echo("  What the keyword rules alone claimed. Not a judged score.")
+        for grade, count in outcome.by_rules_only_score.items():
+            typer.echo(f"  {grade:<12} {count}{'   (no evidence at all)' if grade == 0 else ''}")
+
+    typer.echo("")
+    typer.secho("By reason code", bold=True)
+    if not outcome.by_reason_code:
+        typer.echo("  none")
+    for code, count in outcome.by_reason_code.items():
+        typer.echo(f"  {code:<26} {count}")
+
+    if not outcome.top:
+        return
+
+    typer.echo("")
+    typer.secho(
+        f"Top {len(outcome.top)} in register order ({outcome.priority_label} first)", bold=True
+    )
+    for position, row in enumerate(outcome.top, start=1):
+        title = textwrap.shorten(row.title, width=74, placeholder=" ...")
+        typer.echo(f"  {position:>2}. [{row.priority}] {title}")
+        evidence = ", ".join(row.domain_rules) or "no domain rule matched"
+        typer.echo(f"      {row.tender_id}  {row.band.value}  {evidence}")
 
 
 def _print_assessment(item: screen_service.AssessmentOutcome) -> None:

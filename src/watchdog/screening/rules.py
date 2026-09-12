@@ -282,6 +282,7 @@ class RuleEngine:
         return RuleMatch(
             rule_id=rule.id,
             signal=rule.signal,
+            strength=rule.strength,
             alias_matched=hit.alias,
             field=hit.block.field,
             evidence=_evidence(

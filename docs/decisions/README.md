@@ -88,6 +88,17 @@ consequence - especially decisions that become expensive to reverse.
   configuration. The `config_version` table arrives with the settings page, and ingestion must be
   switched to read the active version at that point, or a colleague's edit in the browser will have
   no effect on what gets fetched.
+- **Migration 0008 must be followed by a re-screen in the same deployment step.** Run
+  `alembic upgrade head` and then `watchdog screen --rescreen` as one step, not two. The migration
+  adds `domain_strength_rank` and `domain_rules_matched` with a zero default, and until a screening
+  run writes the real values every pre-existing row orders as though it had no domain evidence.
+  Nothing on screen says so: the register looks correct and is silently wrong at the top.
+- **`rules_priority` mixes assessed and rules-only numbers in one ordering column.** That is what lets
+  the register sort with or without a model, but during a partial run - `--limit`, or a run stopped
+  after the model was switched on - both kinds are present at once and a rules-only 3 sorts above an
+  assessed 2. It clears on the next full run and the reason codes distinguish them, but the column
+  heading is not honest in that state. Step 8 should decide whether the register says so when it
+  detects a mixed set.
 - The web routes have no schema guard. The CLI checks the schema and explains a stale one in a
   sentence; a browser request against the same database raises an unhandled `OperationalError`. Fix
   it in step 8, where the register starts reading real data.

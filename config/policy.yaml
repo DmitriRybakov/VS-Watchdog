@@ -1,3 +1,133 @@
 # Scoring axes, weights, caps and bands. Authoritative text lives in
 # docs/SCREENING_POLICY.md; this file is its machine-readable form.
-# Placeholder - filled in a later step. Seeds the config_version table.
+# Seeds the config_version table.
+#
+# CONFIGURATION IS DATA. Every number the scoring policy uses is written here and nowhere
+# else: src/watchdog/screening/policy.py reads this file and repeats none of it. Change a
+# weight here and the score changes with no code change.
+#
+# Every screening result records `policy_version`. Bump it on any change that would make a
+# notice score differently, and earlier results are marked stale and re-screened on the next
+# run. Nothing is rewritten in place and nothing is deleted.
+#
+# A `when:` expression is NOT Python and is never evaluated as code. It is a small fixed
+# grammar - an axis name, a comparison operator, a whole number, optionally joined by `and` -
+# parsed and checked when this file is loaded, so a typo fails at startup rather than
+# silently matching nothing on every notice. An axis that is unknown makes its comparison
+# false: a cap is never applied on the strength of a fact we do not have.
+
+version: 1
+
+# The three axes on their 0-5 scale, combined into one number. Must sum to 1.
+# An axis the assessment could not establish is left out of the sum and the remaining
+# weights are re-shared, so "not established" never acts as a zero.
+weights:
+  domain: 0.50
+  service: 0.30
+  stage: 0.20
+
+# A cap only ever lowers a score. It can never raise one, whatever the other axes say.
+caps:
+  out_of_domain:
+    when: "domain_fit <= 1"
+    max_score: 1
+    note: >-
+      Domain is the primary filter. A perfect service fit and a perfect stage fit cannot
+      rescue a notice whose subject matter is not ours - that combination is what a
+      well-written consultancy framework for the health service looks like.
+  execution_dominated:
+    when: "service_fit <= 1"
+    max_score: 2
+    note: >-
+      Construction, installation, supply, operations and embedded personnel are not our
+      services. Capped rather than archived - see project_intelligence below.
+
+# Tags applied when a condition holds. They explain a score; they never change one.
+reason_codes:
+  project_intelligence:
+    when: "domain_fit >= 3 and service_fit <= 1"
+    note: >-
+      An offshore wind construction package is not an advisory opportunity, and is still
+      worth knowing about: it says a project exists and is moving. The execution_dominated
+      cap keeps the score low; this tag is what makes the group a saved view in the
+      register rather than something that has to be hunted for in archive.
+
+bands:
+  shortlist_min: 4
+  review_min: 3
+
+# Anything true here forces REVIEW whatever the score. A review trigger never archives and
+# never shortlists; it puts the notice in front of a person.
+review_triggers:
+  # Any axis the assessment could not establish.
+  axis_unknown: true
+  # The assessment listed something the notice does not say.
+  missing_information: true
+  # Confidence below confidence.review_below.
+  low_confidence: true
+  # The rules found a domain in the buyer's own words and the assessment did not.
+  rules_model_disagreement: true
+  # A multi-lot notice. NOT because the scope may be split between suppliers - because we
+  # assess the whole notice as one text. "Hydrogen" from an equipment lot and "feasibility
+  # study" from an unrelated lot can combine into a 5/5 for a tender where no single lot is
+  # our work. That is not an uncertain judgement, it is a judgement about a scope that does
+  # not exist, and no confidence number describes it. This stays on until the assessment can
+  # establish that domain, service and stage belong to the SAME scope, which means
+  # lot-level processing. Do not switch it off before then.
+  multi_lot: true
+
+# Confidence is computed from observable facts, never asked of the model. It starts at 1.0
+# and every penalty below is subtracted from it.
+confidence:
+  # A description this long or longer costs nothing. A shorter one loses a share of
+  # penalties.short_description, in proportion to how much of it is missing.
+  description_chars_full: 400
+  # A notice with no CPV code at all loses penalties.missing_cpv.
+  require_cpv: true
+  # The rules stage and the assessment disagreeing on domain loses
+  # penalties.rules_model_disagreement.
+  rules_model_agreement: true
+  # Confidence below this forces REVIEW, when review_triggers.low_confidence is on.
+  review_below: 0.5
+  # The assessment scoring domain at or below this, where the rules established a domain
+  # from the buyer's own words, is what counts as a disagreement.
+  disagreement_domain_max: 1
+  penalties:
+    short_description: 0.15
+    missing_cpv: 0.10
+    # Per axis, so all three unknown costs 0.60 and lands below review_below on its own.
+    axis_unknown: 0.20
+    rules_model_disagreement: 0.20
+    no_english_text: 0.10
+
+# What a score means when no model is configured. The rules stage produces graded evidence
+# and the register has to reflect it: capping everything at one number would give every
+# notice the same answer, which is honest and unusable.
+rules_only:
+  # Never SHORTLIST without a model, whatever the evidence. A shortlist claims a judgement
+  # that nothing has made.
+  max_score: 3
+  # A high-strength domain rule and an activity rule: the buyer's own words say both energy
+  # domain and advisory work.
+  strong_domain_and_activity: 3
+  # A high or medium domain rule on its own, or a subject-matter CPV code together with an
+  # activity rule. Real signal, incomplete.
+  partial_evidence: 2
+  # Activity evidence only, or supporting terms only. A supporting term never establishes a
+  # domain on its own, here as anywhere else.
+  weak_evidence: 1
+  # No domain and no activity evidence at all. Banded ARCHIVE and flagged, because with no
+  # model this is the group a missed opportunity would hide in.
+  no_evidence: 2
+
+# The scores for the three paths where nothing was weighted.
+fallbacks:
+  # An exclusion matched, no domain rule matched and no CPV code matched.
+  excluded_by_rule: 1
+  # The assessment errored or failed validation twice. Not a judgement about the notice: it
+  # is left unscreened at the current versions so the next run retries it.
+  assessment_failed: 3
+  # The assessment ran and could establish none of the three axes. The weights are not used
+  # at all here - a number derived from nothing would read as a judgement - so this is the
+  # score, and it sits in the REVIEW band because a person has to look.
+  insufficient_information: 3

@@ -19,7 +19,7 @@ from collections.abc import Sequence
 from datetime import date, datetime
 from decimal import Decimal
 from enum import StrEnum
-from typing import Annotated, Any
+from typing import Annotated, Any, Protocol
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
@@ -35,6 +35,7 @@ from watchdog.core.enums import (
     Polarity,
     RuleSignal,
     RulesRoute,
+    RuleStrength,
     RunKind,
     RunStatus,
     ServiceType,
@@ -289,6 +290,9 @@ class RuleMatch(BaseModel):
 
     rule_id: str
     signal: RuleSignal
+    # The strength the rule carried when it matched, not the strength it carries
+    # today: a stored result has to stay readable after the vocabulary moves.
+    strength: RuleStrength = RuleStrength.MEDIUM
     alias_matched: str
     field: str
     # About 120 characters of surrounding source text, verbatim.
@@ -376,9 +380,20 @@ class ScreeningResult(BaseModel):
     tender_id: str
     score: int = Field(ge=1, le=5)
     band: Band
+    # What the keyword rules alone claimed, on their own 0-3 scale, when no model
+    # was configured. None whenever a model assessed the notice. Kept apart from
+    # ``score`` because merging them would make "score 3" ambiguous forever.
+    rules_only_score: int | None = Field(default=None, ge=0, le=5)
     confidence: float = Field(ge=0.0, le=1.0)
     confidence_reasons: list[str] = Field(default_factory=list)
     reason_codes: list[str] = Field(default_factory=list)
+
+    # The two evidence counts the register orders on, stored rather than derived
+    # from ``rules`` so the order can be done in SQL with paging. Both are facts
+    # about what the rules found, recorded as they were when the notice was
+    # screened; see RANKING_FIELDS below.
+    domain_strength_rank: int = Field(default=0, ge=0, le=3)
+    domain_rules_matched: int = Field(default=0, ge=0)
 
     rules: RulesResult
     assessment: Assessment | None = None
@@ -396,6 +411,72 @@ class ScreeningResult(BaseModel):
 
     created_at: UtcDatetime = Field(default_factory=utc_now)
     superseded: bool = False
+
+    @property
+    def rules_priority(self) -> int:
+        """What the register orders on: the rules grade where there is one.
+
+        The grade runs from 0, so it separates "no evidence at all" from "weak
+        evidence"; the score cannot, because there an unscreened notice sits at 2
+        and a notice that matched something sits at 1.
+        """
+        return self.rules_only_score if self.rules_only_score is not None else self.score
+
+    @property
+    def axes_established(self) -> int:
+        """How many of the three axes the score actually rests on.
+
+        Shown beside the score - "5 (1 of 3 axes established)" - because an
+        unknown axis is left out of the weighting rather than counted as zero, and
+        a bare 5 does not say how much was behind it. Derived rather than stored:
+        the assessment it reads is itself stored, so a column could only disagree.
+        """
+        if self.assessment is None:
+            return 0
+        return sum(1 for _, axis in self.assessment.axes if axis.is_established)
+
+
+# The register order, strongest first. One definition, read by the Python report in
+# the service layer and translated to columns by the repository. Two orderings that
+# drifted apart would put a notice at the top of one view and the middle of another,
+# with nothing on screen to say which was right.
+#
+# It lives here rather than beside the scoring policy because storage may import
+# core and nothing else, and the repository has to page on exactly this order.
+RANKING_FIELDS: tuple[str, ...] = (
+    "rules_priority",
+    "domain_strength_rank",
+    "domain_rules_matched",
+    "published_date",
+)
+
+
+class Rankable(Protocol):
+    """What the register order reads: a stored result, or a policy decision."""
+
+    @property
+    def rules_priority(self) -> int: ...
+
+    @property
+    def domain_strength_rank(self) -> int: ...
+
+    @property
+    def domain_rules_matched(self) -> int: ...
+
+
+def ranking_key(result: Rankable, published_date: date | None) -> tuple[int, int, int, date]:
+    """How the register orders notices inside a band, strongest first.
+
+    Sort with ``reverse=True``, having sorted on the tender id first, so that
+    notices that tie are still in a fixed sequence and paging cannot show the same
+    one twice. A notice with no publication date sorts last, not first.
+    """
+    return (
+        result.rules_priority,
+        result.domain_strength_rank,
+        result.domain_rules_matched,
+        published_date or date.min,
+    )
 
 
 class Review(BaseModel):

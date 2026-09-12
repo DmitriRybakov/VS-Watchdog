@@ -26,6 +26,7 @@ from sqlalchemy.orm import InstrumentedAttribute, Session
 from watchdog.core.clock import utc_now
 from watchdog.core.enums import RunKind, RunStatus, SourcePlatform
 from watchdog.core.models import (
+    RANKING_FIELDS,
     QuarantinedNotice,
     Review,
     Run,
@@ -116,9 +117,26 @@ SORT_KEYS: dict[str, InstrumentedAttribute[Any]] = {
     "title": TenderRow.title,
     "buyer_country": TenderRow.buyer_country,
     "score": ScreeningResultRow.score,
+    # What the keyword rules alone claimed, 0 upwards. This is what the register
+    # orders on when no model is configured: it grades "no evidence at all" below
+    # "weak evidence", which `score` cannot, because there a 2 for an unscreened
+    # notice outranks a 1 for a notice that matched something.
+    "rules_only_score": ScreeningResultRow.rules_only_score,
 }
 
 MAX_PAGE_SIZE = 200
+
+# The register's own order: the four things in core.models.RANKING_FIELDS, in that
+# sequence. Asked for by name rather than by column so that the Python report and
+# this query cannot come to mean different things.
+REGISTER_SORT = "register"
+
+# A result carrying this code judged nothing: the assessment failed. It is stored so
+# the notice is visible, and it never counts as screened.
+RETRY_REASON_CODE = "ASSESSMENT_FAILED"
+
+# How many ids to put in one IN clause. SQLite refuses a very long parameter list.
+_ID_CHUNK = 400
 
 
 class Repository:
@@ -216,6 +234,29 @@ class Repository:
             row = session.get(TenderRow, tender_id)
             return Tender.model_validate(row) if row is not None else None
 
+    def get_tenders(self, ids: Sequence[str]) -> list[Tender]:
+        """The named notices, in the order asked for. Ids we do not hold are absent.
+
+        Screening a whole register one ``get_tender`` at a time is thousands of
+        round trips; this is the same question asked once per few hundred ids.
+        """
+        wanted = list(dict.fromkeys(ids))
+        if not wanted:
+            return []
+
+        found: dict[str, Tender] = {}
+        with self._session_factory() as session:
+            for start in range(0, len(wanted), _ID_CHUNK):
+                chunk = wanted[start : start + _ID_CHUNK]
+                rows = (
+                    session.execute(select(TenderRow).where(TenderRow.id.in_(chunk)))
+                    .scalars()
+                    .all()
+                )
+                found.update({row.id: Tender.model_validate(row) for row in rows})
+
+        return [found[key] for key in wanted if key in found]
+
     def list_tenders(
         self,
         filters: TenderFilters | None = None,
@@ -227,14 +268,15 @@ class Repository:
     ) -> TenderPage:
         """One page of the register, with the total the filters matched.
 
-        ``sort_by`` must be one of ``SORT_KEYS``; anything else is a ValueError.
+        ``sort_by`` must be one of ``SORT_KEYS`` or ``REGISTER_SORT``; anything
+        else is a ValueError. ``REGISTER_SORT`` is the four-part order the register
+        itself uses, defined once in ``core.models.RANKING_FIELDS``.
         ``limit`` is capped at ``MAX_PAGE_SIZE`` rather than refused, so a stray
         request cannot pull the whole register.
         """
-        if sort_by not in SORT_KEYS:
-            raise ValueError(
-                f"unknown sort key {sort_by!r}; allowed: {', '.join(sorted(SORT_KEYS))}"
-            )
+        if sort_by not in SORT_KEYS and sort_by != REGISTER_SORT:
+            allowed = ", ".join(sorted([*SORT_KEYS, REGISTER_SORT]))
+            raise ValueError(f"unknown sort key {sort_by!r}; allowed: {allowed}")
 
         limit = max(1, min(limit, MAX_PAGE_SIZE))
         offset = max(0, offset)
@@ -247,8 +289,11 @@ class Repository:
                 )
             )
 
-            order_column = SORT_KEYS[sort_by]
-            ordering = order_column.desc() if descending else order_column.asc()
+            if sort_by == REGISTER_SORT:
+                ordering = _register_ordering(descending)
+            else:
+                column = SORT_KEYS[sort_by]
+                ordering = [nulls_last(column.desc() if descending else column.asc())]
 
             rows = (
                 session.execute(
@@ -256,7 +301,7 @@ class Repository:
                     .where(*conditions)
                     # Unknown values sort last either way, and id breaks ties so
                     # paging cannot show the same notice twice.
-                    .order_by(nulls_last(ordering), TenderRow.id.asc())
+                    .order_by(*ordering, TenderRow.id.asc())
                     .limit(limit)
                     .offset(offset)
                 )
@@ -459,9 +504,12 @@ class Repository:
                 tender_id=result.tender_id,
                 score=result.score,
                 band=result.band.value,
+                rules_only_score=result.rules_only_score,
                 confidence=result.confidence,
                 confidence_reasons=list(result.confidence_reasons),
                 reason_codes=list(result.reason_codes),
+                domain_strength_rank=result.domain_strength_rank,
+                domain_rules_matched=result.domain_rules_matched,
                 rules=result.rules.model_dump(mode="json"),
                 assessment=(
                     result.assessment.model_dump(mode="json")
@@ -512,6 +560,10 @@ class Repository:
         screening text and CPV codes; the rules, policy, profile or prompt version;
         the provider or the model. Turning the model on therefore makes every
         rules-only result stale, which is what we want.
+
+        A result that records a failed assessment is always stale. The row exists so
+        the notice is visible and filterable rather than silently absent, but nothing
+        was judged, so the next run has to try again.
         """
         with self._session_factory() as session:
             latest = {
@@ -526,6 +578,7 @@ class Repository:
                         ScreeningResultRow.prompt_version,
                         ScreeningResultRow.provider,
                         ScreeningResultRow.model,
+                        ScreeningResultRow.reason_codes,
                     ).where(ScreeningResultRow.superseded.is_(False))
                 )
             }
@@ -551,7 +604,8 @@ class Repository:
                     tender.cpv_all or [],
                 )
                 if (
-                    result.screened_content_hash != current_hash
+                    RETRY_REASON_CODE in (result.reason_codes or [])
+                    or result.screened_content_hash != current_hash
                     or result.rules_version != current_versions.rules_version
                     or result.policy_version != current_versions.policy_version
                     or result.profile_version != current_versions.profile_version
@@ -774,6 +828,37 @@ def _latest_screening_on() -> Any:
 
 def _latest_screening_join(stmt: Select[Any]) -> Select[Any]:
     return stmt.join(ScreeningResultRow, _latest_screening_on(), isouter=True)
+
+
+def _register_ordering(descending: bool) -> list[Any]:
+    """The register order as SQL, built from ``RANKING_FIELDS`` by name.
+
+    Every field in that tuple must have a column here. One added there and
+    forgotten here fails loudly on the next listing rather than dropping quietly
+    out of the order, which is the failure nobody would see on screen.
+    """
+    columns: dict[str, Any] = {
+        # The rules grade where there is one, the score otherwise - the same
+        # coalesce the Python side does when it reads ``rules_priority``.
+        "rules_priority": func.coalesce(
+            ScreeningResultRow.rules_only_score, ScreeningResultRow.score
+        ),
+        "domain_strength_rank": ScreeningResultRow.domain_strength_rank,
+        "domain_rules_matched": ScreeningResultRow.domain_rules_matched,
+        "published_date": TenderRow.published_date,
+    }
+
+    missing = [name for name in RANKING_FIELDS if name not in columns]
+    if missing:
+        raise ValueError(
+            f"the register order asks for {', '.join(missing)}, which has no column here; "
+            "add it to _register_ordering or take it out of RANKING_FIELDS"
+        )
+
+    return [
+        nulls_last(columns[name].desc() if descending else columns[name].asc())
+        for name in RANKING_FIELDS
+    ]
 
 
 def _filter_conditions(filters: TenderFilters) -> list[Any]:

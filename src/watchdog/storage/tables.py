@@ -251,9 +251,20 @@ class ScreeningResultRow(Base):
 
     score: Mapped[int] = mapped_column(Integer, nullable=False)
     band: Mapped[str] = mapped_column(String(16), nullable=False)
+    # Null whenever a model assessed the notice. A different claim from `score`.
+    rules_only_score: Mapped[int | None] = mapped_column(Integer)
     confidence: Mapped[float] = mapped_column(Float, nullable=False)
     confidence_reasons: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     reason_codes: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+
+    # The register orders on these two beside the score. They are in the `rules`
+    # blob as well, and a JSON blob cannot be ordered on with paging.
+    domain_strength_rank: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
+    domain_rules_matched: Mapped[int] = mapped_column(
+        Integer, nullable=False, default=0, server_default=text("0")
+    )
 
     rules: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     assessment: Mapped[dict[str, Any] | None] = mapped_column(JSON)
@@ -276,6 +287,13 @@ class ScreeningResultRow(Base):
     __table_args__ = (
         Index("ix_screening_result_tender_id_created_at", "tender_id", text("created_at DESC")),
         Index("ix_screening_result_band_score", "band", "score"),
+        Index(
+            "ix_screening_result_register_order",
+            "rules_only_score",
+            "score",
+            "domain_strength_rank",
+            "domain_rules_matched",
+        ),
     )
 
 
