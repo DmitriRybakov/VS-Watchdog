@@ -141,17 +141,16 @@ class Repository:
 
     # ------------------------------------------------------------------ tenders
 
-    def upsert_tenders(
-        self, tenders: Sequence[Tender], *, run_id: str | None = None
-    ) -> UpsertStats:
+    def upsert_tenders(self, tenders: Sequence[Tender], *, run_id: str) -> UpsertStats:
         """Insert new notices and update known ones. Never deletes, never re-dates.
 
         ``first_seen_at`` is written once and never touched again. ``last_seen_at``
         moves on every sighting, even when nothing else changed, so "still open at
         the source" and "changed" stay separate facts.
 
-        ``run_id`` is recorded the same way, so every row can be traced back to the
-        run that fetched it. Ingestion always passes one.
+        ``run_id`` is recorded the same way and is required: a tender with no run
+        behind it cannot be traced to the window, the counts or the source version
+        it came from, and a caller that forgets would only be found out later.
         """
         stats = UpsertStats()
 
@@ -167,8 +166,7 @@ class Repository:
                 changed = _record_changes(session, row, tender)
                 _apply_source_fields(row, tender)
                 row.last_seen_at = tender.last_seen_at
-                if run_id is not None:
-                    row.last_seen_run_id = run_id
+                row.last_seen_run_id = run_id
 
                 if changed:
                     stats.updated += 1
@@ -799,13 +797,13 @@ def _escape_like(value: str) -> str:
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
-def _new_row(tender: Tender, run_id: str | None = None) -> TenderRow:
+def _new_row(tender: Tender, run_id: str) -> TenderRow:
     row = TenderRow(id=tender.id)
     _apply_source_fields(row, tender)
     row.first_seen_at = tender.first_seen_at
     row.last_seen_at = tender.last_seen_at
-    row.first_seen_run_id = run_id if run_id is not None else tender.first_seen_run_id
-    row.last_seen_run_id = run_id if run_id is not None else tender.last_seen_run_id
+    row.first_seen_run_id = run_id
+    row.last_seen_run_id = run_id
     return row
 
 

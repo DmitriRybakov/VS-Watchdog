@@ -86,10 +86,10 @@ def screening_for(tender: Tender, *, score: int = 4, band: Band = Band.REVIEW) -
 
 
 def test_upserting_the_same_notice_with_a_new_deadline_updates_and_logs_one_change(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     first = make_tender()
-    repository.upsert_tenders([first])
+    repository.upsert_tenders([first], run_id=run_id)
 
     later = first.model_copy(
         update={
@@ -98,7 +98,7 @@ def test_upserting_the_same_notice_with_a_new_deadline_updates_and_logs_one_chan
             "last_seen_at": datetime(2026, 3, 9, 6, 0, tzinfo=UTC),
         }
     )
-    stats = repository.upsert_tenders([later])
+    stats = repository.upsert_tenders([later], run_id=run_id)
 
     assert (stats.new, stats.updated, stats.unchanged) == (0, 1, 0)
 
@@ -116,13 +116,13 @@ def test_upserting_the_same_notice_with_a_new_deadline_updates_and_logs_one_chan
 
 
 def test_re_ingesting_an_unchanged_notice_only_moves_last_seen_at(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
 
     seen_again = tender.model_copy(update={"last_seen_at": datetime(2026, 3, 9, 6, 0, tzinfo=UTC)})
-    stats = repository.upsert_tenders([seen_again])
+    stats = repository.upsert_tenders([seen_again], run_id=run_id)
 
     assert (stats.new, stats.updated, stats.unchanged) == (0, 0, 1)
     assert repository.list_changes(tender.id) == []
@@ -133,43 +133,47 @@ def test_re_ingesting_an_unchanged_notice_only_moves_last_seen_at(
 
 
 def test_a_notice_that_disappears_from_the_source_is_kept(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     staying = make_tender("aaa-2026")
     vanishing = make_tender("bbb-2026")
-    repository.upsert_tenders([staying, vanishing])
+    repository.upsert_tenders([staying, vanishing], run_id=run_id)
 
     # The next run returns only one of them; the other must survive untouched.
-    repository.upsert_tenders([staying])
+    repository.upsert_tenders([staying], run_id=run_id)
 
     assert repository.get_tender(vanishing.id) is not None
     assert repository.list_tenders().total == 2
 
 
 def test_an_unrelated_change_does_not_write_a_change_row(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
 
     stats = repository.upsert_tenders(
-        [tender.model_copy(update={"buyer_name": "Statsbygg (Oslo)"})]
+        [tender.model_copy(update={"buyer_name": "Statsbygg (Oslo)"})], run_id=run_id
     )
 
     assert stats.updated == 1
     assert repository.list_changes(tender.id) == []
 
 
-def test_source_text_is_stored_exactly_as_received(repository: Repository, make_tender) -> None:
+def test_source_text_is_stored_exactly_as_received(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     original = "Tjenester for hydrogenproduksjon – forprosjekt (FEED)"
-    repository.upsert_tenders([make_tender(title=original)])
+    repository.upsert_tenders([make_tender(title=original)], run_id=run_id)
 
     stored = repository.list_tenders().items[0]
     assert stored.title == original
 
 
-def test_money_keeps_its_currency_and_its_value(repository: Repository, make_tender) -> None:
-    repository.upsert_tenders([make_tender()])
+def test_money_keeps_its_currency_and_its_value(
+    repository: Repository, make_tender, run_id: str
+) -> None:
+    repository.upsert_tenders([make_tender()], run_id=run_id)
 
     stored = repository.list_tenders().items[0]
     assert stored.estimated_value == Decimal("250000.00")
@@ -177,9 +181,9 @@ def test_money_keeps_its_currency_and_its_value(repository: Repository, make_ten
 
 
 def test_a_publication_date_is_the_same_day_in_every_timezone(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
-    repository.upsert_tenders([make_tender(published_date=date(2026, 3, 1))])
+    repository.upsert_tenders([make_tender(published_date=date(2026, 3, 1))], run_id=run_id)
 
     stored = repository.list_tenders().items[0]
 
@@ -190,12 +194,15 @@ def test_a_publication_date_is_the_same_day_in_every_timezone(
     assert datetime(2026, 3, 1, tzinfo=UTC).astimezone(new_york).date() == date(2026, 2, 28)
 
 
-def test_a_publication_date_filter_uses_calendar_days(repository: Repository, make_tender) -> None:
+def test_a_publication_date_filter_uses_calendar_days(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     repository.upsert_tenders(
         [
             make_tender("feb", published_date=date(2026, 2, 27)),
             make_tender("mar", published_date=date(2026, 3, 1)),
-        ]
+        ],
+        run_id=run_id,
     )
 
     page = repository.list_tenders(TenderFilters(published_from=date(2026, 3, 1)))
@@ -206,13 +213,14 @@ def test_a_publication_date_filter_uses_calendar_days(repository: Repository, ma
 # ------------------------------------------------------------------- listing
 
 
-def test_filters_pagination_and_total(repository: Repository, make_tender) -> None:
+def test_filters_pagination_and_total(repository: Repository, make_tender, run_id: str) -> None:
     repository.upsert_tenders(
         [
             make_tender("no-1", buyer_country="NO"),
             make_tender("no-2", buyer_country="NO"),
             make_tender("de-1", buyer_country="DE"),
-        ]
+        ],
+        run_id=run_id,
     )
 
     page = repository.list_tenders(
@@ -230,14 +238,15 @@ def test_filters_pagination_and_total(repository: Repository, make_tender) -> No
 
 
 def test_sorting_by_deadline_puts_unknown_deadlines_last(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     repository.upsert_tenders(
         [
             make_tender("late", deadline=datetime(2026, 6, 1, 12, 0, tzinfo=UTC)),
             make_tender("early", deadline=datetime(2026, 4, 1, 12, 0, tzinfo=UTC)),
             make_tender("unknown", deadline=None),
-        ]
+        ],
+        run_id=run_id,
     )
 
     ordered = repository.list_tenders(sort_by="deadline", descending=False).items
@@ -245,12 +254,15 @@ def test_sorting_by_deadline_puts_unknown_deadlines_last(
     assert [tender.source_id for tender in ordered] == ["early", "late", "unknown"]
 
 
-def test_text_filter_matches_title_or_description(repository: Repository, make_tender) -> None:
+def test_text_filter_matches_title_or_description(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     repository.upsert_tenders(
         [
             make_tender("h", title="Hydrogen feasibility study"),
             make_tender("w", title="Offshore wind survey", description="Seabed survey."),
-        ]
+        ],
+        run_id=run_id,
     )
 
     page = repository.list_tenders(TenderFilters(text="seabed"))
@@ -259,7 +271,7 @@ def test_text_filter_matches_title_or_description(repository: Repository, make_t
 
 
 def test_a_services_filter_keeps_a_works_notice_that_also_buys_services(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     """Modelled on 563282-2026: main nature works, natures [services, works].
 
@@ -274,7 +286,7 @@ def test_a_services_filter_keeps_a_works_notice_that_also_buys_services(
         update={"contract_nature": ContractNature.WORKS}
     )
 
-    repository.upsert_tenders([mixed, works_only])
+    repository.upsert_tenders([mixed, works_only], run_id=run_id)
 
     page = repository.list_tenders(TenderFilters(contract_nature=ContractNature.SERVICES))
 
@@ -283,13 +295,14 @@ def test_a_services_filter_keeps_a_works_notice_that_also_buys_services(
 
 
 def test_a_services_filter_still_excludes_a_notice_with_no_services(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     repository.upsert_tenders(
         [
             make_tender("supplies", contract_natures=[ContractNature.SUPPLIES]),
             make_tender("services", contract_natures=[ContractNature.SERVICES]),
-        ]
+        ],
+        run_id=run_id,
     )
 
     page = repository.list_tenders(TenderFilters(contract_nature=ContractNature.SERVICES))
@@ -298,9 +311,11 @@ def test_a_services_filter_still_excludes_a_notice_with_no_services(
 
 
 def test_a_nature_filter_cannot_match_a_substring_of_another_value(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
-    repository.upsert_tenders([make_tender("w", contract_natures=[ContractNature.WORKS])])
+    repository.upsert_tenders(
+        [make_tender("w", contract_natures=[ContractNature.WORKS])], run_id=run_id
+    )
 
     # "works" must not be found by a filter for "work".
     page = repository.list_tenders(TenderFilters(contract_nature=ContractNature.WORKS))
@@ -308,7 +323,7 @@ def test_a_nature_filter_cannot_match_a_substring_of_another_value(
 
 
 def test_the_text_filter_also_searches_the_buyers_own_title(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     repository.upsert_tenders(
         [
@@ -319,7 +334,8 @@ def test_the_text_filter_also_searches_the_buyers_own_title(
                 description=None,
             ),
             make_tender("other", title="Something else", title_native="Iets anders"),
-        ]
+        ],
+        run_id=run_id,
     )
 
     page = repository.list_tenders(TenderFilters(text="projectmatige"))
@@ -328,14 +344,15 @@ def test_the_text_filter_also_searches_the_buyers_own_title(
 
 
 def test_where_the_work_happens_filters_separately_from_who_is_buying(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     """Modelled on 619675-2026: a French buyer procuring a study for Angola."""
     repository.upsert_tenders(
         [
             make_tender("angola", buyer_country="FRA", performance_countries=["AGO"]),
             make_tender("france", buyer_country="FRA", performance_countries=["FRA"]),
-        ]
+        ],
+        run_id=run_id,
     )
 
     by_buyer = repository.list_tenders(TenderFilters(buyer_country="FRA"))
@@ -346,13 +363,14 @@ def test_where_the_work_happens_filters_separately_from_who_is_buying(
 
 
 def test_a_notice_spanning_several_countries_is_found_by_any_of_them(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     repository.upsert_tenders(
         [
             make_tender("maghreb", performance_countries=["MAR", "DZA", "TUN"]),
             make_tender("norway", performance_countries=["NOR"]),
-        ]
+        ],
+        run_id=run_id,
     )
 
     for code in ("MAR", "DZA", "TUN"):
@@ -362,8 +380,12 @@ def test_a_notice_spanning_several_countries_is_found_by_any_of_them(
     assert repository.get_tender("ted:maghreb").multi_country is True
 
 
-def test_the_performance_country_survives_a_round_trip(repository: Repository, make_tender) -> None:
-    repository.upsert_tenders([make_tender("a", performance_countries=["AGO", "MAR"])])
+def test_the_performance_country_survives_a_round_trip(
+    repository: Repository, make_tender, run_id: str
+) -> None:
+    repository.upsert_tenders(
+        [make_tender("a", performance_countries=["AGO", "MAR"])], run_id=run_id
+    )
 
     stored = repository.get_tender("ted:a")
 
@@ -376,10 +398,12 @@ def test_an_unknown_sort_key_is_rejected(repository: Repository) -> None:
         repository.list_tenders(sort_by="buyer_name; drop table tender")
 
 
-def test_band_filter_reads_the_latest_screening(repository: Repository, make_tender) -> None:
+def test_band_filter_reads_the_latest_screening(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     shortlisted = make_tender("s-1")
     archived = make_tender("a-1")
-    repository.upsert_tenders([shortlisted, archived])
+    repository.upsert_tenders([shortlisted, archived], run_id=run_id)
     repository.save_screening_result(screening_for(shortlisted, score=5, band=Band.SHORTLIST))
     repository.save_screening_result(screening_for(archived, score=1, band=Band.ARCHIVE))
 
@@ -392,10 +416,10 @@ def test_band_filter_reads_the_latest_screening(repository: Repository, make_ten
 
 
 def test_a_screening_result_never_overwrites_the_previous_one(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
 
     first = repository.save_screening_result(
         screening_for(tender, score=2, band=Band.REVIEW).model_copy(
@@ -420,9 +444,11 @@ def test_a_screening_result_never_overwrites_the_previous_one(
     assert latest[tender.id].score == 5
 
 
-def test_an_assessment_survives_the_round_trip(repository: Repository, make_tender) -> None:
+def test_an_assessment_survives_the_round_trip(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
 
     assessment = Assessment(
         domain_fit=AxisScore[Domain](score=5, label=Domain.HYDROGEN, evidence=["hydrogen"]),
@@ -444,10 +470,10 @@ def test_an_assessment_survives_the_round_trip(repository: Repository, make_tend
 
 
 def test_ids_needing_screening_reacts_to_a_version_bump(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_screening_result(screening_for(tender))
 
     assert repository.ids_needing_screening(VERSIONS, "disabled", None) == []
@@ -457,18 +483,20 @@ def test_ids_needing_screening_reacts_to_a_version_bump(
 
 
 def test_turning_the_model_on_makes_every_rules_only_result_stale(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_screening_result(screening_for(tender))
 
     assert repository.ids_needing_screening(VERSIONS, "azure_openai", "gpt-4o") == [tender.id]
 
 
-def test_a_corrected_notice_needs_re_screening(repository: Repository, make_tender) -> None:
+def test_a_corrected_notice_needs_re_screening(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_screening_result(screening_for(tender))
 
     corrected = tender.model_copy(
@@ -478,13 +506,13 @@ def test_a_corrected_notice_needs_re_screening(repository: Repository, make_tend
             ]
         }
     )
-    repository.upsert_tenders([corrected])
+    repository.upsert_tenders([corrected], run_id=run_id)
 
     assert repository.ids_needing_screening(VERSIONS, "disabled", None) == [tender.id]
 
 
 def test_a_corrected_language_variant_needs_re_screening(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     # The hash covers every block, so a correction in any language makes the
     # existing result stale rather than leaving it looking current.
@@ -492,7 +520,7 @@ def test_a_corrected_language_variant_needs_re_screening(
     french = TextBlock(field="title-proc", language="fra", text="Etude de faisabilite")
 
     tender = make_tender().model_copy(update={"screening_blocks": [dutch, french]})
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_screening_result(screening_for(tender))
 
     assert repository.ids_needing_screening(VERSIONS, "disabled", None) == []
@@ -507,26 +535,30 @@ def test_a_corrected_language_variant_needs_re_screening(
             ]
         }
     )
-    repository.upsert_tenders([corrected])
+    repository.upsert_tenders([corrected], run_id=run_id)
 
     assert repository.ids_needing_screening(VERSIONS, "disabled", None) == [tender.id]
 
 
-def test_a_new_cpv_code_needs_re_screening(repository: Repository, make_tender) -> None:
+def test_a_new_cpv_code_needs_re_screening(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_screening_result(screening_for(tender))
 
     repository.upsert_tenders(
-        [tender.model_copy(update={"cpv_all": [*tender.cpv_all, "09330000"]})]
+        [tender.model_copy(update={"cpv_all": [*tender.cpv_all, "09330000"]})], run_id=run_id
     )
 
     assert repository.ids_needing_screening(VERSIONS, "disabled", None) == [tender.id]
 
 
-def test_a_never_screened_tender_needs_screening(repository: Repository, make_tender) -> None:
+def test_a_never_screened_tender_needs_screening(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
 
     assert repository.ids_needing_screening(VERSIONS, "disabled", None) == [tender.id]
 
@@ -535,10 +567,10 @@ def test_a_never_screened_tender_needs_screening(repository: Repository, make_te
 
 
 def test_a_review_round_trips_and_re_screening_leaves_it_alone(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_review(
         Review(
             tender_id=tender.id,
@@ -561,9 +593,11 @@ def test_a_review_round_trips_and_re_screening_leaves_it_alone(
     assert review.reviewed_at == datetime(2026, 3, 3, 10, 0, tzinfo=UTC)
 
 
-def test_changing_your_mind_keeps_the_earlier_review(repository: Repository, make_tender) -> None:
+def test_changing_your_mind_keeps_the_earlier_review(
+    repository: Repository, make_tender, run_id: str
+) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_review(
         Review(
             tender_id=tender.id,
@@ -601,10 +635,10 @@ def test_changing_your_mind_keeps_the_earlier_review(repository: Repository, mak
 
 
 def test_detail_fields_round_trip_with_their_source_reference(
-    repository: Repository, make_tender
+    repository: Repository, make_tender, run_id: str
 ) -> None:
     tender = make_tender()
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
     repository.save_detail(
         TenderDetail(
             tender_id=tender.id,
@@ -669,12 +703,12 @@ def test_a_watermark_is_created_then_moved_forward(repository: Repository) -> No
     assert watermark.source is SourcePlatform.TED
 
 
-def test_notice_stage_change_is_logged(repository: Repository, make_tender) -> None:
+def test_notice_stage_change_is_logged(repository: Repository, make_tender, run_id: str) -> None:
     tender = make_tender(notice_stage=NoticeStage.PRIOR_INFORMATION)
-    repository.upsert_tenders([tender])
+    repository.upsert_tenders([tender], run_id=run_id)
 
     repository.upsert_tenders(
-        [tender.model_copy(update={"notice_stage": NoticeStage.CONTRACT_NOTICE})]
+        [tender.model_copy(update={"notice_stage": NoticeStage.CONTRACT_NOTICE})], run_id=run_id
     )
 
     changes = repository.list_changes(tender.id)

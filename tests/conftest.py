@@ -58,6 +58,17 @@ def repository(session_factory: SessionFactory) -> Repository:
     return Repository(session_factory)
 
 
+@pytest.fixture
+def run_id() -> str:
+    """The run every stored tender in a test belongs to.
+
+    ``upsert_tenders`` requires one, so this is shared rather than written out at
+    each call site: a literal repeated forty times is a habit, and the point of
+    the argument is that traceability stops being a habit.
+    """
+    return "run-test-0001"
+
+
 TenderFactory = Callable[..., Tender]
 
 
