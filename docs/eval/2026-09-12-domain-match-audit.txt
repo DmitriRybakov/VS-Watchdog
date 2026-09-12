@@ -1,0 +1,611 @@
+====================================================================================================
+DOMAIN MATCH AUDIT - rules.yaml version 2 against 2158 notices
+corpus: every TED notice ingested for publication dates 2026-07-01 .. 2026-09-11
+routes under this rule set: assess 1949, archive_candidate 209
+measured against the rule set AS COMMITTED at version 2, before the changes this audit
+caused. What changed and what each change moved is in 2026-09-12-domain-matches.md.
+
+This is the other side of 2026-09-12-rules-archive-audit.txt: that one asked what the
+exclusions archive, this one asks what the domain rules claim about the notices that go
+on to be assessed. A wrong domain match is false evidence in the model prompt and a wrong
+input to the score, and nothing downstream can tell it from a right one.
+====================================================================================================
+
+====================================================================================================
+PART 1 - DOMAIN RULE HISTOGRAM
+one match per rule per notice; 'in building' counts notices that also carry
+building-design or building-profession evidence. That is a screen, not a verdict.
+====================================================================================================
+
+rule                               label/strength              notices  in building  aliases
+domain_supporting_terms            energy_other/supporting         276           42  {'energi*': 190, 'energy': 37, 'environment': 16, 'climate': 16, 'power': 8, 'carbon': 6, 'fuel': 2, 'cable': 1}
+domain_onshore_renewables          onshore_renewables/medium        49            4  {'photovolta*': 14, 'fotowolta*': 12, 'renewable energy': 11, 'fotovolta*': 6, 'zonnepane*': 2, 'solarisation': 1, 'solar': 1, 'renewables': 1}
+domain_energy_system               energy_other/medium              41           16  {'energieeffizienz*': 10, 'energy efficiency': 10, 'rénovation énergétique': 8, 'energetische sanierung': 7, 'energy master plan': 2, 'audit énergétique': 2, 'assainissement énergétique': 1, 'off-grid': 1}
+domain_energy_transition           industrial_decarb/medium         23            5  {'decarbonisation': 7, 'dekarbonisierung*': 5, 'energy transition': 3, 'transition énergétique': 2, 'low-carbon': 2, 'energiewende*': 2, 'emissions reduction': 1, 'decarbonization': 1}
+domain_hydrogen                    hydrogen/high                    15            2  {'wasserstoff*': 5, 'H2': 4, 'hydrogen': 2, 'hydrogène': 2, 'elektrolyse*': 1, 'green hydrogen': 1}
+domain_industrial_heat             energy_other/medium              15            4  {'wärmenetz*': 6, 'réseau de chaleur': 5, 'district heating': 3, 'réseaux de chauffage': 1}
+domain_grid_transmission           grid_transmission/medium         14            1  {'umspannwerk*': 5, 'electrification': 4, 'interconnector': 1, 'HVDC': 1, 'grid connection': 1, 'high voltage': 1, 'substation': 1}
+domain_energy_storage              energy_storage/high               5            0  {'BESS': 4, 'energy storage': 1}
+domain_ccs_co2                     ccs_co2/high                      3            0  {'CO2': 3}
+domain_low_carbon_industry         industrial_decarb/high            3            0  {'industrial decarbonisation': 2, 'green steel': 1}
+domain_renewable_fuels             renewable_fuels/high              3            0  {'biogas*': 1, 'ammonia': 1, 'bioenergy': 1}
+domain_ccs                         ccs_co2/high                      2            0  {'CCS': 2}
+domain_offshore_wind               offshore_wind/high                2            0  {'havvind*': 1, 'offshore wind': 1}
+domain_renewable_fuels_saf         renewable_fuels/high              1            0  {'SAF': 1}
+domain_energy_storage_ess          energy_storage/medium             0            0  {}
+domain_grid_hv                     grid_transmission/medium          0            0  {}
+domain_grid_hvac                   grid_transmission/medium          0            0  {}
+domain_low_carbon_industry_dri     industrial_decarb/high            0            0  {}
+domain_offshore_wind_acronyms      offshore_wind/medium              0            0  {}
+
+
+====================================================================================================
+PART 2 - FIVE RANDOM NOTICES FOR EACH OF THE FIVE BIGGEST RULES
+random.Random(20260912).sample over the sorted match list, so it is reproducible
+and not a selection of the clearest cases.
+====================================================================================================
+
+
+########## domain_supporting_terms  (276 notices) ##########
+
+[476229-2026] Ireland – Energy and related services – A FRAMEWORK OF SPECIALIST SERVICE PROVIDERS FOR THE AWARD OF SERVICES CONTRACTS SERVING A STATEWIDE ENERGY CONSERVATION INITIATIVE IN CENTRAL GOVERNMENT AND PUBLIC SECTOR BUILDINGS
+    alias   'energy'
+    span    [title-proc] …ERS FOR THE AWARD OF SERVICES CONTRACTS SERVING A STATEWIDE ENERGY CONSERVATION INITIATIVE IN CENTRAL GOVERNMENT AND PUBLIC SE…
+    descr   To assist with the administration of OPW's Optimising Power @ Work energy efficiency campaign, the Office of Public Works (OPW) intend to establish a Framework from which Energy Specialists providing professional services in the areas of staff energy awareness, Behavioural Change, Energy Auditing/Reporting, Optimisation of Building Management Systems (BMS) and controls in Centr
+
+[602448-2026] Czechia – Energy and related services – Poskytování energetických služeb metodou EPC v objektech Vysoké školy báňské – Technické univerzity Ostrava
+    alias   'energi*'
+    span    [description-proc] …rnující trvalé sledování a vyhodnocování dosahovaných úspor energie) po dobu trvání smluvního vztahu, včetně kontroly instalov…
+    descr   V rámci zakázky bude poskytovatelem služeb vypracován návrh energeticky úsporných opatření. Realizace energeticky úsporných opatření ve smyslu této zakázky zahrnuje tyto úkony: • zpracování projektové dokumentace a zajištění dalších činností pro zajištění stavebních povolení na realizaci úsporných opatření, budou-li dle nabídky účastníka s ohledem na navrhovaná opatření nezbytn
+
+[538260-2026] Germany – Drilling services – Reallabor Rheinland - Erkundungsbohrung Weisweiler R1 Ausschreibung einer Bohranlage mit Personal, zugehörigem Equipment und Leistungen für die Durchführung einer geothermischen Erkundungsbohrung
+    alias   'power'
+    span    [description-proc] …zur Verfügung. Auf dem Kraftwerksgelände Weisweiler der RWE Power AG bei Eschweiler nahe Aachen soll eine etwa 3140 m tiefe,…
+    descr   Ausschreibung einer Bohranlage mit Personal, zugehörigem Equipment und Leistungen für die Durchführung einer geothermischen Erkundungsbohrung Die Fraunhofer-Gesellschaft zur Förderung der angewandten Forschung e.V. Hansastraße 27c, 80686 München, Deutschland, vertreten durch die Fraunhofer IEG, Am Hochschulcampus 1, 44801 Bochum als Auftraggeberin (nachfolgend AG) plant eine ve
+
+[507459-2026] Germany – Business and management consultancy and related services – 10020688-Mitigation of Human - Wildlife Conflicts in Tanzania II
+    alias   'climate'
+    span    [description-proc] …g settlement and agricultural expansion, livestock grazing, climate stress, and weak coordination between relevant institutions…
+    descr   The project "Mitigation of Human-Wildlife Conflicts in Tanzania" supports the implementation of Tanzania"s National Human-Wildlife Conflict Management Strategy in the Ruvuma landscape, particularly in the districts of Liwale, Namtumbo, and Tunduru. The project aims to strengthen the coordination and steering capacity of the Ministry of Natural Resources and Tourism and its subo
+
+[459160-2026] Ireland – Energy and related services – Energy Master Plan - Killanne Union of Parishes
+    alias   'energy'
+    span    [title-proc] Energy Master Plan - Killanne Union of Parishes
+    descr   The objective of this Request for Tender is to identify a suitably qualified and experienced consultant to carry out the necessary analysis and prepare an Energy Master Plan for the Killanne Union of Parishes which includes Killanne, Davidstown, Castleboro and Templeshambo, County Wexford (Sustainable Energy Community: SEC). The EMP of Killanne includes the parishes of Killanne
+
+
+########## domain_onshore_renewables  (49 notices) ##########
+
+[607607-2026] Poland – Solar photovoltaic modules – Klaster Energii Pogórza Dynowskiego – inicjatorem rozwoju lokalnych odnawialnych źródeł energii – instalacje fotowoltaiczne, magazyny energii oraz wodorowy magazyn energii
+    alias   'fotowolta*'
+    span    [title-proc] …rozwoju lokalnych odnawialnych źródeł energii – instalacje fotowoltaiczne, magazyny energii oraz wodorowy magazyn energii
+    descr   1. Przedmiotem zamówienia jest realizacja zadania inwestycyjnego w ramach przedsięwzięcia pn. „Klaster Energii Pogórza Dynowskiego - inicjatorem rozwoju lokalnych odnawialnych źródeł energii” 2. Zamawiający zgodnie z art. 91 ust. 1 ustawy Pzp dopuszcza składanie ofert częściowych. Zamówienie podzielone jest na 3 (słownie: trzy części), jak poniżej: 2.1. część 1 – „Klaster Energ
+
+[618677-2026] Czechia – Solar photovoltaic modules – FVE společnosti Slavos Slaný
+    alias   'fotovolta*'
+    span    [description-proc] Účelem veřejné zakázky je vybudování nových fotovoltaických elektráren (FVE) na střechách budov a na volném pozem…
+    descr   Účelem veřejné zakázky je vybudování nových fotovoltaických elektráren (FVE) na střechách budov a na volném pozemku a tím nahrazení spotřeby elektrické energie dodávané z distribuční soustavy z tradičních zdrojů, elektrickou energií vyrobenou v rámci instalovaného obnovitelného zdroje. Instalace bude realizována na následujících etapách: I. ETAPA: Fotovoltaická elektrárna SLAVO
+
+[587128-2026] Germany – Electrical services – Neubau einer Mensa mit Betreuungsräumen an der Mönchhof-Grundschule in Heidelberg
+    alias   'photovolta*'
+    span    [description-lot] …den Schulhof. Das Dach erhält eine Dachbegrünung sowie eine Photovoltaikanlage, die durch die Stadtwerke Heidelberg errichtet wird…
+    descr   Fachplanungsleistung Technische Gebäudeausrüstung der Anlagengruppen 4, 5 und 6 nach HOAI
+
+[612363-2026] Germany – Engineering services – Nicht offenes Verfahren (EU-weit) Erstellung eines Bau- und Leistungsverzeichnisses für die Ausschreibung der Errichtung von Photovoltaik-Anlagen auf von der Bundeswehr genutzten Gebäuden
+    alias   'photovolta*'
+    span    [title-proc] …ungsverzeichnisses für die Ausschreibung der Errichtung von Photovoltaik-Anlagen auf von der Bundeswehr genutzten Gebäuden
+    descr   Es handelt sich um die nur geringfügig angepasste Neuausschreibung des erfolglos verlaufenen Vergabeverfahrens VOEK 173-26. Gegenstand der ausgeschriebenen Leistung ist die Erstellung eines ausschreibungsreifen Bau-Leistungsverzeichnisses („Bau-LV“) für die Errichtung und den Betrieb von Photovoltaikanlagen („PV-Anlagen“) auf Dächern von ca. 500 bis 650 Bundeswehrgebäuden bis z
+
+[601219-2026] Poland – Solar installation – Zaprojektowanie, dostawa i montaż instalacji paneli fotowoltaicznych w ramach realizacji projektu pn.: „Budowa instalacji paneli fotowoltaicznych dla budynków użyteczności publicznej w Gminie Aleksandrów Łódzki”
+    alias   'fotowolta*'
+    span    [title-proc] Zaprojektowanie, dostawa i montaż instalacji paneli fotowoltaicznych w ramach realizacji projektu pn.: „Budowa instalacji…
+    descr   1. Przedmiotem zamówienia jest zaprojektowanie, dostawa i montaż instalacji paneli fotowoltaicznych w ramach realizacji projektu pn.: „Budowa instalacji paneli fotowoltaicznych dla budynków użyteczności publicznej w Gminie Aleksandrów Łódzki”. 2. Przedmiot zamówienia będzie realizowany w formule „zaprojektuj i wybuduj” i obejmuje wykonanie i uruchomienie instalacji fotowoltaicz
+
+
+########## domain_energy_system  (41 notices) ##########
+
+[582569-2026] Germany – Energy and related services – 10025180 - Provision of technical advisory services for energy efficiency, renewable energy self-consumption, and institutional capacity development in Kosovo
+    alias   'energy efficiency'
+    span    [title-proc] 10025180 - Provision of technical advisory services for energy efficiency, renewable energy self-consumption, and institutional capac…
+    descr   The Kosovo Energy Project (KEP) is a development cooperation initiative implemented by GIZ, co-financed by the German Federal Ministry for Economic Cooperation and Development (BMZ) and the Ministry of Foreign Affairs of Denmark, supporting Kosovo"s transition toward a more sustainable, efficient, and inclusive energy system. KEP aims to help Kosovo fulfil its obligations under
+
+[474558-2026] France – Administrative social services – Élaboration et suivi des dossiers de demandes d'aides présentées par les propriétaires et locataires dans le cadre du dispositif « Habitat Privé - Hauts-de-Seine »
+    alias   'rénovation énergétique'
+    span    [description-proc] …n et le suivi des dossiers de demande d'aides relatifs à la rénovation énergétique de l'habitat privé, ainsi qu'à l'adaptation des logements e…
+    descr   Dans le cadre de ses missions notamment l'amélioration et l'adaptation de l'habitat privé, le Département a mis en place un dispositif d'aides afin d'accompagner les ménages dans la réalisation de travaux au sein de leur logement. Ce dispositif a plusieurs objectifs : - soutenir la rénovation du parc de logements privés, en particulier au regard des enjeux de performance énergé
+
+[484189-2026] Germany – Architectural, construction, engineering and inspection services – TNW_ELT_Landkreis Regensburg_Neubau Schulgebäude Realschule Regenstauf
+    alias   'energieeffizienz*'
+    span    [description-lot] …lichen, nachhaltigen und zukunftsfähigen Gebäudes mit hoher Energieeffizienz, geringen Treibhausgasemissionen, niedrigen Lebenszykluskos…
+    descr   Der Landkreis Regensburg plant den Neubau des Schulgebäudes der Max-Ulrich-von-Drechsel-Realschule Regenstauf, um den steigenden Schülerzahlen gerecht zu werden und die funktionellen sowie baulichen Defizite des bestehenden Gebäudes zu beheben. Der Neubau soll an den bestehenden Mensabau sowie an die Sportstätten angebunden werden. Geplant ist ein nachhaltiges, barrierefreies S
+
+[595676-2026] Germany – Energy and related services – 10021886-Provision of standardised consultancy services for On- & Off-Grid Regulation and Market Development
+    alias   'off-grid'
+    span    [title-proc] …86-Provision of standardised consultancy services for On- & Off-Grid Regulation and Market Development
+    descr   GET.transform, is a technical assistance program supporting national and regional partners and institutions in advancing their energy transitions. GET.transform is a component of the GET.pro (Global Energy Transformation Programme), which is a global multi-donor platform and implemented by Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ) GmbH. The three instruments
+
+[577382-2026] Germany – Architectural, engineering and planning services – Sanierung eines Freizeitbades in Reinbek - Leistungen der Generalplanung
+    alias   'energieeffizienz*'
+    span    [description-lot] …gen sowie die komplexen Anforderungen an Badewassertechnik, Energieeffizienz, Bauphysik und Betriebsorganisation geprägt. Von den Bewerb…
+    descr   Die Stadt Reinbek beabsichtigt die umfassende Sanierung des bestehenden Freizeitbades Reinbek in der Hermann-Körner-Straße 47. Das Freizeitbad wurde in den Jahren 1978/1979 errichtet und stellt eine zentrale Sport-, Bildungs- und Freizeiteinrichtung für die Stadt Reinbek sowie die umliegende Region dar. Das Bad wird jährlich von rund 175.000 Besucherinnen und Besuchern genutzt
+
+
+########## domain_energy_transition  (23 notices) ##########
+
+[608440-2026] Germany – Business development consultancy services – 10040388-Consulting Services for Fostering a Just Transition in the Mexican Industrial Sector
+    alias   'decarbonization'
+    span    [description-proc] …civil society actors to design and implement socially just decarbonization processes in strategic sectors of the Mexican economy, with…
+    descr   The project "Supporting a Just Transition in Mexico" aims to strengthen the capacities of key public, private and civil society actors to design and implement socially just decarbonization processes in strategic sectors of the Mexican economy, with a particular focus in key industrial (incl. industrial parks) and the energy sector. The project is commissioned by the German Fede
+
+[626032-2026] Ireland – Architectural design services – Architect and Building (M and E) Services Engineer Led Design Team Consultancy Services for SEAI Local Authority Energy Pathfinder Programme 2 - Galway County Council
+    alias   'decarbonisation'
+    span    [description-proc] …to collaborate on the delivery of an Energy Efficiency and Decarbonisation Pathfinder Programme for the Local Authority sector (the 'P…
+    descr   The services contract is to provide an Architect and Building (M and E) Services Engineering Led Integrated Design Team Consultancy Services for: The Sustainable Energy Authority of Ireland (SEAI) and the Local Authority have agreed to collaborate on the delivery of an Energy Efficiency and Decarbonisation Pathfinder Programme for the Local Authority sector (the 'Pathfinder').
+
+[609078-2026] Ireland – Project management consultancy services – CFT for a Multi-Party Framework Agreement for the Provision of Energy Retrofit Project Management and Integrated Design Team Services for Energy Efficiency, Sustainability and Decarbonisation at MTU
+    alias   'decarbonisation'
+    span    [title-proc] …ign Team Services for Energy Efficiency, Sustainability and Decarbonisation at MTU
+    descr   The successful Consultants appointed to the Framework may be required to provide a comprehensive range of professional consultancy services to support the planning, design, procurement and delivery of energy efficiency, sustainability and decarbonisation projects across the MTU estate. The services shall be delivered in accordance with applicable legislation, MTU policies and p
+
+[486533-2026] Ireland – Consultative engineering and construction services – Multi-Party Framework Agreement for provision of Engineering Consultancy and PSDP Services for Building Services Projects (2026-2030)
+    alias   'decarbonisation'
+    span    [description-proc] …hese services will be related, but not limited to, building decarbonisation, energy efficiency upgrades, heat pump integration, buildin…
+    descr   Multi-Party Framework Agreement for provision of Engineering Consultancy and PSDP Services for Building Service Projects associated with Civil, Structural, Architectural, Mechanical and Electrical Design Disciplines (2026-2030). To assist in achieving the obligations and targets as indicated above, the Council is now seeking to establish a Framework of suitably competent Engine
+
+[615031-2026] Germany – Other sources of energy supplies and distribution – Stadtwerke Essen AG: EU-weites Vergabeverfahren "Netzkonzept und Wärmenetzoptimierung" (Los 1)
+    alias   'dekarbonisierung*'
+    span    [description-proc] …zentraler Baustein dieses Transformationsprozesses ist die Dekarbonisierung der Wärmeversorgung. Im Gebiet Essen-Überruhr/Burgaltendorf…
+    descr   Die Stadt Essen verfolgt das strategische Ziel, bis spätestens 2045 Klimaneutralität zu erreichen. Ein zentraler Baustein dieses Transformationsprozesses ist die Dekarbonisierung der Wärmeversorgung. Im Gebiet Essen-Überruhr/Burgaltendorf bestehen derzeit ungenutzte Potenziale für die Nutzung erneuerbarer Energiequellen. Der aktuelle Wärmebedarf von ca. 98,6 GWh/a verteilt sich
+
+
+########## domain_hydrogen  (15 notices) ##########
+
+[585315-2026] Germany – Engineering design services for the construction of civil engineering works – Losweise Ausschreibung über Objekt- und Tragwerksplanung für Ingenieurbauwerke Strom (Los 1) sowie Erdgas- und Wasserstoff (Los 2)
+    alias   'wasserstoff*'
+    span    [title-proc] …anung für Ingenieurbauwerke Strom (Los 1) sowie Erdgas- und Wasserstoff (Los 2)
+    descr   Fachlos 1: Objekt- und Tragwerksplanung für Ingenieurbauwerke Strom Fachlos 2: Objekt- und Tragwerksplanung für Ingenieurbauwerke Erdgas- und Wasserstoff
+
+[472903-2026] Germany – Engineering services – H2G Planung Reallabor Wasserstoff
+    alias   'wasserstoff*'
+    span    [title-proc] H2G Planung Reallabor Wasserstoff
+    descr   Dienstleistung zur Planung, Beratung, Genehmigungsvorbereitung sowie Bauleitung eines Reallabors zur Wasserstoffproduktion und -nutzung.
+
+[547488-2026] Germany – Research consultancy services – 10005247 - Green Hydrogen Investments in India
+    alias   'green hydrogen'
+    span    [title-proc] 10005247 - Green Hydrogen Investments in India
+    descr   The project "Green Hydrogen Investments" (GH2I), implemented under the Indo-German Bilateral Development Cooperation by Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ) GmbH on behalf of the German Federal Ministry for Economic Cooperation and Development (BMZ) and Ministry of New and Renewable Energy India (MNRE), contributes to a sustainable and inclusive energy
+
+[602839-2026] France – Energy and related services – Procédure de mise en concurrence portant sur le soutien à la production d’hydrogène renouvelable ou bas-carbone au sens de l’article L.811-1 du code de l’énergie par électrolyse de l’eau
+    alias   'hydrogène'
+    span    [title-proc] …ise en concurrence portant sur le soutien à la production d’hydrogène renouvelable ou bas-carbone au sens de l’article L.811-1 du…
+    descr   Cette procédure, définie par les art. R. 812-1 et suivants du code de l'énergie, a pour objet la sélection des bénéficiaires du dispositif de soutien pour les filières de production d’hydrogène bas-carbone par électrolyse de l'eau ou d'hydrogène renouvelable sur le territoire français. Les modalités d’octroi de l’aide seront précisées dans le cahier des charges établi à l’issue
+
+[572323-2026] Romania – Engineering design services for the construction of civil engineering works – “SERVICII DE PROIECTARE SI ASISTENTA TEHNICA PENTRU INFRASTRUCTURA DIN CAZARMA 2645 BABADAG” - cod proiect: 2021 - C/I – 2645 (proiectare și asistenta tehnica)
+    alias   'H2'
+    span    [description-lot] …2645:OBIECT 1 - AMENAJARE TEREN și DEMOLARE PAVILIOANE HI, H2, H3, H4, L2, L4 și N;OBIECT 2 - CONSTRUIRE PAVILION NOU – C…
+    descr   Durata totală a serviciilor de proiectare este de 38 de luni, defalcate astfel: - durata efectivă de realizare a serviciilor de proiectare de către Antreprenor este de 6 luni de la data menționată în Ordinul de începere a serviciilor de proiectare, conform activităților menționate la punctul 2 din Caiet de sarcini, Etapa I: I.1, I.2, I.3, I.4, I.7; - durata de realizare a sarci
+
+
+====================================================================================================
+PART 3 - EVERY SURFACE WORD BEHIND EACH PREFIX ALIAS
+occurrences, not notices. This is the check on whether a prefix widened a term
+into something it does not mean.
+====================================================================================================
+
+--- energi*  (985 occurrences, 101 forms)
+        7  energi
+       80  energia
+        2  energiaellatas
+        6  energiahatekonysagi
+        3  energiaploki
+        2  energiavirasto
+        2  energiaviraston
+        3  energideklarationer
+      172  energie
+        3  energieadviezen
+        1  energieagentur
+        2  energiearmoede
+        2  energieaudit
+        2  energieaudits
+        3  energieausweis
+        3  energiebedarf
+        1  energiebedrijf
+        1  energiebehoefte
+        1  energieberater
+        5  energieberatung
+        2  energieberatungs
+        4  energiebesparende
+        4  energiebesparing
+       22  energiebilanzierung
+        2  energiecoaching
+        1  energiedaten
+        3  energiedeelplatform
+        2  energiedelen
+        2  energiedienste
+        3  energiediensten
+        2  energiedrehscheibe
+        3  energieeffizienten
+       13  energieeffizienz
+        1  energieeffizienzexperte
+        1  energieeinsparpotentiale
+        1  energieeinsparpotenzial
+        1  energieeinsparung
+        2  energieerzeugung
+        1  energieerzeugungsanlagen
+        3  energieforschung
+        2  energiegemeenschappen
+        1  energiei
+        1  energieinfrastruktur
+        1  energieintensiver
+        2  energieklusdienst
+        1  energiekonzept
+        2  energiekosten
+        1  energiekostenreduzierung
+        3  energiekrise
+        1  energielabel
+        3  energielabels
+        1  energieleitlinien
+        1  energieliefer
+        1  energiemaatschappij
+        1  energiemanagement
+        3  energiemanagementsystem
+       13  energien
+        2  energieoptimierungsgutachten
+        3  energieopwekking
+        5  energiepark
+        1  energieparks
+        2  energiepartner
+        2  energieplannen
+        1  energiepolitische
+        1  energiepolitischer
+        1  energieprijzen
+        4  energiequellen
+        1  energierekening
+       18  energies
+        1  energiescans
+        1  energiespeichern
+        1  energiestromen
+        8  energiesysteem
+        5  energiesystemen
+        3  energiesystemmodellierung
+        4  energietrager
+        1  energietragerverteilungen
+        3  energietransitie
+        1  energieverbrauchs
+        4  energieverbruik
+        1  energieverbund
+        1  energieverbundes
+        1  energieversor
+        8  energieversorgung
+        3  energieversorgungskonzepts
+        1  energieversorgungsunternehmen
+        2  energievoorziening
+        5  energiewende
+        1  energiewirtschaft
+        3  energiewirtschaftliche
+       13  energiezentrale
+        2  energiezuinige
+      433  energii
+        4  energije
+        2  energijom
+        2  energikartlaggning
+        2  energiledningssystem
+        4  energimarknadsinspektionen
+        8  energinet
+        2  energiovervagning
+        2  energipositivt
+
+--- photovolta*  (38 occurrences, 5 forms)
+        9  photovoltaik
+        8  photovoltaikanlage
+        4  photovoltaikanlagen
+        1  photovoltaikpotenzial
+       16  photovoltaiques
+
+--- fotowolta*  (202 occurrences, 6 forms)
+       15  fotowoltaiczna
+       16  fotowoltaiczne
+       68  fotowoltaicznej
+       99  fotowoltaicznych
+        1  fotowoltaika
+        3  fotowoltaiki
+
+--- fotovolta*  (26 occurrences, 5 forms)
+        3  fotovoltaica
+        3  fotovoltaicas
+        4  fotovoltaicka
+        2  fotovoltaicke
+       14  fotovoltaickych
+
+--- energieeffizienz*  (14 occurrences, 2 forms)
+       13  energieeffizienz
+        1  energieeffizienzexperte
+
+--- wasserstoff*  (21 occurrences, 3 forms)
+       19  wasserstoff
+        1  wasserstoffproduktion
+        1  wasserstoffs
+
+--- dekarbonisierung*  (10 occurrences, 3 forms)
+        7  dekarbonisierung
+        2  dekarbonisierungspfad
+        1  dekarbonisierungsszenario
+
+--- wärmenetz*  (31 occurrences, 5 forms)
+       11  warmenetz
+        6  warmenetze
+        8  warmenetzes
+        1  warmenetzkomponenten
+        5  warmenetzoptimierung
+
+--- umspannwerk*  (10 occurrences, 5 forms)
+        3  umspannwerk
+        2  umspannwerke
+        1  umspannwerken
+        1  umspannwerkes
+        3  umspannwerks
+
+
+====================================================================================================
+PART 4 - EVERY OCCURRENCE OF THE SHORT ACRONYMS, IN CONTEXT
+Not every occurrence produces a match: a rule counts once per notice, and CO2,
+CCS on this rule set and SAF carry context requirements.
+====================================================================================================
+
+--- H2  (5 occurrences)
+  [472903-2026] Germany – Engineering services – H2G Planung Reallabor Wasserstoff
+      ...Die Hochschule Reutlingen beabsichtigt im Rahmen des laufenden Projektes "H2-Grid" den Aufbau eines Reallabors zur Herstellung und Nutzung von Wasserstoff....
+  [490197-2026] Romania – Engineering design services for the construction of civil engineering works – 
+      ...roiect: 2021 - C/I - 2645:OBIECT 1 - AMENAJARE TEREN și DEMOLARE PAVILIOANE HI, H2, H3, H4, L2, L4 și N;OBIECT 2 - CONSTRUIRE PAVILION NOU – CĂMIN MILITAR DE UNIT...
+  [490615-2026] Norway – Procurement consultancy services – Consultancy services within public procureme
+      ...H2. Senior: Procurement manager. The contracting authority needs 4 resources. See...
+  [567045-2026] Romania – Engineering design services for the construction of civil engineering works – 
+      ...roiect: 2021 - C/I - 2645:OBIECT 1 - AMENAJARE TEREN și DEMOLARE PAVILIOANE HI, H2, H3, H4, L2, L4 și N;OBIECT 2 - CONSTRUIRE PAVILION NOU – CĂMIN MILITAR DE UNIT...
+  [572323-2026] Romania – Engineering design services for the construction of civil engineering works – 
+      ...roiect: 2021 - C/I - 2645:OBIECT 1 - AMENAJARE TEREN și DEMOLARE PAVILIOANE HI, H2, H3, H4, L2, L4 și N;OBIECT 2 - CONSTRUIRE PAVILION NOU – CĂMIN MILITAR DE UNIT...
+
+--- CO2  (33 occurrences)
+  [617948-2026] Germany – Architectural, engineering and planning services – Friedrich-Ebert-Schule Trag
+      ...elen. Dies umfasst Materialwahl, Energie- und Flächeneffizienz, Minimierung der CO2-Emissionen und Klimawandelanpassung, räumliche Flexibilität und baulich-gestalt...
+  [619162-2026] Germany – Architectural, engineering and planning services – Dynamisches Beschaffungssys
+      ...ilanzierung und Lebenszyklusbewertung – Vergleich von Varianten, Berechnung von CO2- Einsparungen, Lebenszykluskosten und Umweltwirkungen sowie Dokumentation für n...
+  [619162-2026] Germany – Architectural, engineering and planning services – Dynamisches Beschaffungssys
+      ...ilanzierung und Lebenszyklusbewertung – Vergleich von Varianten, Berechnung von CO2 Einsparungen, Lebenszykluskosten und Umweltwirkungen sowie Dokumentation für na...
+  [625345-2026] Belgium – Feasibility study, advisory service, analysis – Raamovereenkomst Studies
+      ...re energie, fossielvrije warmteopwekking en een aantoonbare vermindering van de CO₂-uitstoot ten opzichte van de referentiesituatie. Bij het ontwerp mag eveneens c...
+  [450191-2026] Denmark – Services related to the oil and gas industry – Gas Storage Denmark: Onshore In
+      ...ojects. In the upcoming years GSD will evaluate if projects and works involving CO2 and/or hydrogen storage will be pursued. The value of each lot is stated below....
+  [484189-2026] Germany – Architectural, construction, engineering and inspection services – TNW_ELT_Lan
+      ...Augenmerk auf Aufenthaltsqualität, dem Einsatz von Holz als Baustoff und einer CO2-neutralen Energieversorgung. Es werden stufenweise die Grundleistungen der Leis...
+  [484189-2026] Germany – Architectural, construction, engineering and inspection services – TNW_ELT_Lan
+      ...Augenmerk auf Aufenthaltsqualität, dem Einsatz von Holz als Baustoff und einer CO2-neutralen Energieversorgung. Im Zuge der ursprünglich angedachten Generalsanier...
+  [494007-2026] Romania – Afforestation services – Servicii de împădurire proiectare, asistență tehnică 
+      ...e traversate de obiectivul de investiții, cu scopul de a neutraliza emisiile de CO2 produse de traficul rutier rezultate urmare a realizării proiectului de infrast...
+  [496917-2026] Netherlands – Supply services of personnel including temporary staff – Inhuur van specia
+      ...ibel inhuren van specialisten met kennis op het vlak van: • Energiebesparing; • CO2-reductie; • Verlaging milieudruk/circulaire economie; • Duurzame energieopwekki...
+  [496917-2026] Netherlands – Supply services of personnel including temporary staff – Inhuur van specia
+      ...ibel inhuren van specialisten met kennis op het vlak van: • Energiebesparing; • CO2-reductie; • Verlaging milieudruk/circulaire economie; • Duurzame energieopwekki...
+  [496917-2026] Netherlands – Supply services of personnel including temporary staff – Inhuur van specia
+      ...ibel inhuren van specialisten met kennis op het vlak van: • Energiebesparing; • CO2-reductie; • Verlaging milieudruk/circulaire economie; • Duurzame energieopwekki...
+  [498359-2026] Netherlands – Energy-efficiency consultancy services – Energiescans
+      ...energieadviezen en procesbegeleiding met als doel CO2 reductie...
+  [498359-2026] Netherlands – Energy-efficiency consultancy services – Energiescans
+      ...energieadviezen en procesbegeleiding met als doel CO2 reductie...
+  [516239-2026] Germany – Technical assistance services – 10019362-Appui à l'adaptation de la chaîne d'a
+      ...events. Implementation will adhere to predefined expert deployment, travel with CO2 minimising choices and compensation, fixed budgets for materials and workshops,...
+  [547488-2026] Germany – Research consultancy services – 10005247 - Green Hydrogen Investments in India
+      ...42% of industrial GHG emissions, is well-suited to save significant amounts of CO2 and make an effective contribution to climate protection. The technical coopera...
+  [563326-2026] Germany – Engineering studies – Konzeptstudie „Errichtung von Infrastruktur für den Eins
+      ...Erfurt – Würzburg sowie Eisenach – Neuhaus a. Rwg. den Einsatz insbesondere von CO2-neutralen Triebfahrzeugen mit alternativen Antriebstechnologien. Für einen Eins...
+  [563326-2026] Germany – Engineering studies – Konzeptstudie „Errichtung von Infrastruktur für den Eins
+      ...Erfurt – Würzburg sowie Eisenach – Neuhaus a. Rwg. den Einsatz insbesondere von CO2-neutralen Triebfahrzeugen mit alternativen Antriebstechnologien. Für einen Eins...
+  [565418-2026] Netherlands – Energy-efficiency consultancy services – Advies en activering van woningei
+      ...n schokken in de energieprijzen. Het is ook van belang voor het beperken van de CO2-uitstoot, het realiseren van de energietransitie, verbeteren van de luchtkwalit...
+  [570635-2026] Belgium – Custom software development services – Marktconsultatie "Digital Twin voor lok
+      ...outekeuze, vervoerswijzekeuze, congestie, voertuigkilometers, luchtkwaliteit en CO₂-uitstoot te analyseren. Deze uitdaging omvat meer dan één softwaretoepassing. Z...
+  [583081-2026] Germany – Energy-efficiency consultancy services – LVR-Klinik Viersen, Transformationspl
+      ...agenstandort 3. Soll-Analyse des Wärmenetzes (inkl. Primärenergieeinsparung und CO2-Einsparung) Im Rahmen der Soll-Analyse sollen dieselben Parameter wie in der Is...
+  [583081-2026] Germany – Energy-efficiency consultancy services – LVR-Klinik Viersen, Transformationspl
+      ...er Wärmeerzeugung, Primärenergieeinsparungen (Vergleich Ist- und Soll-Zustand), CO2-Einsparungen (Vergleich Ist- und Soll-Zustand) 4. Ermittlung eines Kostenrahmen...
+  [583081-2026] Germany – Energy-efficiency consultancy services – LVR-Klinik Viersen, Transformationspl
+      ...erbarkeit des Vorhabens • Priorisierung der Maßnahmen nach: Wirtschaftlichkeit, CO2-Minderung, technischer Umsetzbarkeit, Investitionsbedarf. 5. Erstellung eines Z...
+  [593436-2026] Poland – Project-management services other than for construction work – „INŻYNIER KONTRA
+      ...LANIE BIOMASY NA BLOKACH KLASY 500 MWE W CELU OGRANICZENIA EMISJI PONIŻEJ 550 G CO2/KWH””...
+  [593436-2026] Poland – Project-management services other than for construction work – „INŻYNIER KONTRA
+      ...LANIE BIOMASY NA BLOKACH KLASY 500 MWE W CELU OGRANICZENIA EMISJI PONIŻEJ 550 G CO2/KWH”” Szczegółowy zakres przedmiotu zamówienia został określony w Części II SWZ...
+  [593436-2026] Poland – Project-management services other than for construction work – „INŻYNIER KONTRA
+      ...LANIE BIOMASY NA BLOKACH KLASY 500 MWE W CELU OGRANICZENIA EMISJI PONIŻEJ 550 G CO2/KWH”” - Szczegółowy opis przedmiotu zamówienia został określony w Części II SWZ...
+  [594575-2026] Belgium – Architectural and related services – Selectieleidraad in het kader van de opma
+      ...de opdrachtgever het Researchpark Zellik (RPZ) herontwikkelen tot een duurzame, CO2-neutrale onderzoeks- en innovatiecluster voor kennisintensieve bedrijven. Daarb...
+  [594575-2026] Belgium – Architectural and related services – Selectieleidraad in het kader van de opma
+      ...de opdrachtgever het Researchpark Zellik (RPZ) herontwikkelen tot een duurzame, CO2-neutrale onderzoeks- en innovatiecluster voor kennisintensieve bedrijven. Daarb...
+  [599375-2026] Germany – Environmental engineering consultancy services – Gutachterliche Überwachung de
+      ...rd über insgesamt 15 Brunnen entnommen, mit Sauerstoff versetzt, gereinigt, mit CO2 versetzt und über insgesamt 37 Infiltrationsbrunnen wieder versickert. Der Betr...
+  [606105-2026] Germany – Engineering design services – Schöpfwerk Niendorf - Ersatzneubau
+      ...e Lebenszykluskosten und Klimawirkung mit zu berücksichtigen, insbesondere sind CO2-Schattenpreise zu ermitteln. Hierbei sind auch die Vorgaben des Niedersächsisch...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...ket to identify suppliers who can offer carbon capture and permanent storage of CO2 as a service (CCS as a service). The deadline for input is 30 September 2026. I...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...facilities, as well as managing the transport and permanent storage of captured CO2 from the Trehørningen energy center. Eidsiva Bioenergi procures in such a model...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...rocures in such a model a service connected to capture and permanent storage of CO2 based on further agreed commercial and technical terms. The tenderer is require...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...enderer is required to handle the downstream value chain for storing biogeneous CO2, including the sale of CDR (carbon removal credits)....
+
+--- CCS  (7 occurrences)
+  [494002-2026] Spain – Project management consultancy services – La prestación del servicio de Oficina 
+      ...La prestación del servicio de Oficina Técnica para apoyar al CCS, en la implantación del Proyecto ODIN —Optimización y Digitalización Integral d...
+  [494002-2026] Spain – Project management consultancy services – La prestación del servicio de Oficina 
+      ...La prestación del servicio de Oficina Técnica para apoyar al CCS, en la implantación del Proyecto ODIN —Optimización y Digitalización Integral d...
+  [494002-2026] Spain – Project management consultancy services – La prestación del servicio de Oficina 
+      ...La prestación del servicio de Oficina Técnica para apoyar al CCS, en la implantación del Proyecto ODIN —Optimización y Digitalización Integral d...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...Request for Information (RFI) - CCS as a service...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...their own emissions by 60%. As a part of this work, carbon capture and storage (CCS) at Eidsiva Bioenergis waste incineration plant at Trehørningen energy centre o...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...ppliers who can offer carbon capture and permanent storage of CO2 as a service (CCS as a service). The deadline for input is 30 September 2026. In this context, "C...
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      ...S as a service). The deadline for input is 30 September 2026. In this context, "CCS as a service" refers to the business model in which the supplier assumes respon...
+
+--- SAF  (5 occurrences)
+  [547488-2026] Germany – Research consultancy services – 10005247 - Green Hydrogen Investments in India
+      ...icularly important for energy-intensive industrial sectors, such as the iron, e-SAF and fertilizer industry among others, which cannot be efficiently and cost-effe...
+  [547488-2026] Germany – Research consultancy services – 10005247 - Green Hydrogen Investments in India
+      ...icularly important for energy-intensive industrial sectors, such as the iron, e-SAF and fertilizer industry among others, which cannot be efficiently and cost-effe...
+  [547488-2026] Germany – Research consultancy services – 10005247 - Green Hydrogen Investments in India
+      ...rs support through studies in the space of green ports, green iron and steel, e-SAF and green public procurement. The assignment provides the project also with ten...
+  [547488-2026] Germany – Research consultancy services – 10005247 - Green Hydrogen Investments in India
+      ...Indo-German Energy Partnership and India's National Green Hydrogen Mission - e-SAF Regulatory Readiness Framework, e.g. covering the development of a regulatory f...
+  [547488-2026] Germany – Research consultancy services – 10005247 - Green Hydrogen Investments in India
+      ...latory framework for the production, certification, accounting, and export of e-SAF in India, aligned with international requirements as ReFuelEU Aviation Regulati...
+
+--- BESS  (6 occurrences)
+  [497122-2026] Germany – Engineering services – Planungsleistungen Elektrotechnik Haus Aden für die RAG
+      ...nlagen (WEA) - 2 Photovoltaik-Freiflächenanlagen (PV) - Batteriespeichersystem (BESS) Hierzu ist die vollständige Planung und Realisierungsbegleitung des 110-kV-Net...
+  [550587-2026] Germany – Electrical wiring and fitting work – Südbaden - Energiepark
+      ...tionen Jeweils ca. 5 MVA / 0,8 kV Batteriespeicher Anzahl in Abstimmung mit dem BESS-Lieferanten Ausstattung Mittelspannungsschaltanlage Ringfelder Messfelder Schut...
+  [574262-2026] Czechia – Solar photovoltaic modules – Rámcová dohoda – Dodávky a instalace FVE, FVE s a
+      ...Rámcová dohoda – Dodávky a instalace FVE, FVE s akumulací a samostatně stojící BESS...
+  [574262-2026] Czechia – Solar photovoltaic modules – Rámcová dohoda – Dodávky a instalace FVE, FVE s a
+      ...akumulace nebo s akumulací a dodávky samostatně stojících bateriových úložišť (BESS) na střechách budov, v budovách nebo na pozemcích ve vlastnictví města Mladá Bo...
+  [597259-2026] Germany – Energy and related services – Präqualifikationsverfahren für Großbatteriespeic
+      ...Verfahren zugrunde liegenden Leistungsbeschreibungen für Großbatteriespeicher (BESS) - Projektentwicklung, EPC-Errichtung sowie Betrieb und Wartung (O&M) vollumfän...
+  [597259-2026] Germany – Energy and related services – Präqualifikationsverfahren für Großbatteriespeic
+      ...Partnerunternehmen (Beteiligungsunternehmen) der Thüga-Gruppe die Möglichkeit, BESS Projekte vollständig durch präqualifizierte EPC-Dienstleister realisieren zu la...
+
+
+====================================================================================================
+PART 5 - EVERY GRID MATCH
+The 'a ventilation contract reads as grid work' check. HVAC and HV carry context
+requirements and matched nothing at all.
+====================================================================================================
+  [614160-2026] Germany – Engineering services – Qualifizierungssystem Sanierung von Umspannwerke
+      alias 'umspannwerk*' :: Qualifizierungssystem Sanierung von Umspannwerke
+  [454915-2026] Greece – Environmental impact assessment for construction – ENVIRONMENTAL IMPACT ASSESSMENT (EIA) STUDY FOR TH
+      alias 'interconnector' :: …y for the 2.13-ELEG-S-M-25-GREGY STUDIES Project. The GREGY Interconnector is a Project of Mutual Interest (PMI) and a strategic elect…
+  [464758-2026] Germany – Electrical installation work – Elektrotechnische Leistungen in 220-/380-kV-Umspannwerken / Electrote
+      alias 'umspannwerk*' :: Elektrotechnische Leistungen in 220-/380-kV-Umspannwerken / Electrotechnical Works in 220-/380-kV Substations
+  [473083-2026] Germany – Electrical power systems design services – Market Consultation - Questionnaire on the Further Develo
+      alias 'HVDC' :: …Consultation - Questionnaire on the Further Development of HVDC Multiterminal Systems towards Multi-Vendor
+  [498146-2026] Belgium – Energy-efficiency consultancy services – Secretariat of the Clean Energy for EU Islands Initiative
+      alias 'electrification' :: …decarbonisation pathways with particular emphasis on broad electrification of energy demand and increased deployment of renewable ener…
+  [507629-2026] Germany – Energy and related services – 10016508-Appui à la transition énergétique au Sénégal (PED III)
+      alias 'electrification' :: …énergies renouvelables (ANER), the Agence sénégalaise de l'électrification rurale (ASER), the Commission de régulation du secteur de l…
+  [523981-2026] Ireland – Marine construction works – 26/034 - A Qualification System for the provision of Engineering, Procur
+      alias 'grid connection' :: …nting system • Pipeline and pig traps • A high pressure gas grid connection pipeline 600mm diameter around 900m in length • A connectio…
+  [524194-2026] Netherlands, United Kingdom – Engineering services – EU-400 Engineeringsdiensten Technical & Spatial Services
+      alias 'high voltage' :: …sactiviteiten. EN TenneT is facing a major expansion of the high-voltage grid. Within the EU‑400 program for Engineering Services –…
+  [535267-2026] Germany – Shipping operations – Preliminary Market Consultation – Compact SOV / Walk-to-Work offshore logistic
+      alias 'substation' :: …or the operation and maintenance (O&M) of the ONAS offshore substation platforms in the German Baltic Sea
+  [550587-2026] Germany – Electrical wiring and fitting work – Südbaden - Energiepark
+      alias 'umspannwerk*' :: …iflächen-Photovoltaik, Agri-Photovoltaik, Batteriespeicher, Umspannwerk, Logistikkoordination und zugehöriger elektrischer Infrastr…
+  [553375-2026] Germany – Electrical power systems design services – Elektroplanungsleistungen für die Errichtung eines Umspan
+      alias 'umspannwerk*' :: Elektroplanungsleistungen für die Errichtung eines Umspannwerks
+  [568570-2026] Germany – Engineering services – Technische Projekt- und Ingenieursleistungen
+      alias 'umspannwerk*' :: …cherung und -kontrolle sowie Teilprojektleitung Freileitung/Umspannwerk. Ziel der Ausschreibung ist der Abschluss von mehreren Rahm…
+  [586506-2026] France – Feasibility study, advisory service, analysis – ETUDES POUR RESEAUX D'ELECTRIFICATION, DE RACCORDEMEN
+      alias 'electrification' :: ETUDES POUR RESEAUX D'ELECTRIFICATION, DE RACCORDEMENT ELECTRIQUES ET ECLAIRAGE PUBLIC
+  [595676-2026] Germany – Energy and related services – 10021886-Provision of standardised consultancy services for On- & Off-
+      alias 'electrification' :: …productive-use projects. Support activities may include: - Electrification Planning and Siting: Support governments in developing inte…
+
+
+====================================================================================================
+PART 6 - SUPPORTING TERMS, FIRST SIX NOTICES PER ALIAS
+Supporting strength establishes no domain and changes no route. It is still shown
+as evidence, which is why what it matches on matters.
+====================================================================================================
+
+--- cable
+  [454915-2026] Greece – Environmental impact assessment for construction – ENVIRONMENTAL IMPACT ASSESSMENT (EIA) STUDY F
+      :: …e between Egypt and Greece, including submarine and onshore cable systems and associated facilities. The associated project,…
+
+--- carbon
+  [494007-2026] Romania – Afforestation services – Servicii de împădurire proiectare, asistență tehnică din partea proiec
+      :: …luării atmosferice prin sechestrarea emisiilor de dioxid de carbon (pădurea este cea mai importantă formă de vegetaţie capabil…
+  [514139-2026] Belgium – Research and development services and related consultancy services – The development and analys
+      :: …view to contributing to the environmental integrity of the carbon credits generated under this framework.
+  [515329-2026] Finland – Research and development services and related consultancy services – Nanomaterial Risk Assessme
+      :: …based on a limited set of information covering metallic and carbon-based nanomaterials. The present contract aims at refining…
+  [588536-2026] Romania – Construction supervision services – Servicii de supervizare a lucrărilor și Servicii de consult
+      :: …general al proiectului îl reprezintă reducerea emisiilor de carbon în municipiile reședință de județ prin investiții bazate pe…
+  [597218-2026] Germany – Financial consultancy services – 10021232 - Supporting the Financial Institutions Green Transit
+      :: …re that future capital flows genuinely support Jordan"s low-carbon, climate-resilient transition. Against this backdrop, the D…
+  [626265-2026] Norway – Environmental services – Request for Information (RFI) - CCS as a service
+      :: …reduce their own emissions by 60%. As a part of this work, carbon capture and storage (CCS) at Eidsiva Bioenergis waste incin…
+
+--- climate
+  [507459-2026] Germany – Business and management consultancy and related services – 10020688-Mitigation of Human - Wildl
+      :: …g settlement and agricultural expansion, livestock grazing, climate stress, and weak coordination between relevant institutions…
+  [519866-2026] Luxembourg – Technical assistance services – Climate Action and Sustainability for Corporate
+      :: Climate Action and Sustainability for Corporate
+  [520323-2026] Ireland – Research and development consultancy services – Consultancy in Genetic Genomic breeding program
+      :: …tion and deployment of individual animal sustainability and climate orientated metrics and their integration into breeding prog…
+  [520425-2026] Ireland – Environmental engineering consultancy services – Donegal County Council -The Two Rivers - Catch
+      :: …l County Council -The Two Rivers - Catchment, Community and Climate Project, Carndonagh, Co. Donegal
+  [530183-2026] Germany – Business and management consultancy services – 10004007_1-Provision of Technical Expert Support
+      :: 10004007_1-Provision of Technical Expert Support on Climate Change Adaptation and Climate Finance in Central and West A…
+  [535615-2026] Ireland – Professional services for the gas industry – Gas and Electricity Infrastructure Technical Servi
+      :: …n in-depth analysis of the progress achieved, including for climate tracking, and that they are collected efficiently, effectiv…
+
+--- energi*
+  [613579-2026] Slovakia – Electricity – Dodávka elektrickej energie 2027 – 2028
+      :: Dodávka elektrickej energie 2027 – 2028
+  [614114-2026] France – Feasibility study, advisory service, analysis – Etude Marchés et emplois concourant à la transit
+      :: …6 avec les objectifs de la programmation pluriannuelle de l'énergie (PPE) et /ou de la stratégie nationale bas carbone (SNBC).
+  [614713-2026] Romania – Feasibility study, advisory service, analysis – Servicii de elaborarea a documentație de avizar
+      :: …populate, alimentarea cu apa a industriilor, producerea de energie electrica, alte folosințe. Funcțiile actuale ale obiectivu…
+  [614730-2026] Germany – Technical analysis or consultancy services – Stadtwerke Essen AG: EU-weites Verfahren "Technisc
+      :: …derzeit ungenutzte Potenziale für die Nutzung erneuerbarer Energiequellen. Der aktuelle Wärmebedarf von ca. 98,6 GWh/a vertei…
+  [615031-2026] Germany – Other sources of energy supplies and distribution – Stadtwerke Essen AG: EU-weites Vergabeverfa
+      :: …derzeit ungenutzte Potenziale für die Nutzung erneuerbarer Energiequellen. Der aktuelle Wärmebedarf von ca. 98,6 GWh/a vertei…
+  [615945-2026] France – Electrical power systems design services – Maîtrise d'oeuvre pour les travaux de renforcement, e
+      :: …ssement et extension des réseaux de distribution publique d’énergie électrique, du réseau d’éclairage public et génie civil du…
+
+--- energy
+  [628473-2026] Norway – Energy-efficiency consultancy services – Consultancy services when Enova SF ́s new response serv
+      :: …he additional costs that the market incurs by choosing more energy- and climate-friendly solutions, Enova shall contribute to…
+  [449464-2026] Ireland – Advisory and consultative engineering services – The provision of Technical and Regulatory Cons
+      :: …ion of Technical and Regulatory Consultancy Support for Gas Energy Safety
+  [457580-2026] Ireland – Energy and related services – Energy Master Plan - Murrintown
+      :: Energy Master Plan - Murrintown
+  [459160-2026] Ireland – Energy and related services – Energy Master Plan - Killanne Union of Parishes
+      :: Energy Master Plan - Killanne Union of Parishes
+  [476162-2026] Ireland – Energy and related services – A FRAMEWORK OF SPECIALIST SERVICE PROVIDERS FOR THE AWARD OF SERV
+      :: …ERS FOR THE AWARD OF SERVICES CONTRACTS SERVING A STATEWIDE ENERGY CONSERVATION INITIATIVE IN CENTRAL GOVERNMENT AND PUBLIC SE…
+  [476229-2026] Ireland – Energy and related services – A FRAMEWORK OF SPECIALIST SERVICE PROVIDERS FOR THE AWARD OF SERV
+      :: …ERS FOR THE AWARD OF SERVICES CONTRACTS SERVING A STATEWIDE ENERGY CONSERVATION INITIATIVE IN CENTRAL GOVERNMENT AND PUBLIC SE…
+
+--- environment
+  [617674-2026] Norway – Research and development services and related consultancy services – Evaluation of the SLT model
+      :: …scheme, which shall be outsited to an external professional environment.
+  [453075-2026] Luxembourg – Technical assistance services – Innovation and Digitalisation Advisory Programme
+      :: …The capacity building programme aims to create an enabling environment so that financing providers can adapt and/or further streng…
+  [453213-2026] Norway – Research and development services and related consultancy services – Research on introduction of
+      :: …e organisation, the National Police Agency wants a research environment to carry out action research, or other type of follow-up re…
+  [457621-2026] Ireland – Information technology services – Request for Tender for the Provision of Chief Information Sec
+      :: …e required to support An Coimisiún in ensuring that its ICT environment, information security arrangements and cyber security pract…
+  [461103-2026] Ireland – Oceanography and hydrology services – Multi-disciplinary Consultancy Services for EPA Abstracti
+      :: Following the enactment of the Water Environment (Abstractions and Associated Impoundments) Act 2022 and the…
+  [463505-2026] Netherlands – Business and management consultancy services – Framework Contract for Technical Assistance 
+      :: …trengthening This component aims to strengthen the enabling environment and institutional readiness required to scale inclusive fin…
+
+--- fuel
+  [561061-2026] Finland – Research and development services and related consultancy services – Subcontracted inspections 
+      :: Subcontracted inspections of fuel samples
+  [590970-2026] Norway – Systems and technical consultancy services – Procurement of consultancy services for nuclear sec
+      :: …ancy services for nuclear security, including handling used fuel, radiation protection and risk assessment.
+
+--- power
+  [471020-2026] Romania – Evaluation consultancy services – Servicii de evaluare a progresului implementarii Programului 
+      :: …ea unei prezentari a raportului de evaluare final in format power point si sustinerea acesteia in sedinta CM de dupa acceptan…
+  [516239-2026] Germany – Technical assistance services – 10019362-Appui à l'adaptation de la chaîne d'approvisionnement 
+      :: …rent; services are narrow, networks are weak and bargaining power with buyers is limited. The project is organized in four co…
+  [523981-2026] Ireland – Marine construction works – 26/034 - A Qualification System for the provision of Engineering, P
+      :: …the existing natural gas network • Utility connections for power, water and telecom • Integration with the FSRU • Onshore te…
+  [538260-2026] Germany – Drilling services – Reallabor Rheinland - Erkundungsbohrung Weisweiler R1 Ausschreibung einer B
+      :: …zur Verfügung. Auf dem Kraftwerksgelände Weisweiler der RWE Power AG bei Eschweiler nahe Aachen soll eine etwa 3140 m tiefe,…
+  [541548-2026] Finland – IT services: consulting, software development, Internet and support – ICT-asiantuntijapalveluid
+      :: …ijapalvelut 10. Microsoft Dynamics asiantuntijapalvelut 11. Power Platform asiantuntijapalvelut 12. Perus ICT-asiantuntijapal…
+  [587502-2026] Norway – Design consultancy services – P 01-26 Prequalification - Knowledge power - decision support for 
+      :: P 01-26 Prequalification - Knowledge power - decision support for Norwegian municipalities.

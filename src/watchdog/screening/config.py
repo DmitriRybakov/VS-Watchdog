@@ -146,6 +146,12 @@ class Rule(BaseModel):
     # asks what the notice is about. Used to stop a term that names how a service
     # is priced or staffed from archiving a notice on its own.
     requires_companion: list[str] = Field(default_factory=list)
+    # The mirror of requires_companion: words that stop this rule counting at all
+    # when they appear anywhere in the notice. For the case a companion cannot
+    # express - the word is genuinely there, and the notice is still about
+    # something else. "Energieeffizienz" in a school's design brief is the case
+    # this exists for; the measurement is in docs/eval/2026-09-12-domain-matches.md.
+    blocked_by: list[str] = Field(default_factory=list)
     fields: list[str] = Field(default_factory=lambda: ["title", "description"])
     active: bool = True
     # Why this rule exists, in plain language. Data, not a comment, so it survives
@@ -160,7 +166,9 @@ class Rule(BaseModel):
             raise ValueError("a rule needs an id")
         return identifier
 
-    @field_validator("aliases", "requires_context", "requires_companion", mode="before")
+    @field_validator(
+        "aliases", "requires_context", "requires_companion", "blocked_by", mode="before"
+    )
     @classmethod
     def _clean_terms(cls, value: Any) -> Any:
         """Drop blanks and duplicates, keeping the order they were written in."""
@@ -212,11 +220,11 @@ class Rule(BaseModel):
 
     @model_validator(mode="after")
     def _check_prefixes(self) -> Rule:
-        for term in self.requires_context + self.requires_companion:
+        for term in self.requires_context + self.requires_companion + self.blocked_by:
             if PREFIX_MARKER in term:
                 raise ValueError(
                     f"rule {self.id!r}: {term!r} - a prefix marker is only allowed on an alias, "
-                    "not on a context or companion word"
+                    "not on a context, companion or blocking word"
                 )
 
         for alias in self.aliases:
@@ -311,6 +319,7 @@ def _rule_to_dict(rule: Rule) -> dict[str, Any]:
         "aliases": list(rule.aliases),
         "requires_context": list(rule.requires_context),
         "requires_companion": list(rule.requires_companion),
+        "blocked_by": list(rule.blocked_by),
         "fields": list(rule.fields),
         "active": rule.active,
         "note": rule.note,

@@ -1,6 +1,12 @@
 # Deterministic screening rules: vocabulary, aliases, required context words, CPV codes.
 # Seeds the config_version table.
 #
+# FROZEN AT VERSION 3 until the step 10 audit. Step 7 tunes a scoring policy against this
+# vocabulary, and a vocabulary that moves underneath it makes every distribution change
+# ambiguous. Two exceptions only: a rule that crashes or corrupts, and a false positive at
+# HIGH strength, which distorts a score directly. Everything else goes on the outstanding
+# list in docs/decisions/README.md and waits for human review decisions to judge it against.
+#
 # READ THIS BEFORE EDITING.
 #
 # A rule is one canonical concept with its aliases, not a flat keyword list. Aliases are
@@ -27,6 +33,15 @@
 # applies to every alias in its rule, which is why an ambiguous acronym gets a rule of its
 # own beside the plain-language rule it belongs to.
 #
+# requires_companion: subject words that must appear SOMEWHERE in the notice - any block, no
+# proximity window - before the rule counts at all. A different question from
+# requires_context: that one asks what an ambiguous word means in one sentence, this one asks
+# what the notice is about.
+#
+# blocked_by: the mirror. Words that stop a rule counting when they appear anywhere in the
+# notice, for the case a companion cannot express - the term is genuinely there and the
+# notice is still about something else. "Energieeffizienz" in a school's design brief.
+#
 # note: is data, not a comment, so a justification survives the settings page rewriting this
 # file. Corpus figures in the notes are counts of notices, from the 2,158 TED notices
 # ingested for 1 July - 11 September 2026, measured on the screening blocks.
@@ -39,7 +54,7 @@
 # companion word: a prefix widens recall on a domain term and widens archiving everywhere
 # else, and those are opposite risks. See docs/decisions/0006.
 
-version: 2
+version: 3
 updated: 2026-09-12
 owner: Entr Advisory & Decision Support
 
@@ -82,7 +97,6 @@ rules:
       - hydrogen
       - green hydrogen
       - blue hydrogen
-      - H2
       - electrolyser
       - electrolyzer
       - electrolysis
@@ -99,11 +113,18 @@ rules:
     fields: [title, description]
     active: true
     note: >-
-      H2 is safe on a token boundary: it does not fire inside H2O or H2G. The native forms
-      earn their place - 623022-2026, the Baden-Wuerttemberg electrolysis funding programme,
-      says "Elektrolyse" and "Wasserstoff" and no English word for either. power-to-x sits
-      here rather than among the medium terms because a PtX notice is a hydrogen notice.
-      The prefixes cover Wasserstoffinfrastruktur and Elektrolyseanlage, not Gruenwasserstoff.
+      The native forms earn their place - 623022-2026, the Baden-Wuerttemberg electrolysis
+      funding programme, says "Elektrolyse" and "Wasserstoff" and no English word for either.
+      power-to-x sits here rather than among the medium terms because a PtX notice is a
+      hydrogen notice. The prefixes cover Wasserstoffinfrastruktur and Elektrolyseanlage, not
+      Gruenwasserstoff.
+
+      "H2" was REMOVED on 2026-09-12. It occurred five times in ten weeks and four of those
+      were document labels: pavilions "HI, H2, H3, H4" in a Romanian barracks design notice
+      (490197, 567045, 572323) and a resource table row "H2. Senior: Procurement manager"
+      (490615). The one real case, 472903-2026, matches wasserstoff* anyway, so the alias had
+      never contributed a match we needed. A context requirement would have kept a term that
+      earns nothing; removing it is cheaper and more honest.
 
   - id: domain_renewable_fuels
     signal: domain
@@ -155,16 +176,36 @@ rules:
       - carbon capture and storage
       - carbon storage
       - carbon dioxide
-      - CCS
       - CCUS
       - kohlendioxid*
       - koldioxid*
     requires_context: []
+    requires_companion: []
+    blocked_by: []
     fields: [title, description]
     active: true
     note: >-
       626265-2026, Eidsiva Bioenergi's "CCS as a service" RFI, is the notice this rule exists
       for. It is also the notice the CPV list could not see until 45251000 was added.
+
+  - id: domain_ccs_acronym
+    signal: domain
+    label: ccs_co2
+    strength: high
+    aliases:
+      - CCS
+    requires_context: [carbon, capture, storage, CO2]
+    requires_companion: []
+    blocked_by: []
+    fields: [title, description]
+    active: true
+    note: >-
+      Three letters that a buyer can own. 494002-2026 procures an "Oficina Tecnica para
+      apoyar al CCS" inside a Spanish digitalisation programme, where CCS is the client's own
+      internal unit. The context list is definitional rather than invented - CCS stands for
+      carbon capture and storage - so a real CCS notice satisfies it by saying what it is:
+      626265-2026 now matches on the phrase "carbon capture and storage" instead, which is
+      better evidence than the acronym was.
 
   - id: domain_ccs_co2
     signal: domain
@@ -172,13 +213,26 @@ rules:
     strength: high
     aliases:
       - CO2
-    requires_context: [capture, storage, transport, emission, carbon]
+    requires_context: [capture, storage]
+    requires_companion: []
+    blocked_by: []
     fields: [title, description]
     active: true
     note: >-
       Unqualified CO2 is building-energy boilerplate: it appears in 617948-2026, a school
       structural-design job, and 619162-2026, a sustainability-coordination framework.
       Token-boundary matching also keeps it out of ECO2000 and similar product codes.
+
+      The context list was cut from five words to two on 2026-09-12, because a context word
+      that is a cognate in a corpus language is not a guard. "transport" is a word in Romanian,
+      French, German, Dutch, Polish and Swedish; "carbon" is the Romanian word and, once
+      accents are stripped, the Spanish word for coal; "emission" is French for a broadcast or
+      a share issue. Together they let 494007-2026 - afforestation to offset road-traffic CO2 -
+      read as carbon capture. Removing "transport" alone did not fix it; "carbon" was doing the
+      same work through "dioxid de carbon". "capture" and "storage" are kept: storage has no
+      cognate that normalises to it, and a notice pairing CO2 with "capture" within 300
+      characters is carbon capture in practice. Neither "emission" nor "transport" contributed
+      a single match in the corpus.
 
   - id: domain_offshore_wind
     signal: domain
@@ -221,10 +275,6 @@ rules:
       - solar park
       - solar farm
       - solarisation
-      - photovolta*
-      - fotovolta*
-      - fotowolta*
-      - zonnepane*
       - onshore wind
       - wind farm
       - wind turbine
@@ -232,11 +282,55 @@ rules:
       - éolien*
       - eolic*
     requires_context: []
+    requires_companion: []
+    blocked_by: []
     fields: [title, description]
     active: true
     note: >-
       626958-2026, the Ville de Nimes roof-solarisation strategy study, carries no energy CPV
       at all - only 71241000, feasibility study. Text is the only thing that finds it.
+
+  - id: domain_photovoltaic
+    signal: domain
+    label: onshore_renewables
+    strength: medium
+    aliases:
+      - photovolta*
+      - fotovolta*
+      - fotowolta*
+      - zonnepane*
+    requires_context: []
+    requires_companion: []
+    # The building-design vocabulary, written out rather than shared with an anchor: a save
+    # from the settings page would expand an anchor and the two lists would then drift apart
+    # silently.
+    blocked_by:
+      - HOAI
+      - leistungsphase
+      - leistungsphasen
+      - LPH
+      - objektplanung
+      - tragwerksplanung
+      - generalplaner
+      - generalplanung
+      - bauleitung
+      - architect
+      - architectural
+      - architekt
+      - architecte
+    fields: [title, description]
+    active: true
+    note: >-
+      Separated from the other renewables terms on 2026-09-12 because a roof array is the one
+      renewable that turns up as somebody else's scope inside a building contract. 587128-2026
+      is a new school canteen whose roof gets a PV system built by the city utility; 545866,
+      535783 and 611739 are the same shape. The array is real, the contract is building
+      services design, and calling those four solar notices is false evidence.
+
+      Measured cost: 5 of 34 photovoltaic matches are blocked and one of the five, 497122-2026,
+      is a genuine energy park - a 110 kV grid connection for PV and battery storage - whose
+      planning scope is written in German fee-schedule vocabulary. It keeps its domain through
+      the battery storage rule, so it loses a match rather than its evidence.
 
   - id: domain_grid_transmission
     signal: domain
@@ -404,6 +498,23 @@ rules:
       - islanded
       - energy master plan
       - energy strategy
+      - energy management
+    requires_context: []
+    requires_companion: []
+    blocked_by: []
+    fields: [title, description]
+    active: true
+    note: >-
+      profile.yaml settles this as core: a study sizing or optimising an energy system for an
+      industrial site is our work whatever the output is called. The efficiency and retrofit
+      vocabulary moved to domain_energy_efficiency on 2026-09-12; it needed a guard and these
+      terms do not.
+
+  - id: domain_energy_efficiency
+    signal: domain
+    label: energy_other
+    strength: medium
+    aliases:
       - energy efficiency
       - energieeffizienz*
       - energetische sanierung
@@ -411,17 +522,48 @@ rules:
       - rénovation énergétique
       - assainissement énergétique
       - audit énergétique
-      - energy management
     requires_context: []
+    requires_companion: []
+    # The building-design vocabulary, written out rather than shared with an anchor: a save
+    # from the settings page would expand an anchor and the two lists would then drift apart
+    # silently.
+    blocked_by:
+      - HOAI
+      - leistungsphase
+      - leistungsphasen
+      - LPH
+      - objektplanung
+      - tragwerksplanung
+      - generalplaner
+      - generalplanung
+      - bauleitung
+      - architect
+      - architectural
+      - architekt
+      - architecte
     fields: [title, description]
     active: true
     note: >-
-      profile.yaml settles this as core: a study sizing or optimising an energy system for an
-      industrial site is our work whatever the output is called. "energy efficiency" is here
-      so that 521603-2026, an energy-efficient design framework for healthcare estates, is
-      not archived by the health exclusion. The French and German retrofit terms were added
-      on 2026-09-12: "assainissement energetique" is an energy retrofit and not sewerage, and
-      456280-2026 was archived by the water exclusion for saying it.
+      "energy efficiency" is in the vocabulary so that 521603-2026, an energy-efficient design
+      framework for healthcare estates, is not archived by the health exclusion, and
+      "assainissement energetique" so that 456280-2026 is not archived by the water exclusion
+      for a phrase that means energy retrofit. Both earn their place. What they cannot do is
+      establish a domain inside a building design brief, where Energieeffizienz sits in a list
+      beside fire safety, acoustics and accessibility - profile.yaml settles that as out of
+      domain, "sustainability language attached to unrelated procurement".
+
+      A positive companion was tried first and rejected on measurement: requiring an
+      energy-subject word alongside took the domain away from 28 notices, including an energy
+      audit of a county's building portfolio (471520-2026) and a Belgian framework for
+      "missions variees liees a l'energie" (538632-2026). The discriminator is not whether the
+      notice mentions energy - they all do - but whether the procured work is building design.
+      Blocking on the fee-schedule and profession vocabulary drops 17 and every one of the 17
+      is a German building design job. The two that keep a domain another way, 626032-2026 and
+      486533-2026, keep it through decarbonisation.
+
+      Known residual: 474558-2026, French housing-grant administration, still matches on
+      "renovation energetique". It is not a building design contract, so nothing here reaches
+      it. That one is a topic-versus-subject problem, not a building problem.
 
   - id: domain_supporting_terms
     signal: domain

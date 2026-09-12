@@ -115,6 +115,7 @@ class _CompiledRule:
     aliases: tuple[tuple[str, re.Pattern[str]], ...]
     context: tuple[re.Pattern[str], ...]
     companions: tuple[re.Pattern[str], ...]
+    blockers: tuple[re.Pattern[str], ...]
 
 
 @dataclass(frozen=True)
@@ -143,6 +144,7 @@ class RuleEngine:
                 aliases=tuple((alias, _term_pattern(alias)) for alias in rule.aliases),
                 context=tuple(_term_pattern(word) for word in rule.requires_context),
                 companions=tuple(_term_pattern(word) for word in rule.requires_companion),
+                blockers=tuple(_term_pattern(word) for word in rule.blocked_by),
             )
             for rule in config.active_rules()
         ]
@@ -192,6 +194,9 @@ class RuleEngine:
         alias wins a tie because "green hydrogen" explains more than "hydrogen".
         """
         if not self._has_companion(compiled, blocks):
+            return None
+
+        if self._is_blocked(compiled, blocks):
             return None
 
         for block, normalised in blocks:
@@ -251,6 +256,25 @@ class RuleEngine:
             for block, normalised in blocks
             if compiled.rule.reads(block.field)
             for pattern in compiled.companions
+        )
+
+    def _is_blocked(
+        self, compiled: _CompiledRule, blocks: list[tuple[TextBlock, _Normalised]]
+    ) -> bool:
+        """True when the notice says somewhere that it is about something else.
+
+        The mirror of a companion, and the only thing that separates an energy word
+        that is the subject of a contract from the same word inside a building
+        design brief, where it sits in a list beside fire safety and acoustics.
+        """
+        if not compiled.blockers:
+            return False
+
+        return any(
+            pattern.search(normalised.text)
+            for block, normalised in blocks
+            if compiled.rule.reads(block.field)
+            for pattern in compiled.blockers
         )
 
     def _as_match(self, rule: Rule, hit: _Hit) -> RuleMatch:

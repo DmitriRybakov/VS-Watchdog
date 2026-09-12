@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+import sys
 import textwrap
 from datetime import date
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 
@@ -12,9 +13,10 @@ from watchdog import __version__
 from watchdog.core.countries import country_name, country_names
 from watchdog.core.enums import RunStatus, SourcePlatform
 from watchdog.core.logging import configure_logging, get_logger
-from watchdog.core.models import Run, SchemaCheck
+from watchdog.core.models import AxisScore, Run, SchemaCheck
 from watchdog.core.settings import get_settings
 from watchdog.services import ingest as ingest_service
+from watchdog.services import screen as screen_service
 from watchdog.services import ted as ted_service
 
 app = typer.Typer(help="Watchdog - tender screening for Entr Advisory & Decision Support.")
@@ -30,6 +32,12 @@ _STATUS_COLOURS = {
     RunStatus.FAILED: typer.colors.RED,
     RunStatus.RUNNING: typer.colors.CYAN,
 }
+
+
+@app.callback()
+def main() -> None:
+    """Watchdog. Run a command, or --help to see them all."""
+    _survive_the_console_encoding()
 
 
 @app.command()
@@ -233,6 +241,56 @@ def ingest(
         raise typer.Exit(code=1) from exc
 
     _report_outcome(outcome)
+
+    if not outcome.ok:
+        raise typer.Exit(code=1)
+
+
+@app.command("screen")
+def screen(
+    stage: int = typer.Option(
+        2, "--stage", help="Which screening stage to run. Only stage 2 exists so far."
+    ),
+    limit: int = typer.Option(20, "--limit", min=1, max=100, help="How many notices to assess."),
+    explain: bool = typer.Option(
+        False,
+        "--explain",
+        help="Print the three judgements, their quotes and the confidence for each notice.",
+    ),
+    no_cache: bool = typer.Option(
+        False, "--no-cache", help="Ignore stored answers and call the model again."
+    ),
+) -> None:
+    """Assess a sample of the register with the configured model.
+
+    Stage 2 is the model's three judgements - domain, service and decision stage -
+    with the quotes behind each one. It stores no score and no band: combining the
+    axes is stage 3, which does not exist yet. Reading twenty of these with
+    --explain is how the first real model run gets checked.
+    """
+    settings = get_settings()
+    configure_logging(settings.log_level, json_output=not settings.is_dev)
+
+    if stage != 2:
+        typer.secho(f"There is no screening stage {stage}.", fg=typer.colors.RED)
+        typer.echo(
+            "Stage 1 is the deterministic rules and runs as part of this command. "
+            "Stage 2 is the model assessment. Stage 3, the score and the band, is not "
+            "built yet. Nothing was changed."
+        )
+        raise typer.Exit(code=1)
+
+    try:
+        outcome = screen_service.assess_sample(limit=limit, use_cache=not no_cache)
+    except ingest_service.DatabaseNotReady as exc:
+        _report_schema_problem(exc.check)
+        raise typer.Exit(code=1) from exc
+    except screen_service.LLMError as exc:
+        typer.secho(f"The model could not be used: {exc}", fg=typer.colors.RED)
+        typer.echo("Nothing was stored. Check LLM_PROVIDER and its settings, then try again.")
+        raise typer.Exit(code=1) from exc
+
+    _report_assessment(outcome, explain=explain)
 
     if not outcome.ok:
         raise typer.Exit(code=1)
@@ -476,6 +534,102 @@ def _report_outcome(outcome: ingest_service.IngestOutcome) -> None:
     )
 
 
+def _survive_the_console_encoding() -> None:
+    """Never let a notice in Norwegian stop a listing halfway through.
+
+    Notice text is stored in its original language, and a Windows console is
+    often still on a legacy code page that cannot represent it. Replacing the
+    characters it cannot print loses an accent; raising loses the listing.
+    """
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            reconfigure(errors="replace")
+
+
+def _report_assessment(outcome: screen_service.SampleOutcome, *, explain: bool) -> None:
+    """Say what the model judged, or say plainly that no model was involved."""
+    run = outcome.run
+    counts = run.counts
+
+    typer.echo("")
+    if not outcome.ai_enabled:
+        typer.secho(
+            "AI assessment is off, so nothing was assessed.",
+            fg=typer.colors.YELLOW,
+        )
+        typer.echo(
+            f"{counts['skipped']} notice(s) would be screened on the deterministic rules alone. "
+            "To switch a model on, set LLM_PROVIDER, LLM_MODEL, LLM_ENDPOINT and LLM_API_KEY."
+        )
+        return
+
+    typer.echo(
+        f"Provider {run.provider}, model {run.model or 'not named'}, "
+        f"prompt {run.prompt_version}, rules v{outcome.rules_version}, "
+        f"profile v{outcome.profile_version}."
+    )
+    typer.echo(
+        f"Read {outcome.considered} notice(s) from the register: "
+        f"{counts['assessed']} assessed, {counts['cached']} answered from the cache, "
+        f"{counts['repaired']} needed a second attempt, {counts['failed']} could not be "
+        f"assessed, {counts['skipped']} were not worth a model call."
+    )
+    if not outcome.cache_enabled:
+        typer.echo("  The cache was ignored for this run (--no-cache).")
+    typer.echo(
+        f"  {run.tokens_in} token(s) in, {run.tokens_out} out, "
+        f"{run.latency_ms / 1000:.1f}s waiting for the model."
+    )
+    typer.secho("  No score and no band were stored: that is stage 3.", fg=typer.colors.CYAN)
+
+    if explain:
+        for item in run.results:
+            _print_assessment(item)
+
+    for item in run.failed:
+        typer.secho(f"  could not assess {item.tender_id}: {item.error}", fg=typer.colors.YELLOW)
+
+    if run.failed:
+        typer.echo("  Those notices are left unassessed and a later run will try them again.")
+
+
+def _print_assessment(item: screen_service.AssessmentOutcome) -> None:
+    typer.echo("")
+    typer.secho(textwrap.shorten(item.title, width=96, placeholder=" ..."), fg=typer.colors.CYAN)
+    typer.echo(f"  {item.tender_id}{'  (from the cache)' if item.cached else ''}")
+
+    assessment = item.assessment
+    if assessment is None:
+        typer.secho(f"  not assessed: {item.error}", fg=typer.colors.YELLOW)
+        return
+
+    for name, axis in (
+        ("domain", assessment.domain_fit),
+        ("service", assessment.service_fit),
+        ("stage", assessment.stage_fit),
+    ):
+        _print_axis(name, axis)
+
+    for signal in assessment.negative_signals:
+        typer.secho(f"  against  {signal}", fg=typer.colors.YELLOW)
+    for gap in assessment.missing_information:
+        typer.echo(f"  missing  {gap}")
+
+    typer.echo(f"  reason   {assessment.short_reason}")
+    typer.echo(f"  confidence {item.confidence:.2f}")
+    for reason in item.confidence_reasons:
+        typer.echo(f"    - {reason}")
+
+
+def _print_axis(name: str, axis: AxisScore[Any]) -> None:
+    score = "not established" if axis.score is None else f"{axis.score}/5"
+    typer.echo(f"  {name:<8} {score:<16} {axis.label.value}")
+    for quote in axis.evidence:
+        shortened = textwrap.shorten(quote, width=88, placeholder=" ...")
+        typer.echo(f"           \u201c{shortened}\u201d")
+
+
 def _print_run(run: Run) -> None:
     started = run.started_at.strftime("%Y-%m-%d %H:%M")
     where = run.source.value if run.source is not None else "-"
@@ -488,6 +642,13 @@ def _print_run(run: Run) -> None:
 
     counts = ", ".join(f"{name} {value}" for name, value in run.counts.items())
     typer.echo(f"  {counts or 'no counts recorded'}")
+
+    if run.provider is not None:
+        typer.echo(
+            f"  judged by {run.provider}/{run.model or 'unnamed model'}"
+            f" under prompt {run.prompt_version or 'unknown'}"
+            f"  {run.tokens_in} token(s) in, {run.tokens_out} out"
+        )
 
     if run.window_from is not None and run.window_to is not None:
         typer.echo(

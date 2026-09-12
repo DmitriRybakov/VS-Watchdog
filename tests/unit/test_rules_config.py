@@ -191,6 +191,14 @@ def test_a_prefix_marker_is_rejected_on_a_context_or_companion_word() -> None:
         parse_rules_config(data)
 
 
+def test_a_prefix_marker_is_rejected_on_a_blocking_word() -> None:
+    data = minimal()
+    data["rules"][0]["blocked_by"] = ["architekt*"]
+
+    with pytest.raises(ValueError, match="only allowed on an alias"):
+        parse_rules_config(data)
+
+
 def test_a_prefix_marker_belongs_at_the_end_of_an_alias() -> None:
     data = minimal()
     data["rules"][0]["aliases"] = ["wasser*stoff"]
@@ -242,12 +250,25 @@ def test_a_companion_requirement_survives_a_save(tmp_path: Path, rules_config: R
 
     save_rules_config(rules_config, target)
     reloaded = {rule.id: rule for rule in load_rules_config(target).rules}
+    original = {rule.id: rule for rule in rules_config.rules}
 
-    assert reloaded["exclusion_building_profession"].requires_companion == (
-        {rule.id: rule for rule in rules_config.rules}[
-            "exclusion_building_profession"
-        ].requires_companion
+    assert (
+        reloaded["exclusion_building_profession"].requires_companion
+        == original["exclusion_building_profession"].requires_companion
     )
+    assert (
+        reloaded["domain_energy_efficiency"].blocked_by
+        == original["domain_energy_efficiency"].blocked_by
+    )
+
+
+def test_the_seed_blocks_the_building_prone_energy_terms(rules_config: RulesConfig) -> None:
+    """The two rules carrying energy vocabulary that a building design brief uses too."""
+    by_id = {rule.id: rule for rule in rules_config.rules}
+
+    for rule_id in ("domain_energy_efficiency", "domain_photovoltaic"):
+        blocked = {term.casefold() for term in by_id[rule_id].blocked_by}
+        assert {"hoai", "leistungsphasen", "architekt"} <= blocked
 
 
 # ----------------------------------------------------------------- versioning

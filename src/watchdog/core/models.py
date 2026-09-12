@@ -21,7 +21,7 @@ from decimal import Decimal
 from enum import StrEnum
 from typing import Annotated, Any
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 from watchdog.core.clock import ensure_utc, utc_now
 from watchdog.core.enums import (
@@ -320,6 +320,15 @@ class AxisScore[LabelT: StrEnum](BaseModel):
     label: LabelT
     evidence: list[str] = Field(default_factory=list)
 
+    @property
+    def quotes(self) -> list[str]:
+        """The evidence with blanks dropped. A whitespace-only quote is no quote."""
+        return [quote for quote in self.evidence if quote.strip()]
+
+    @property
+    def is_established(self) -> bool:
+        return self.score is not None
+
 
 class Assessment(BaseModel):
     """The model's contract. Everything it is allowed to tell us, and nothing more."""
@@ -332,6 +341,31 @@ class Assessment(BaseModel):
     negative_signals: list[str] = Field(default_factory=list)
     missing_information: list[str] = Field(default_factory=list)
     short_reason: str = Field(max_length=240)
+
+    @property
+    def axes(self) -> list[tuple[str, AxisScore[Any]]]:
+        """The three axes with the names the prompt and the schema call them."""
+        return [
+            ("domain_fit", self.domain_fit),
+            ("service_fit", self.service_fit),
+            ("stage_fit", self.stage_fit),
+        ]
+
+    @model_validator(mode="after")
+    def _require_evidence(self) -> Assessment:
+        """A scored axis carries a quote, or it is not an answer we accept.
+
+        Enforced here rather than left to the confidence number: a score with
+        nothing behind it cannot be defended to a colleague, and a rule that only
+        moves a number is advice. Failing validation sends it back for repair.
+        """
+        unquoted = [name for name, axis in self.axes if axis.is_established and not axis.quotes]
+        if unquoted:
+            raise ValueError(
+                f"{', '.join(unquoted)}: an axis with a score must carry at least one evidence "
+                "quote copied from the notice; use score null and label unknown instead"
+            )
+        return self
 
 
 class ScreeningResult(BaseModel):
@@ -427,6 +461,15 @@ class Run(BaseModel):
     tokens_in: int = 0
     tokens_out: int = 0
     watermark_advanced: bool = False
+
+    # What judged this run, when anything did. None on an ingest, which calls no
+    # model: a score cannot be defended without knowing which provider, model and
+    # prompt produced it, and those three change independently of each other.
+    provider: str | None = None
+    model: str | None = None
+    prompt_version: str | None = None
+    # Time spent waiting for the provider, summed over every call in the run.
+    latency_ms: int = 0
 
 
 class Watermark(BaseModel):

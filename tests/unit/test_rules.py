@@ -49,7 +49,7 @@ NORMALISATION_CASES = [
     ("spaced form", "power to x readiness", "domain_hydrogen"),
     ("accents are stripped", "Production d'hydrog\u00e8ne vert", "domain_hydrogen"),
     ("accent already absent", "Production d'hydrogene vert", "domain_hydrogen"),
-    ("subscript H2", "Studie zur H\u2082-Infrastruktur", "domain_hydrogen"),
+    ("subscript H2", "Studie zur H\u2082-Wirtschaft und Wasserstoffnetz", "domain_hydrogen"),
     ("case is folded", "MACHBARKEITSSTUDIE", "activity_early_phase_study"),
     (
         "eszett folds to ss",
@@ -190,14 +190,14 @@ PREFIX_CASES = [
         "domain_hydrogen",
         True,
     ),
-    ("Polish adjective", "Budowa instalacji fotowoltaicznych", "domain_onshore_renewables", True),
+    ("Polish adjective", "Budowa instalacji fotowoltaicznych", "domain_photovoltaic", True),
     (
         "French plural",
         "Maintenance des installations photovolta\u00efques",
-        "domain_onshore_renewables",
+        "domain_photovoltaic",
         True,
     ),
-    ("Italian plural", "Impianti fotovoltaici sugli edifici", "domain_onshore_renewables", True),
+    ("Italian plural", "Impianti fotovoltaici sugli edifici", "domain_photovoltaic", True),
     ("still needs a word start", "Lieferung eines Mikrowasserstoffs", "domain_hydrogen", False),
 ]
 
@@ -281,6 +281,123 @@ def test_capacity_building_does_not_archive_without_an_administration_subject(
 
     assert "exclusion_capacity_building_generic" not in {m.rule_id for m in result.matches}
     assert result.route is RulesRoute.ASSESS
+
+
+# ------------------------------------------------------------ blocked domains
+
+BLOCKED_CASES = [
+    (
+        "efficiency in a school design brief",
+        "Neubau Schulgeb\u00e4ude - Planungsleistungen gem. HOAI, hohe Energieeffizienz",
+        "domain_energy_efficiency",
+        False,
+    ),
+    (
+        "efficiency as the subject",
+        "Energieeffizienz-Konzept f\u00fcr das Industriegebiet",
+        "domain_energy_efficiency",
+        True,
+    ),
+    (
+        "a roof array on a building contract",
+        "Neubau einer Mensa - Fachplanung TGA nach HOAI, Dach mit Photovoltaikanlage",
+        "domain_photovoltaic",
+        False,
+    ),
+    (
+        "photovoltaics as the subject",
+        "Budowa instalacji fotowoltaicznych dla budynk\u00f3w u\u017cyteczno\u015bci publicznej",
+        "domain_photovoltaic",
+        True,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("case", "text", "rule_id", "expected"),
+    BLOCKED_CASES,
+    ids=[case[0] for case in BLOCKED_CASES],
+)
+def test_a_blocked_rule_does_not_count_inside_a_building_design_brief(
+    rule_engine: RuleEngine, case: str, text: str, rule_id: str, expected: bool
+) -> None:
+    """profile.yaml: sustainability language attached to unrelated procurement is out
+    of domain. A companion cannot express this - the notice does mention energy -
+    so the building-design vocabulary blocks the rule instead."""
+    hit = rule_id in matched_rules(rule_engine, notice(("title-proc", "deu", text)))
+
+    assert hit is expected
+
+
+def test_a_blocker_reaches_across_blocks(rule_engine: RuleEngine) -> None:
+    """Like a companion and unlike a context word, a blocker is a question about the
+    whole notice: the title names the energy word, the description names the fee scale."""
+    tender = notice(
+        ("title-proc", "deu", "Energetische Sanierung der Kindertagesst\u00e4tte"),
+        ("description-proc", "deu", "Planungsleistungen LPH 1-9, stufenweise Beauftragung."),
+    )
+
+    assert "domain_energy_efficiency" not in matched_rules(rule_engine, tender)
+
+
+def test_h2_is_no_longer_a_hydrogen_alias(rule_engine: RuleEngine) -> None:
+    """Four of its five occurrences in ten weeks were document labels - barracks
+    pavilions and a table row - and the one real case matches wasserstoff*."""
+    labels = notice(
+        ("title-proc", "ron", "DEMOLARE PAVILIOANE HI, H2, H3, H4, L2, L4"),
+    )
+    real = notice(("title-proc", "deu", "Reallabor Wasserstoff H2-Grid"))
+
+    assert "domain_hydrogen" not in matched_rules(rule_engine, labels)
+    assert "domain_hydrogen" in matched_rules(rule_engine, real)
+
+
+CO2_CONTEXT_CASES = [
+    ("capture counts", "\u00c9tude de capture du CO2 industriel", True),
+    ("storage counts", "Onshore services involving CO2 and hydrogen storage", True),
+    (
+        "a transport cognate no longer counts",
+        "Servicii de \u00eemp\u0103durire pentru a neutraliza emisiile de CO2 "
+        "produse de transportul rutier",
+        False,
+    ),
+    (
+        "a carbon cognate no longer counts",
+        "Sechestrarea emisiilor de dioxid de carbon si a emisiilor de CO2",
+        False,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    ("case", "text", "expected"),
+    CO2_CONTEXT_CASES,
+    ids=[case[0] for case in CO2_CONTEXT_CASES],
+)
+def test_the_co2_context_words_are_not_cognates(
+    rule_engine: RuleEngine, case: str, text: str, expected: bool
+) -> None:
+    """A context word that is also a word in the notice's own language is not a
+    guard. "transport" is Romanian, French, German, Dutch, Polish and Swedish;
+    "carbon" is the Romanian word and, accents stripped, the Spanish word for coal."""
+    hit = "domain_ccs_co2" in matched_rules(rule_engine, notice(("title-proc", "ron", text)))
+
+    assert hit is expected
+
+
+def test_ccs_needs_to_say_what_it_stands_for(rule_engine: RuleEngine) -> None:
+    """494002-2026 procures an "Oficina Tecnica para apoyar al CCS" in a Spanish
+    digitalisation programme, where CCS is the client's own internal unit."""
+    buyers_acronym = notice(
+        ("title-proc", "spa", "Oficina T\u00e9cnica para apoyar al CCS en el Proyecto ODIN"),
+    )
+    real = notice(
+        ("title-proc", "eng", "Request for Information - CCS as a service"),
+        ("description-proc", "eng", "Carbon capture and permanent storage of CO2 as a service."),
+    )
+
+    assert "domain_ccs_acronym" not in matched_rules(rule_engine, buyers_acronym)
+    assert Domain.CCS_CO2 in rule_engine.evaluate(real).domains_hit
 
 
 def test_technical_assistance_for_capacity_building_is_not_an_activity(

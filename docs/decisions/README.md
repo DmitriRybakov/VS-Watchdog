@@ -5,6 +5,79 @@ consequence - especially decisions that become expensive to reverse.
 
 ## Outstanding
 
+- **THE RULE SET IS FROZEN AT VERSION 3 until the step 10 audit.** Step 7 tunes a scoring policy, and
+  tuning against a moving vocabulary means never knowing whether a change in the distribution came
+  from the policy or from the rules. Two exceptions, both narrow: a rule that crashes or corrupts, and
+  a false positive at **high** strength, which distorts scoring directly - the H2 case, where four of
+  four matches were document labels, is the shape that qualifies. Everything else goes on this list
+  and waits for human review decisions to be judged against, instead of a reading of samples.
+
+  Known residuals, all deliberate, none of them qualifying for the exceptions:
+
+  - **474558-2026** matches `rénovation énergétique` on a French contract to administer housing-grant
+    applications. It is not a building-design notice, so the blocking list in 0007 does not reach it.
+    This is topic versus subject - the notice is *about* energy renovation and is not *procuring* any -
+    and no list of words solves it.
+  - **The companion lists are monolingual.** `exclusion_building_profession` and
+    `exclusion_capacity_building_generic` name their subject terms mostly in German, French and
+    English. Every language not enumerated makes those exclusions weaker, which is safe and costs
+    model calls. 603890-2026, a Dutch architect and installation adviser for a primary school and
+    sports hall, is the measured example: plainly a building notice, assessed because *basisschool*
+    and *sporthal* are not companion terms.
+  - **Supporting-term boilerplate reaches the evidence column.** `environment` matches "an enabling
+    environment" and "ICT environment"; `climate` matches "climate stress" in a wildlife programme;
+    `power` matches the company name RWE Power AG. It establishes no domain and changes no route, so
+    the rule set is right to leave it - but a register that shows "matched: environment" on a wildlife
+    programme teaches a colleague to stop reading the column. That is register design, for step 6.
+  - **497122-2026 is the `blocked_by` warning case** (0007): a 110 kV grid connection for a
+    photovoltaic and battery park, written in HOAI language, which loses its photovoltaic match and
+    survives only through its battery storage match. If the blocking list is ever widened or applied
+    to more rules, this is the notice that shows what it costs.
+
+  The freeze has no enforcement today - it is a comment at the top of `config/rules.yaml` and the
+  paragraph above. The check belongs in the rules save path in step 9: refuse a save unless an
+  explicit flag is set, so a settings-page edit cannot quietly produce version 4 while step 7 is
+  being tuned.
+
+- **Step 7 owes three answers about the rules-only grade.** All three come out of the version 3
+  baseline, `docs/eval/2026-09-12-rules-baseline-v3.md`, which is the reference point to tune
+  against - no screening result has ever been stored, so that file is the only starting distribution
+  there is.
+
+  - **Evidence COUNT tracks text length and language, not fit.** Three of the four notices with both
+    a high-strength domain and a service term are GIZ development programmes - long, English, full of
+    both vocabularies - while 523353-2026, *Machbarkeitsstudie Netzanschluss Lubmin* and the one
+    Entr-shaped notice among them, got there on two matches. A grade that sums matches will rank long
+    English development programmes above short German feasibility studies. The grade has to be shaped
+    by **what** matched - the highest domain strength, whether a service term is present at all - and
+    not by **how many** matched.
+  - **An exclusion should probably demote, not only archive.** 568229-2026 is public relations for a
+    hydrogen project and sits at rank 10 of the whole corpus, because the exclusion signal is used
+    solely to decide archiving and does nothing to a notice that is not archived. Decide whether an
+    exclusion match caps or reduces a score in that case.
+  - **The rules-only grade has nowhere to live.** `ScreeningResult` has `score` (1-5) and `band`, and
+    no rules-only column. Decide whether the grade maps into `score` with band REVIEW, or gets its
+    own column. It affects the register sort, the migration, and whether switching the model on later
+    rewrites history or appends to it. Cheap now, a migration later.
+  - **The baseline window is pinned and step 7 must say what it did with it.** The file measures
+    `published_date` between 2026-07-01 and 2026-09-11, 2,158 notices. Every daily ingest changes the
+    denominator, so a policy tuned in October against "the corpus" is not being compared with
+    anything in that file. Either filter to the pinned window or regenerate the baseline at the start
+    of the step, and **write down which** - choosing by accident is the failure mode here, not
+    choosing wrongly.
+
+- **Step 10 needs a repeatable measurement command for the rules stage.** The three eval files
+  describing version 3 - the archive audit, the domain-match audit and the baseline - were generated
+  by throwaway scripts that no longer exist, so re-measuring after a rule change means rewriting them
+  from the method descriptions in their headers. Not needed before step 10, but that is the first
+  point where the same measurement has to be run twice and compared.
+- **The assessment-stage confidence is invented in step 6** (`screening/assess.py`): it measures how
+  well evidenced a judgement is, not how relevant a notice is, so step 7 must either take it as an
+  input to the real confidence or replace it, and it must not quietly become the stored value.
+- **Azure strict schema mode is unverified against a real endpoint.** If the first live run fails with
+  a schema error, look first at `_UNSUPPORTED_KEYWORDS` in `llm/azure_openai.py`, which strips the
+  JSON Schema keywords pydantic emits and Azure rejects; the constraints those keywords express are
+  still enforced by our own validation of the answer.
 - **The step 10 recall audit must report recall BY LANGUAGE, not as one figure.** The rules vocabulary
   is English-seeded and the corpus is 24 languages, so the stage under-fires on non-English notices by
   construction (0006). A single overall recall number will be dominated by English and Irish notices

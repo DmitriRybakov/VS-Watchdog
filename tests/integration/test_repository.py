@@ -490,7 +490,9 @@ def test_an_assessment_survives_the_round_trip(
 
     assessment = Assessment(
         domain_fit=AxisScore[Domain](score=5, label=Domain.HYDROGEN, evidence=["hydrogen"]),
-        service_fit=AxisScore[ServiceType](score=4, label=ServiceType.EARLY_PHASE_STUDY),
+        service_fit=AxisScore[ServiceType](
+            score=4, label=ServiceType.EARLY_PHASE_STUDY, evidence=["pre-FEED study"]
+        ),
         stage_fit=AxisScore[DecisionStage](score=None, label=DecisionStage.UNKNOWN),
         negative_signals=[],
         missing_information=["No stage stated in the notice"],

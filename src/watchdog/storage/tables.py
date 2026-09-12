@@ -331,6 +331,12 @@ class RunRow(Base):
     tokens_out: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     watermark_advanced: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
+    # Which model judged this run, if any. Null on an ingest run.
+    provider: Mapped[str | None] = mapped_column(String(32))
+    model: Mapped[str | None] = mapped_column(String(128))
+    prompt_version: Mapped[str | None] = mapped_column(String(32))
+    latency_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
 
 class WatermarkRow(Base):
     """How far each source has been read successfully. One row per source."""

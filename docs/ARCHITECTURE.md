@@ -13,8 +13,8 @@ Jinja2 templates + HTMX
         \                /
           services/
         /      |       \
- sources/  screening/  llm/      storage/
-        \      |       /            |
+ sources/  screening/ -> llm/    storage/
+        \      |        /           |
               core/              database
 ```
 
@@ -31,7 +31,11 @@ Jinja2 templates + HTMX
 ## The import rule
 
 - `core/` imports nothing internal.
-- `sources/`, `screening/`, `storage/` and `llm/` import `core` only.
+- `sources/`, `storage/` and `llm/` import `core` only.
+- `screening/` imports `core` and `llm`. The assessment stage holds a provider, so it needs the
+  gateway's interface; the dependency runs one way only and `llm/` never imports `screening/`. The
+  alternative, moving the provider protocol into `core/`, would split the single door to a model
+  across two folders and make it harder to find, which is what this rule exists to prevent.
 - `services/` may import all of them.
 - `web/` and `cli.py` import `services` and `core` only.
 - Never import sideways between `sources/` and `screening/`. A source must not know how screening

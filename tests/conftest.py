@@ -12,6 +12,7 @@ from fastapi.testclient import TestClient
 from watchdog.core.enums import ContractNature, DeadlineType, NoticeStage, SourcePlatform
 from watchdog.core.models import Tender, TextBlock
 from watchdog.screening import RuleEngine, RulesConfig, load_rules_config
+from watchdog.screening.profile import Profile, load_profile
 from watchdog.storage.db import SessionFactory, create_db_engine, create_session_factory
 from watchdog.storage.repository import Repository
 from watchdog.storage.tables import Base
@@ -47,6 +48,12 @@ def rules_config() -> RulesConfig:
 @pytest.fixture(scope="session")
 def rule_engine(rules_config: RulesConfig) -> RuleEngine:
     return RuleEngine(rules_config)
+
+
+@pytest.fixture(scope="session")
+def profile() -> Profile:
+    """The shipped screening profile. Part 1 only; the model never sees Part 2."""
+    return load_profile(CONFIG_DIR / "profile.yaml")
 
 
 @pytest.fixture

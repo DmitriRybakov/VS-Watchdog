@@ -681,6 +681,7 @@ class Repository:
                     tokens_in=0,
                     tokens_out=0,
                     watermark_advanced=False,
+                    latency_ms=0,
                 )
             )
             session.commit()
@@ -697,6 +698,10 @@ class Repository:
         tokens_in: int = 0,
         tokens_out: int = 0,
         watermark_advanced: bool = False,
+        provider: str | None = None,
+        model: str | None = None,
+        prompt_version: str | None = None,
+        latency_ms: int = 0,
     ) -> Run:
         with self._session_factory() as session:
             row = session.get(RunRow, run_id)
@@ -709,6 +714,10 @@ class Repository:
             row.tokens_in = tokens_in
             row.tokens_out = tokens_out
             row.watermark_advanced = watermark_advanced
+            row.provider = provider
+            row.model = model
+            row.prompt_version = prompt_version
+            row.latency_ms = latency_ms
             row.finished_at = utc_now()
 
             session.commit()

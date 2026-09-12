@@ -18,7 +18,7 @@ Long operations show progress and then a result. Failures say what failed and wh
 
 One Python process: Jinja2 templates + HTMX -> FastAPI routes -> services -> engine modules + database
 
-- Import direction, between packages: `core/` imports no other package. `sources/`, `screening/`, `storage/` and `llm/` import `core` only. `services/` may import all of them. `web/` and `cli.py` import `services` and `core` only. Never import sideways between `sources/` and `screening/`. Within a single package, modules may import each other freely.
+- Import direction, between packages: `core/` imports no other package. `sources/`, `storage/` and `llm/` import `core` only. `screening/` imports `core` and `llm` — the assessment stage holds a provider, the dependency runs one way only, and `llm/` never imports `screening/`. `services/` may import all of them. `web/` and `cli.py` import `services` and `core` only. Never import sideways between `sources/` and `screening/`. Within a single package, modules may import each other freely.
 - **Never add Node, npm, React or a bundler.** Pages are server-rendered Jinja2 templates in `web/templates/`, using HTMX for partial updates. HTMX and the CSS are vendored into `web/static/` and served from there — no CDN request at runtime.
 - Application queries live only in `storage/repository.py` — no SQL, no ORM session and no query outside it. Engine and session setup belong in `storage/db.py`, table definitions in `storage/tables.py`, and schema changes in the Alembic migration files. Those three are the only exceptions.
 - Route handlers parse input, call one service function, and render. No business logic and no queries in routes or templates.
