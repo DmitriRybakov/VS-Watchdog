@@ -43,6 +43,8 @@ class TedSourceConfig(BaseModel):
     # Whole days, because TED's query language has no hour: the publication-date
     # field only accepts YYYYMMDD or today(+/-n).
     overlap_days: int = Field(default=2, ge=0, le=30)
+    # How far back the very first run reaches, when there is no watermark yet.
+    backfill_days: int = Field(default=30, ge=1, le=365)
     page_size: int = Field(default=MAX_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE)
 
     @field_validator("cpv_prefixes", mode="before")

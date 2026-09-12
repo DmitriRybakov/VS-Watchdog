@@ -174,6 +174,12 @@ class TenderRow(Base):
     first_seen_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
     last_seen_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
 
+    # Which ingest run fetched this notice first, and which one saw it last, so
+    # any row on screen can be traced back to the run that produced it. Null only
+    # on rows written before runs recorded this.
+    first_seen_run_id: Mapped[str | None] = mapped_column(String(64))
+    last_seen_run_id: Mapped[str | None] = mapped_column(String(64))
+
     # The untouched source payload, so any mapping can be re-checked later.
     raw: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
 

@@ -97,5 +97,10 @@ extra_query: null
 # overlap could not be expressed and would be a lie in a file people read.
 overlap_days: 2
 
+# How far back the very first run reaches, when there is no watermark yet. Only
+# ever used once per source; after that the watermark decides. Override it for a
+# one-off with: watchdog ingest --full-backfill 2026-01-01
+backfill_days: 30
+
 # Notices per request. 250 is TED's maximum; anything higher is rejected outright.
 page_size: 250

@@ -190,6 +190,12 @@ class Tender(BaseModel):
     first_seen_at: UtcDatetime = Field(default_factory=utc_now)
     last_seen_at: UtcDatetime = Field(default_factory=utc_now)
 
+    # Which ingest run first fetched this notice, and which one saw it last.
+    # Watchdog provenance, not a source fact: the repository writes them from the
+    # run it was given, and a mapper never sets them.
+    first_seen_run_id: str | None = None
+    last_seen_run_id: str | None = None
+
     raw: dict[str, Any] = Field(default_factory=dict)
 
     @property

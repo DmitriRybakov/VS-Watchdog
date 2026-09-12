@@ -37,6 +37,7 @@ from watchdog.core.models import (
     TenderFilters,
     TextBlock,
 )
+from watchdog.storage.db import create_db_engine, create_session_factory
 from watchdog.storage.repository import Repository
 
 VERSIONS = ScreeningVersions(
@@ -45,6 +46,20 @@ VERSIONS = ScreeningVersions(
     profile_version="profile-1",
     prompt_version=None,
 )
+
+
+def test_an_unmigrated_database_is_reported_rather_than_raised() -> None:
+    # The first thing a colleague does on a new machine is run a command before
+    # the migration. That must be a sentence, not a database error.
+    engine = create_db_engine("sqlite+pysqlite:///:memory:")
+    try:
+        assert Repository(create_session_factory(engine)).is_ready() is False
+    finally:
+        engine.dispose()
+
+
+def test_a_migrated_database_reports_itself_ready(repository: Repository) -> None:
+    assert repository.is_ready() is True
 
 
 def screening_for(tender: Tender, *, score: int = 4, band: Band = Band.REVIEW) -> ScreeningResult:

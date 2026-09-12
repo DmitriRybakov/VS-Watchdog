@@ -192,6 +192,6 @@ def test_a_final_score_of_zero_is_rejected() -> None:
 def test_every_tender_field_is_either_a_source_field_or_ours() -> None:
     # If a field is added to Tender and forgotten in the upsert, it would silently
     # never be updated. This is the tripwire for that.
-    ours = {"first_seen_at", "last_seen_at"}
+    ours = {"first_seen_at", "last_seen_at", "first_seen_run_id", "last_seen_run_id"}
 
     assert set(Tender.model_fields) == set(SOURCE_FIELDS) | ours

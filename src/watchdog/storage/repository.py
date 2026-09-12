@@ -21,6 +21,7 @@ from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy import Select, and_, func, nulls_last, or_, select, update
+from sqlalchemy.exc import OperationalError, ProgrammingError
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
 from watchdog.core.clock import utc_now
@@ -123,14 +124,32 @@ class Repository:
     def __init__(self, session_factory: SessionFactory | Callable[[], Session]) -> None:
         self._session_factory = session_factory
 
+    def is_ready(self) -> bool:
+        """True when the schema exists. False means the migration has not been run yet.
+
+        Here rather than in a caller because only this file may ask the database
+        anything. SQLite and PostgreSQL report a missing table differently.
+        """
+        with self._session_factory() as session:
+            try:
+                session.execute(select(func.count()).select_from(RunRow))
+            except (OperationalError, ProgrammingError):
+                return False
+        return True
+
     # ------------------------------------------------------------------ tenders
 
-    def upsert_tenders(self, tenders: Sequence[Tender]) -> UpsertStats:
+    def upsert_tenders(
+        self, tenders: Sequence[Tender], *, run_id: str | None = None
+    ) -> UpsertStats:
         """Insert new notices and update known ones. Never deletes, never re-dates.
 
         ``first_seen_at`` is written once and never touched again. ``last_seen_at``
         moves on every sighting, even when nothing else changed, so "still open at
         the source" and "changed" stay separate facts.
+
+        ``run_id`` is recorded the same way, so every row can be traced back to the
+        run that fetched it. Ingestion always passes one.
         """
         stats = UpsertStats()
 
@@ -139,7 +158,7 @@ class Repository:
                 row = session.get(TenderRow, tender.id)
 
                 if row is None:
-                    session.add(_new_row(tender))
+                    session.add(_new_row(tender, run_id))
                     stats.new += 1
                     continue
 
@@ -159,6 +178,8 @@ class Repository:
 
                 _apply_source_fields(row, tender)
                 row.last_seen_at = tender.last_seen_at
+                if run_id is not None:
+                    row.last_seen_run_id = run_id
 
                 if changed:
                     stats.updated += 1
@@ -168,6 +189,19 @@ class Repository:
             session.commit()
 
         return stats
+
+    def known_tender_ids(self, ids: Iterable[str]) -> set[str]:
+        """Which of these ids the register already holds. Used by a dry run."""
+        tender_ids = list(ids)
+        if not tender_ids:
+            return set()
+
+        with self._session_factory() as session:
+            return set(
+                session.execute(select(TenderRow.id).where(TenderRow.id.in_(tender_ids)))
+                .scalars()
+                .all()
+            )
 
     def get_tender(self, tender_id: str) -> Tender | None:
         with self._session_factory() as session:
@@ -639,11 +673,13 @@ def _escape_like(value: str) -> str:
     return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 
-def _new_row(tender: Tender) -> TenderRow:
+def _new_row(tender: Tender, run_id: str | None = None) -> TenderRow:
     row = TenderRow(id=tender.id)
     _apply_source_fields(row, tender)
     row.first_seen_at = tender.first_seen_at
     row.last_seen_at = tender.last_seen_at
+    row.first_seen_run_id = run_id if run_id is not None else tender.first_seen_run_id
+    row.last_seen_run_id = run_id if run_id is not None else tender.last_seen_run_id
     return row
 
 
