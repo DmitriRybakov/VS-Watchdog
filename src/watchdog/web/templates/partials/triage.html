@@ -1,0 +1,64 @@
+{#
+  Triage mode: an ordered queue on the left, one decision card on the right.
+
+  Every card for this page is rendered here and all but one hidden, so j and k
+  move between notices with no request at all. Twenty-five cards of already
+  escaped text cost less than one round trip, and a queue that pauses between
+  notices is a queue people stop using.
+#}
+{% include "partials/toolbar.html" %}
+
+{% if not rows %}
+  {% include "partials/nothing.html" %}
+{% else %}
+<div class="triage" data-cursor="{{ view.cursor }}" data-count="{{ rows | length }}">
+
+  <ol class="queue" role="listbox" aria-label="Notices to triage" tabindex="0">
+    {% for row in rows %}
+      {% set badge = row.days_left | days_badge %}
+      <li class="queue-row{{ ' is-current' if loop.index0 == view.cursor else '' }}"
+          role="option"
+          id="queue-row-{{ loop.index0 }}"
+          data-index="{{ loop.index0 }}"
+          aria-selected="{{ 'true' if loop.index0 == view.cursor else 'false' }}">
+        <span class="queue-mark">
+          {% if row.screening %}
+            {% if row.is_assessed %}
+              <span class="chip chip-score chip-{{ row.screening.score }}"
+                    title="Assessed score">{{ row.screening.score }}</span>
+            {% else %}
+              <span class="chip chip-evidence chip-e{{ row.evidence_grade }}"
+                    title="Rules evidence grade, not a judged score">E{{ row.evidence_grade }}</span>
+            {% endif %}
+          {% else %}
+            <span class="chip chip-none" title="Never screened">&ndash;</span>
+          {% endif %}
+        </span>
+        <span class="queue-text">
+          <span class="queue-title">{{ row.tender.title }}</span>
+          <span class="queue-meta">
+            {{ row.tender.buyer_country or '&ndash;' | safe }} &middot;
+            <span class="badge badge-{{ badge.state }}">{{ badge.text }}</span>
+            {% if row.review %}
+              &middot; <span class="verdict verdict-{{ row.review.verdict.value }}">{{ row.review.verdict.value | verdict_label }}</span>
+            {% endif %}
+          </span>
+        </span>
+      </li>
+    {% endfor %}
+  </ol>
+
+  <div class="cards">
+    {% for row in rows %}
+      <article class="card decision-card{{ ' is-hidden' if loop.index0 != view.cursor else '' }}"
+               id="card-{{ loop.index0 }}"
+               data-index="{{ loop.index0 }}"
+               {{ 'hidden' if loop.index0 != view.cursor }}>
+        {% include "partials/card.html" %}
+      </article>
+    {% endfor %}
+  </div>
+</div>
+
+{% include "partials/pagination.html" %}
+{% endif %}

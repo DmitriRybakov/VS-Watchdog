@@ -1,0 +1,61 @@
+# One native Python web service on Render's free plan. No database here: the
+# database is Supabase, reached over the Session pooler with DATABASE_URL.
+#
+# Nothing in this file runs a migration. Render Free has no pre-deploy command, so
+# migrations are run from Windows against the same database - see
+# docs/DEPLOY_RENDER.md. A build that migrated would run on every deploy, and a
+# start command that migrated would run on every wake-up from sleep.
+services:
+  - type: web
+    name: watchdog
+    runtime: python
+    plan: free
+    region: frankfurt
+    branch: main
+
+    # The package declares its dependencies and ships its own templates, CSS and
+    # vendored HTMX as package data, so installing it is the whole build.
+    buildCommand: pip install --upgrade pip && pip install .
+
+    # One worker, no reload, bound to the port Render gives us. More than one
+    # worker on the free plan would mean two processes and two job locks fighting
+    # over 512 MB.
+    #
+    # forwarded-allow-ips is not optional here: Render terminates TLS at its own
+    # proxy and forwards plain HTTP to this process. Without it uvicorn believes
+    # the request arrived over http, and every link the templates build - the
+    # stylesheet and the vendored HTMX among them - comes out as an http:// URL
+    # that the browser then refuses to load on an https page.
+    startCommand: >-
+      python -m uvicorn watchdog.web.app:app
+      --host 0.0.0.0 --port $PORT --workers 1 --forwarded-allow-ips="*"
+
+    # The one route that needs no sign-in, and now says nothing but "up".
+    healthCheckPath: /health
+
+    envVars:
+      # Match the interpreter Watchdog is developed on. If Render reports this
+      # version as unavailable, move to the nearest 3.13.x and say so here.
+      - key: PYTHON_VERSION
+        value: 3.13.0
+
+      # Hosted. This is what makes sign-in and PostgreSQL compulsory.
+      - key: ENVIRONMENT
+        value: production
+
+      - key: LOG_LEVEL
+        value: INFO
+
+      # Entered in the Render dashboard, never in this file and never in git.
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_USERNAME
+        sync: false
+      - key: AUTH_PASSWORD
+        sync: false
+      - key: SESSION_SECRET
+        sync: false
+
+      # No model in the pilot. The whole application works with this.
+      - key: LLM_PROVIDER
+        value: disabled

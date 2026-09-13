@@ -1,0 +1,89 @@
+{#
+  Table mode: the register as a dense, sortable list. Deliberately the columns a
+  decision needs and no more - this is not the thirty-two-column workbook, and
+  everything else is one click away on the detail page.
+#}
+{% include "partials/toolbar.html" %}
+
+{% if not rows %}
+  {% include "partials/nothing.html" %}
+{% else %}
+<div class="table-wrap">
+  <table class="register-table">
+    <thead>
+      <tr>
+        <th scope="col">{{ 'Score' if view.ai_enabled else 'Evidence' }}</th>
+        <th scope="col">Band</th>
+        <th scope="col">Title</th>
+        <th scope="col">Buyer</th>
+        <th scope="col">Country</th>
+        <th scope="col">Domain</th>
+        <th scope="col">Published</th>
+        <th scope="col">Deadline</th>
+        <th scope="col">Signals</th>
+        <th scope="col">Conf.</th>
+        <th scope="col">Verdict</th>
+        <th scope="col">Owner</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+        {% set badge = row.days_left | days_badge %}
+        <tr class="table-row{{ ' is-current' if loop.index0 == view.cursor else '' }}"
+            data-index="{{ loop.index0 }}"
+            data-detail="/register/notice/{{ row.tender.id }}?{{ query.query_string(cursor=loop.index0) }}">
+          <td>
+            {% if row.screening %}
+              {% if row.is_assessed %}
+                <span class="chip chip-score chip-{{ row.screening.score }}"
+                      title="Assessed score">{{ row.screening.score }}</span>
+              {% else %}
+                <span class="chip chip-evidence chip-e{{ row.evidence_grade }}"
+                      title="Rules evidence grade, not a judged score">E{{ row.evidence_grade }}</span>
+              {% endif %}
+            {% else %}
+              <span class="chip chip-none" title="Never screened">&ndash;</span>
+            {% endif %}
+          </td>
+          <td>{{ row.screening.band.value | band_label if row.screening else 'Not screened' }}</td>
+          <td class="cell-title">
+            <a href="/register/notice/{{ row.tender.id }}?{{ query.query_string(cursor=loop.index0) }}">
+              {{ row.tender.title_native or row.tender.title }}
+            </a>
+            {% if row.tender.title_native %}
+              <span class="muted cell-sub">{{ row.tender.title }}</span>
+            {% endif %}
+          </td>
+          <td>{{ row.tender.buyer_name or '\u2013' }}</td>
+          <td>{{ row.tender.buyer_country or '\u2013' }}</td>
+          <td>
+            {% for domain in row.domains %}<span class="tag">{{ domain.value | words }}</span>{% else %}<span class="muted">&ndash;</span>{% endfor %}
+          </td>
+          <td>{{ row.tender.published_date | day }}</td>
+          <td class="cell-deadline">
+            {{ row.tender.deadline_date | day }}
+            <span class="badge badge-{{ badge.state }}">{{ badge.text }}</span>
+            <span class="muted cell-sub">{{ row.tender.deadline_type.value | deadline_type }}</span>
+          </td>
+          <td class="cell-signals">
+            {% for match in row.signals[:3] %}
+              <span class="tag tag-{{ match.signal.value }}" title="{{ match.alias_matched }}">{{ match.rule_id }}</span>
+            {% else %}
+              <span class="muted">&ndash;</span>
+            {% endfor %}
+          </td>
+          <td>{{ row.screening.confidence | percent if row.screening else '\u2013' }}</td>
+          <td>
+            <span class="verdict verdict-{{ row.review.verdict.value if row.review else 'none' }}">
+              {{ (row.review.verdict.value if row.review else None) | verdict_label }}
+            </span>
+          </td>
+          <td>{{ row.review.owner if row.review and row.review.owner else '\u2013' }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% include "partials/pagination.html" %}
+{% endif %}

@@ -1,0 +1,34 @@
+{#
+  Who this browser records decisions as.
+
+  It is attribution and nothing else: nothing is verified, anyone can type anyone's
+  name, and no permission depends on it. It says so on screen, because a box that
+  looks like a sign-in and is not one is worse than no box at all.
+
+  Nothing can be recorded until it is filled in. A verdict with nobody's name on
+  it cannot be told apart from any other later, and these reviews are the set the
+  next step gets measured against.
+#}
+<div class="reviewer{{ ' needs-name' if not reviewer else '' }}">
+  {% if reviewer_error %}
+    <p class="notice notice-warn" role="alert">{{ reviewer_error }}</p>
+  {% endif %}
+
+  {% if reviewer %}
+    <p class="reviewer-set">
+      Recording decisions as <strong>{{ reviewer }}</strong>.
+      <span class="muted">Not a sign-in &mdash; just a name on the review.</span>
+    </p>
+    <details class="reviewer-change">
+      <summary>Change</summary>
+      {% include "partials/reviewer_form.html" %}
+    </details>
+  {% else %}
+    <p class="reviewer-prompt" role="status">
+      <strong>Put your name in before you decide anything.</strong>
+      It goes on every verdict you record, so the decisions made today can still
+      be told apart tomorrow. This is not a sign-in and nothing is verified.
+    </p>
+    {% include "partials/reviewer_form.html" %}
+  {% endif %}
+</div>

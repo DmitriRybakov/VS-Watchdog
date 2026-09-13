@@ -84,6 +84,17 @@ consequence - especially decisions that become expensive to reverse.
   and will look healthy while Polish or Greek recall is half of it. The measurement can only come from
   human review decisions - the register itself is blind to this, because everything in it already
   passed our own vocabulary.
+- **PostgreSQL is stricter than SQLite about lengths and types, so this class of failure cannot be
+  caught by the local test suite.** SQLite ignores a declared `String(n)` entirely and converts
+  loosely between types; PostgreSQL rejects the row. A column that is too narrow, or a value of the
+  wrong type, therefore works on a laptop and raises `DataError` on the first hosted write - which is
+  what `deadline_source`, declared `String(64)` and always 65 to 75 characters long, did to the first
+  ingest against Supabase. Every test we have runs on SQLite and none of them can see it.
+  `tests/unit/test_column_lengths.py` checks the mapped fixtures against the declared lengths, which
+  catches the obvious case and proves nothing about a notice we have not recorded. The real answer is
+  to run the test suite against PostgreSQL in CI, or to stop declaring a length on anything that is
+  not a short code from a closed vocabulary. Until one of those is done, assume any new `String(n)`
+  on text that a source composes is a hosted-only failure waiting to happen.
 - Ingestion reads `config/sources/ted.yaml`, which is the configuration **seed**, not the active
   configuration. The `config_version` table arrives with the settings page, and ingestion must be
   switched to read the active version at that point, or a colleague's edit in the browser will have

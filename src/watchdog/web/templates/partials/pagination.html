@@ -1,0 +1,31 @@
+{% set pages = query.pages(view.page.total) %}
+{% if pages > 1 %}
+<nav class="pagination" aria-label="Pages">
+  {% if query.offset > 0 %}
+    {% set previous = query.query_string(offset=[0, query.offset - query.limit] | max, cursor=0) %}
+    <a href="/register?{{ previous }}" hx-get="/register?{{ previous }}"
+       hx-target="#results" hx-push-url="true" rel="prev">Previous</a>
+  {% else %}
+    <span class="muted">Previous</span>
+  {% endif %}
+
+  <span class="page-of">Page {{ query.page }} of {{ pages }}</span>
+
+  {% if query.offset + query.limit < view.page.total %}
+    {% set next = query.query_string(offset=query.offset + query.limit, cursor=0) %}
+    <a href="/register?{{ next }}" hx-get="/register?{{ next }}"
+       hx-target="#results" hx-push-url="true" rel="next">Next</a>
+  {% else %}
+    <span class="muted">Next</span>
+  {% endif %}
+
+  <label class="inline" for="page-size">Per page
+    <select id="page-size" name="limit" hx-get="/register" hx-include="#filters"
+            hx-target="#results" hx-push-url="true">
+      {% for size in [10, 25, 50, 100, 200] %}
+        <option value="{{ size }}" {{ 'selected' if query.limit == size }}>{{ size }}</option>
+      {% endfor %}
+    </select>
+  </label>
+</nav>
+{% endif %}

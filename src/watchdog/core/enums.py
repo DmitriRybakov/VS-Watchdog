@@ -175,3 +175,11 @@ class RunStatus(StrEnum):
     SUCCESS = "success"
     PARTIAL = "partial"
     FAILED = "failed"
+    # The process died while the run was in progress. A different claim from
+    # FAILED: nothing reported an error, so what it managed to write is unknown
+    # rather than wrong. Set at startup, never by the run itself.
+    INTERRUPTED = "interrupted"
+
+    @property
+    def finished(self) -> bool:
+        return self is not RunStatus.RUNNING

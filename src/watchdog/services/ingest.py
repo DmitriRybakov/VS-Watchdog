@@ -40,6 +40,7 @@ from watchdog.sources.base import TenderSource
 from watchdog.sources.errors import MappingError
 from watchdog.sources.ted import TedClient, TedSource, TedSourceConfig, map_notice
 from watchdog.storage.db import get_session_factory
+from watchdog.storage.errors import describe_error
 from watchdog.storage.repository import Repository
 
 log = get_logger(__name__)
@@ -607,15 +608,13 @@ def _ready(store: Repository) -> Repository:
 
 
 def _brief(exc: Exception) -> str:
-    """The first line of an error, and no more than that.
+    """One line, naming the failure and never the notice that caused it.
 
-    A database error carries the whole failed statement and every bound value
-    after its first line, and here those values are the notice itself. That must
-    reach neither the log nor the screen, and 16KB of SQL is not a sentence
-    anybody can act on.
+    A database error carries the whole failed statement and every bound value,
+    and here those values are the notice itself. That must reach neither the log
+    nor the screen, and 16KB of SQL is not a sentence anybody can act on.
     """
-    lines = str(exc).strip().splitlines()
-    text = lines[0].strip() if lines else type(exc).__name__
+    text = describe_error(exc)
     return text if len(text) <= 200 else f"{text[:197]}..."
 
 

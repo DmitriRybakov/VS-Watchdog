@@ -1,0 +1,28 @@
+{#
+  No rows. Which sentence to show depends on why, and each one says what to do
+  next: an unfiltered empty register is a different problem from a filter that
+  matched nothing, and telling a colleague the wrong one wastes their morning.
+#}
+<section class="card empty" role="status">
+  {% if view.empty_database %}
+    <h2>No notices yet</h2>
+    <p>Nothing has been read from TED on this database.
+       Press <strong>Update from TED</strong> at the top of the page.</p>
+
+  {% elif query.filters.undecided_only %}
+    <h2>Nothing left undecided here</h2>
+    <p>Every notice matching these filters has a verdict recorded against it.</p>
+    <p><a href="/register?{{ query.query_string(undecided=None) }}">Show decided ones too</a></p>
+
+  {% elif not query.filters.include_past_deadline %}
+    <h2>No open notices match these filters</h2>
+    <p>There may be notices here whose deadline has already passed.</p>
+    <p><a href="/register?{{ query.query_string(past='1') }}">Include past-deadline notices</a>
+       &middot; <a href="/register">Reset all filters</a></p>
+
+  {% else %}
+    <h2>No notices match these filters</h2>
+    <p>Nothing has been deleted &mdash; try widening the search.</p>
+    <p><a href="/register">Reset all filters</a></p>
+  {% endif %}
+</section>

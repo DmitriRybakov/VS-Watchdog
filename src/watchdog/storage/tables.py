@@ -147,7 +147,9 @@ class TenderRow(Base):
     # Set only when the source gave a time of day as well as a date.
     deadline: Mapped[datetime | None] = mapped_column(UtcDateTime)
     deadline_date: Mapped[date | None] = mapped_column(Date)
-    deadline_source: Mapped[str | None] = mapped_column(String(64))
+    # Two source field names joined by "+", not a code: the longest TED can
+    # produce today is 75 characters and a new deadline field could be longer.
+    deadline_source: Mapped[str | None] = mapped_column(Text)
     deadline_type: Mapped[str] = mapped_column(String(32), nullable=False)
 
     notice_stage: Mapped[str] = mapped_column(String(32), nullable=False)
@@ -266,6 +268,16 @@ class ScreeningResultRow(Base):
         Integer, nullable=False, default=0, server_default=text("0")
     )
 
+    # What the `rules` blob and `reason_codes` already say, in a form SQL can
+    # filter on. The register filters by domain, by matched rule and by reason
+    # code, and a JSON column cannot be asked "does it contain" in a way that
+    # works on SQLite and PostgreSQL both. Derived on write in the repository from
+    # the blob beside them, exactly as domain_strength_rank is, so the two cannot
+    # come to disagree.
+    domains: Mapped[list[str]] = mapped_column(DelimitedList, nullable=False, default=list)
+    matched_rules: Mapped[list[str]] = mapped_column(DelimitedList, nullable=False, default=list)
+    reason_tags: Mapped[list[str]] = mapped_column(DelimitedList, nullable=False, default=list)
+
     rules: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
     assessment: Mapped[dict[str, Any] | None] = mapped_column(JSON)
     explanation: Mapped[str] = mapped_column(Text, nullable=False)
@@ -354,6 +366,41 @@ class RunRow(Base):
     model: Mapped[str | None] = mapped_column(String(128))
     prompt_version: Mapped[str | None] = mapped_column(String(32))
     latency_ms: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+
+
+class JobLockRow(Base):
+    """One row per job name, saying whether a run is in progress and how far it got.
+
+    It is the lock and the progress report at the same time, on purpose: a second
+    lock held somewhere else could disagree with what the page is showing, and the
+    page would have no way to tell which was right.
+
+    Acquiring is a conditional UPDATE, so two requests arriving together cannot
+    both win - the database decides, not the web process. The row is never
+    deleted; it is released by being set not held.
+    """
+
+    __tablename__ = "job_lock"
+
+    name: Mapped[str] = mapped_column(String(32), primary_key=True)
+    held: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    kind: Mapped[str | None] = mapped_column(String(32))
+    run_id: Mapped[str | None] = mapped_column(String(64))
+    # What the job is doing right now, in words a colleague can read.
+    phase: Mapped[str | None] = mapped_column(String(64))
+    processed: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    # 0 means "not known yet", which is a real state at the start of an ingest.
+    total: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    counts: Mapped[dict[str, int]] = mapped_column(JSON, nullable=False, default=dict)
+    status: Mapped[str | None] = mapped_column(String(16))
+    # One sentence. Never a stack trace: this is shown to the person who pressed
+    # the button.
+    error: Mapped[str | None] = mapped_column(Text)
+
+    started_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    finished_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
+    updated_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
 
 
 class WatermarkRow(Base):

@@ -94,6 +94,16 @@ Everything comes from environment variables; see `.env.example`. Defaults are ch
 clone runs with no configuration at all: SQLite in `data/`, and the language model provider
 `disabled`.
 
+## Hosted deployment
+
+A laptop needs no sign-in and no PostgreSQL. Anything hosted needs both, and refuses to start
+without them rather than coming up open to the internet or writing to a disk that the next deploy
+erases. One shared username and password covers the whole site; `/health` is the only route in front
+of it, and says nothing but that the process is answering.
+
+See [docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md) for the Render and Supabase setup, the exact
+Windows commands for migrating and filling a hosted database, and the restart test.
+
 ## Layout
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the layers and the import rule.

@@ -1,0 +1,16 @@
+<form class="reviewer-form"
+      hx-post="/register/reviewer"
+      hx-target="#reviewer"
+      hx-swap="innerHTML">
+  <label for="reviewer-name">Recording as
+    <input id="reviewer-name"
+           type="text"
+           name="name"
+           value="{{ reviewer or '' }}"
+           maxlength="80"
+           autocomplete="name"
+           placeholder="Your name"
+           required />
+  </label>
+  <button type="submit" class="button">Save</button>
+</form>

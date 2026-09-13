@@ -1,0 +1,60 @@
+{#
+  Above the results: how many matched, how they are ordered, which mode, and the
+  two exports. Every control is a link or a select carrying the current filter,
+  so nothing here can show a different set from the rows below it.
+#}
+<div class="toolbar">
+  <p class="result-count" role="status">
+    <strong>{{ view.page.total }}</strong>
+    notice{{ '' if view.page.total == 1 else 's' }} match
+    {% if view.page.total > view.page.limit %}
+      &mdash; showing {{ view.page.offset + 1 }}&ndash;{{ view.page.offset + rows | length }}
+    {% endif %}
+    {% if not query.filters.include_past_deadline %}
+      <span class="muted">Past-deadline notices are hidden.</span>
+    {% endif %}
+  </p>
+
+  <div class="toolbar-controls">
+    <span class="modes" role="group" aria-label="View mode">
+      <a class="mode{{ ' is-current' if query.mode == 'triage' }}"
+         href="/register?{{ query.query_string(mode='triage', cursor=0) }}"
+         hx-get="/register?{{ query.query_string(mode='triage', cursor=0) }}"
+         hx-target="#results" hx-push-url="true">Triage</a>
+      <a class="mode{{ ' is-current' if query.mode == 'table' }}"
+         href="/register?{{ query.query_string(mode='table', cursor=0) }}"
+         hx-get="/register?{{ query.query_string(mode='table', cursor=0) }}"
+         hx-target="#results" hx-push-url="true">Table</a>
+    </span>
+
+    <label class="inline" for="sort-select">Order by
+      <select id="sort-select" name="sort"
+              hx-get="/register"
+              hx-include="#filters"
+              hx-target="#results"
+              hx-push-url="true">
+        {% for key, label in sorts %}
+          <option value="{{ key }}" {{ 'selected' if query.sort == key }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <a class="muted"
+       href="/register?{{ query.query_string(dir='asc' if query.descending else 'desc') }}"
+       hx-get="/register?{{ query.query_string(dir='asc' if query.descending else 'desc') }}"
+       hx-target="#results" hx-push-url="true">
+      {{ 'Highest first' if query.descending else 'Lowest first' }}
+    </a>
+
+    <span class="exports">
+      <a href="/register/export.csv?{{ query.query_string() }}">Export CSV</a>
+      <a href="/register/export.xlsx?{{ query.query_string() }}">Export Excel</a>
+    </span>
+  </div>
+
+  <p class="keys muted">
+    <kbd>j</kbd>/<kbd>k</kbd> move &middot; <kbd>Enter</kbd> open &middot;
+    <kbd>y</kbd> relevant &middot; <kbd>n</kbd> not relevant &middot; <kbd>u</kbd> unsure &middot;
+    <kbd>/</kbd> search
+  </p>
+</div>

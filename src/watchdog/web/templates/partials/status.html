@@ -1,0 +1,109 @@
+{#
+  The header belt: what the last run did, what a run is doing now, and the two
+  buttons that start one. Replaces itself while a job is running, and once more
+  after it finishes so the final counts land without a page load.
+
+  "Running" means holding the lock *and* still reporting progress. A run whose
+  process was stopped - which is what happens when a free host goes to sleep
+  mid-run - stops reporting, and is shown as something to restart rather than as
+  something to wait for.
+#}
+<div class="belt{{ ' is-running' if job and job.running else '' }}"
+     {% if job and job.running %}
+     hx-get="/runs/status"
+     hx-trigger="every 1s"
+     hx-target="#run-status"
+     hx-swap="innerHTML"
+     {% endif %}
+     {% if finished %}data-run-finished="{{ job.status.value }}"{% endif %}>
+
+  <div class="belt-actions">
+    <form hx-post="/runs/update" hx-target="#run-status" hx-swap="innerHTML">
+      <button type="submit" class="button primary"
+              {{ 'disabled' if job and job.running else '' }}>Update from TED</button>
+    </form>
+    <form hx-post="/runs/rescreen" hx-target="#run-status" hx-swap="innerHTML">
+      <button type="submit" class="button"
+              {{ 'disabled' if job and job.running else '' }}>Re-screen</button>
+    </form>
+  </div>
+
+  <div class="belt-state">
+    {% if busy_error %}
+      <p class="notice notice-warn" role="alert">{{ busy_error }}</p>
+
+    {% elif job and job.stale %}
+      <p class="notice notice-warn" role="alert">
+        <strong>A run stopped part way through.</strong>
+        It last reported at {{ job.updated_at | moment }} and has said nothing since,
+        so the process running it is gone. Everything it had already written is kept.
+        Press a button above to carry on from there.
+      </p>
+
+    {% elif job and job.running %}
+      <p class="running" role="status">
+        <span class="spinner" aria-hidden="true"></span>
+        <strong>{{ job.phase or 'Working' }}</strong>
+        {% if job.total %}
+          &mdash; {{ job.processed }} of {{ job.total }}
+          {% if job.percent is not none %}({{ job.percent }}%){% endif %}
+        {% elif job.processed %}
+          &mdash; {{ job.processed }} so far
+        {% endif %}
+      </p>
+      {% if job.total %}
+        <progress value="{{ job.processed }}" max="{{ job.total }}"></progress>
+      {% else %}
+        <progress></progress>
+      {% endif %}
+      <p class="muted">The page stays usable while this runs.</p>
+
+    {% elif job and job.status and job.status.value == 'failed' %}
+      <p class="notice notice-error" role="alert">
+        <strong>That run failed.</strong> {{ job.error or 'No reason was recorded.' }}
+      </p>
+      <form hx-post="/runs/{{ 'rescreen' if job.kind and job.kind.value == 'screen' else 'update' }}"
+            hx-target="#run-status" hx-swap="innerHTML">
+        <button type="submit" class="button">Retry</button>
+      </form>
+
+    {% elif job and job.status and job.status.value == 'interrupted' %}
+      <p class="notice notice-warn" role="alert">
+        <strong>A run was interrupted.</strong>
+        {{ job.error or 'The application restarted while it was in progress.' }}
+        What it had already written is kept; press Update from TED to carry on.
+      </p>
+
+    {% elif job and job.status %}
+      <p class="run-result" role="status">
+        Last run: <strong>{{ job.status.value }}</strong>
+        {% if job.counts %}
+          &mdash;
+          {% for name, value in job.counts.items() %}{% if value %}{{ value }} {{ name | replace('_', ' ') }}{{ ', ' if not loop.last }}{% endif %}{% endfor %}
+        {% endif %}
+        {% if job.finished_at %}<span class="muted">at {{ job.finished_at | moment }}</span>{% endif %}
+      </p>
+    {% endif %}
+
+    <p class="belt-runs muted">
+      {% if last_ingest %}
+        Last update from TED: {{ last_ingest.started_at | moment }},
+        <span class="status status-{{ last_ingest.status.value }}">{{ last_ingest.status.value }}</span>
+        {% if last_ingest.errors %}&mdash; {{ last_ingest.errors | length }} error(s){% endif %}
+      {% else %}
+        TED has never been read on this database.
+      {% endif %}
+      {% if last_screen %}
+        &middot; Last screening: {{ last_screen.started_at | moment }},
+        <span class="status status-{{ last_screen.status.value }}">{{ last_screen.status.value }}</span>
+      {% endif %}
+      &middot;
+      {% if ai_enabled %}
+        <span class="ai-on">AI assessment is on.</span>
+      {% else %}
+        <span class="ai-off">AI assessment is off &mdash; rules only.</span>
+      {% endif %}
+      <a href="/runs">All runs</a>
+    </p>
+  </div>
+</div>

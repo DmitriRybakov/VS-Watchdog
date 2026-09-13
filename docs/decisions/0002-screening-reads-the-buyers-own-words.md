@@ -51,3 +51,42 @@ and `description-lot` are likewise the buyer's own text.
 - The cost: `screening_text` for a bilingual multi-lot notice is longer than one title and one
   description, which matters when it reaches a model prompt. If that becomes expensive, the place to
   economise is block selection at prompt time, not at storage time - the blocks stay.
+
+## Amendment, 2026-09-13: what is *read* and what is *displayed* are different questions
+
+This record governs what the screening reads. It does **not** govern what the register shows, and the
+two must not be conflated - which is easy to do, because the reasoning above reads like an argument
+against the composed title in general. It is not.
+
+The argument is about circularity. Our query filters on CPV; the composed title restates that CPV
+label back to us; so matching a rule against it would manufacture evidence for the thing we searched
+for. That is a fatal objection to **screening** on it. It is not an objection to **displaying** it,
+because displaying a line makes no claim about relevance at all.
+
+Measured on the 2,158-notice corpus of 1 July to 11 September 2026:
+
+| | |
+| --- | --- |
+| notices with a non-empty `title_native` | 2,158 of 2,158 |
+| of those, in English | 335 (15.5%) |
+| in French | 467 &middot; German 393 &middot; Spanish 240 &middot; Polish 124 |
+
+A triage screen showing only `title_native` is therefore unreadable to a Norwegian or British
+colleague on roughly 85% of rows. The composed `title` carries the country and the CPV category in
+English and is the most legible single line available.
+
+**Decision.**
+
+6. The register's triage line and card heading are `Tender.title`, the composed title.
+   `Tender.title_native` is shown on the card directly beneath it, labelled "Buyer's own title" with
+   its language named, because that is the text the screening actually read.
+7. The composed title is **never presented as a translation**. It is not one: TED translates the
+   country name and the CPV category, and the buyer's own title inside it stays in its original
+   language. The detail page says so in as many words. Anything that labels it "English" or
+   "translated scope" is wrong and should be changed back.
+8. The table mode leads with `title_native` and shows the composed title beneath it as secondary
+   text, because a dense table is a scanning tool where the buyer's exact words are the useful key.
+   Triage leads with the composed title because it is a reading tool.
+
+Nothing in points 1 to 5 changes. `screening_blocks` still excludes the composed title, `content_hash`
+still covers exactly what is screened, and no rule may ever match against `Tender.title`.

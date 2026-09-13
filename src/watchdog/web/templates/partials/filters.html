@@ -1,0 +1,173 @@
+{#
+  The left rail. One form; changing any control swaps only the results region and
+  pushes the new URL, so a filtered view can be bookmarked and shared.
+
+  It posts to /register rather than to a fragment endpoint on purpose: that way
+  the URL HTMX pushes is the same URL a person could type.
+#}
+<form class="filters"
+      id="filters"
+      hx-get="/register"
+      hx-target="#results"
+      hx-swap="innerHTML"
+      hx-push-url="true"
+      hx-indicator="#results"
+      hx-trigger="change, submit, keyup from:#filter-text delay:400ms">
+
+  <input type="hidden" name="mode" value="{{ query.mode }}" />
+  <input type="hidden" name="sort" value="{{ query.sort }}" />
+  <input type="hidden" name="dir" value="{{ 'desc' if query.descending else 'asc' }}" />
+  {% if query.view %}<input type="hidden" name="view" value="{{ query.view }}" />{% endif %}
+
+  <div class="filter-head">
+    <h2>Filter</h2>
+    <a class="muted" href="/register">Reset</a>
+  </div>
+
+  <label for="filter-text">Free text
+    <input id="filter-text" type="search" name="q" value="{{ query.filters.text or '' }}"
+           placeholder="Title, native title or description"
+           aria-describedby="filter-text-help" />
+  </label>
+  <p id="filter-text-help" class="muted">Searches the buyer's own words. Press / to jump here.</p>
+
+  <fieldset>
+    <legend>Band</legend>
+    {% for band in ['shortlist', 'review', 'archive'] %}
+      <label class="check">
+        <input type="checkbox" name="band" value="{{ band }}"
+               {{ 'checked' if query.filters.bands and band in query.filters.bands | map(attribute='value') | list }} />
+        {{ band | band_label }}
+      </label>
+    {% endfor %}
+    <label class="check">
+      <input type="checkbox" name="band" value="all"
+             {{ 'checked' if not query.filters.bands }} />
+      Any band
+    </label>
+  </fieldset>
+
+  {% if view.ai_enabled %}
+    <label for="filter-score">Minimum score
+      <select id="filter-score" name="score_min">
+        <option value="">Any</option>
+        {% for number in [1, 2, 3, 4, 5] %}
+          <option value="{{ number }}" {{ 'selected' if query.filters.min_score == number }}>{{ number }}+</option>
+        {% endfor %}
+      </select>
+    </label>
+  {% else %}
+    <label for="filter-evidence">Minimum evidence
+      <select id="filter-evidence" name="evidence_min">
+        <option value="">Any</option>
+        {% for number in [0, 1, 2, 3] %}
+          <option value="{{ number }}" {{ 'selected' if query.filters.min_rules_score == number }}>
+            {{ number }} &ndash; {{ number | evidence_label }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+  {% endif %}
+
+  <label for="filter-domain">Domain
+    <select id="filter-domain" name="domain">
+      <option value="">Any</option>
+      {% for domain in view.facets.domains %}
+        <option value="{{ domain }}"
+                {{ 'selected' if query.filters.domain and query.filters.domain.value == domain }}>
+          {{ domain | words }}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label for="filter-buyer-country">Buyer country
+    <select id="filter-buyer-country" name="buyer_country">
+      <option value="">Any</option>
+      {% for country in view.facets.buyer_countries %}
+        <option value="{{ country }}" {{ 'selected' if query.filters.buyer_country == country }}>{{ country }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label for="filter-performance-country">Country of performance
+    <select id="filter-performance-country" name="performance_country"
+            aria-describedby="performance-help">
+      <option value="">Any</option>
+      {% for country in view.facets.performance_countries %}
+        <option value="{{ country }}"
+                {{ 'selected' if query.filters.place_of_performance_country == country }}>{{ country }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <p id="performance-help" class="muted">
+    Where the work happens, which is a different question from who is buying.
+    Country level only &mdash; regions are not resolved.
+  </p>
+
+  <label for="filter-source">Source
+    <select id="filter-source" name="source">
+      <option value="">Any</option>
+      {% for source in view.facets.sources %}
+        <option value="{{ source }}" {{ 'selected' if query.filters.source and query.filters.source.value == source }}>
+          {{ source | upper }}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label for="filter-rule">Keyword rule
+    <select id="filter-rule" name="rule">
+      <option value="">Any</option>
+      {% for rule in view.facets.rule_ids %}
+        <option value="{{ rule }}" {{ 'selected' if query.filters.rule_id == rule }}>{{ rule }}</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <fieldset>
+    <legend>Published</legend>
+    <label for="filter-published-from">From
+      <input id="filter-published-from" type="date" name="published_from"
+             value="{{ query.filters.published_from or '' }}" />
+    </label>
+    <label for="filter-published-to">To
+      <input id="filter-published-to" type="date" name="published_to"
+             value="{{ query.filters.published_to or '' }}" />
+    </label>
+  </fieldset>
+
+  <label for="filter-closing">Deadline within
+    <select id="filter-closing" name="closing">
+      <option value="">Any</option>
+      {% for days in [7, 14, 30, 60] %}
+        <option value="{{ days }}" {{ 'selected' if query.filters.closing_within_days == days }}>{{ days }} days</option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <label class="check">
+    <input type="checkbox" name="past" value="1" {{ 'checked' if query.filters.include_past_deadline }} />
+    Include past-deadline notices
+  </label>
+  <p class="muted">A passed date is not evidence the procurement is closed, so nothing is deleted &mdash; only hidden.</p>
+
+  <label class="check">
+    <input type="checkbox" name="undecided" value="1" {{ 'checked' if query.filters.undecided_only }} />
+    Undecided only
+  </label>
+
+  <label for="filter-verdict">Verdict
+    <select id="filter-verdict" name="verdict">
+      <option value="">Any</option>
+      {% for choice in verdicts %}
+        <option value="{{ choice.value }}"
+                {{ 'selected' if query.filters.verdict and query.filters.verdict.value == choice.value }}>
+          {{ choice.value | verdict_label }}
+        </option>
+      {% endfor %}
+    </select>
+  </label>
+
+  <noscript><button type="submit" class="button">Apply filters</button></noscript>
+</form>

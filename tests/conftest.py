@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from collections.abc import Callable, Iterator
 from datetime import UTC, date, datetime
 from decimal import Decimal
@@ -11,9 +12,15 @@ from fastapi.testclient import TestClient
 
 from watchdog.core.enums import ContractNature, DeadlineType, NoticeStage, SourcePlatform
 from watchdog.core.models import Tender, TextBlock
+from watchdog.core.settings import get_settings
 from watchdog.screening import RuleEngine, RulesConfig, load_rules_config
 from watchdog.screening.profile import Profile, load_profile
-from watchdog.storage.db import SessionFactory, create_db_engine, create_session_factory
+from watchdog.storage.db import (
+    SessionFactory,
+    create_db_engine,
+    create_session_factory,
+    get_session_factory,
+)
 from watchdog.storage.repository import Repository
 from watchdog.storage.tables import Base
 
@@ -22,6 +29,31 @@ TED_FIXTURES_DIR = FIXTURES_DIR / "ted"
 # The shipped configuration, found from the repository root rather than the
 # working directory, so a test run from anywhere reads the same files.
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _never_the_real_register() -> Iterator[None]:
+    """Point the process-wide database at memory, for the whole test session.
+
+    Without this, anything that reaches for the configured database rather than
+    taking an injected one - the application's startup recovery, most obviously -
+    would read and write ``data/watchdog.db``. A test suite that can edit the
+    register it is testing is a test suite nobody can trust.
+    """
+    os.environ["DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
+    get_settings.cache_clear()
+    get_session_factory.cache_clear()
+
+    factory = get_session_factory()
+    with factory() as session:
+        Base.metadata.create_all(session.connection())
+        session.commit()
+
+    try:
+        yield
+    finally:
+        get_settings.cache_clear()
+        get_session_factory.cache_clear()
 
 
 def load_ted_fixture(name: str) -> dict:
@@ -57,14 +89,6 @@ def profile() -> Profile:
 
 
 @pytest.fixture
-def client() -> Iterator[TestClient]:
-    from watchdog.web.app import create_app
-
-    with TestClient(create_app()) as test_client:
-        yield test_client
-
-
-@pytest.fixture
 def session_factory() -> Iterator[SessionFactory]:
     """An empty database in memory, built from the same metadata as production."""
     engine = create_db_engine("sqlite+pysqlite:///:memory:")
@@ -78,6 +102,24 @@ def session_factory() -> Iterator[SessionFactory]:
 @pytest.fixture
 def repository(session_factory: SessionFactory) -> Repository:
     return Repository(session_factory)
+
+
+@pytest.fixture
+def client(repository: Repository) -> Iterator[TestClient]:
+    """The application, pointed at an empty in-memory database.
+
+    Overriding the dependency rather than the environment is what keeps a test run
+    off the real register: the routes, the startup recovery and the background
+    jobs all take their repository from here.
+    """
+    from watchdog.web.app import create_app
+    from watchdog.web.deps import get_repository
+
+    app = create_app()
+    app.dependency_overrides[get_repository] = lambda: repository
+
+    with TestClient(app) as test_client:
+        yield test_client
 
 
 @pytest.fixture

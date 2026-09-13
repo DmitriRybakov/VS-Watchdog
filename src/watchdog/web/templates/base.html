@@ -6,15 +6,32 @@
     <title>{% block title %}Watchdog{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', path='css/watchdog.css') }}" />
     <script src="{{ url_for('static', path='js/htmx.min.js') }}" defer></script>
+    <script src="{{ url_for('static', path='js/triage.js') }}" defer></script>
   </head>
-  <body>
+  {#
+    Every HTMX request on the page carries the session's CSRF token, so each of
+    the buttons that change something is confirmed as coming from Watchdog.
+    Empty on a laptop with no sign-in configured, where there is no session.
+  #}
+  <body hx-headers='{"X-CSRF-Token": "{{ request.state.csrf_token }}"}'>
     <header class="site-header">
       <a class="brand" href="/">Watchdog</a>
       <span class="subtitle">Entr Advisory &amp; Decision Support</span>
+      <nav class="site-nav">
+        <a href="/register">Register</a>
+        <a href="/runs">Runs</a>
+        {% if request.state.user %}
+          <form class="sign-out" method="post" action="/logout">
+            <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}" />
+            <button type="submit" class="link-button">Sign out {{ request.state.user }}</button>
+          </form>
+        {% endif %}
+      </nav>
     </header>
     <main>{% block content %}{% endblock %}</main>
     <footer class="site-footer">
       <span>Version {{ version }}</span>
+      <span class="muted">All times UTC. Nothing is ever deleted.</span>
     </footer>
   </body>
 </html>

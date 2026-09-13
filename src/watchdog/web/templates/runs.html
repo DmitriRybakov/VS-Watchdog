@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Runs &middot; Watchdog{% endblock %}
+
+{% block content %}
+<h1>Runs</h1>
+<p class="muted">
+  Every number in the register can be traced to one of these. Nothing here is
+  deleted; a run that failed keeps its row and its errors.
+</p>
+
+<div id="run-status">
+  {% include "partials/status.html" %}
+</div>
+
+{% if not runs %}
+  <section class="card empty">
+    <h2>No runs yet</h2>
+    <p>Nothing has been read or screened on this database.
+       Press <strong>Update from TED</strong> above.</p>
+  </section>
+{% else %}
+<div class="table-wrap">
+  <table class="register-table">
+    <thead>
+      <tr>
+        <th scope="col">Started</th>
+        <th scope="col">Kind</th>
+        <th scope="col">Status</th>
+        <th scope="col">Window</th>
+        <th scope="col">Duration</th>
+        <th scope="col">Counts</th>
+        <th scope="col">Model</th>
+        <th scope="col">Errors</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for run in runs %}
+        <tr>
+          <td>{{ run.started_at | moment }}</td>
+          <td>{{ run.kind.value }}{% if run.source %} &middot; {{ run.source.value | upper }}{% endif %}</td>
+          <td><span class="status status-{{ run.status.value }}">{{ run.status.value }}</span></td>
+          <td>
+            {% if run.window_from and run.window_to %}
+              {{ run.window_from | day }} &rarr; {{ run.window_to | day }}
+            {% else %}<span class="muted">&ndash;</span>{% endif %}
+          </td>
+          <td>
+            {% if run.finished_at %}
+              {{ ((run.finished_at - run.started_at).total_seconds() | round | int) }}s
+            {% else %}<span class="muted">unfinished</span>{% endif %}
+          </td>
+          <td class="cell-counts">
+            {% for name, value in run.counts.items() %}
+              <span class="tag">{{ name | replace('_', ' ') }} {{ value }}</span>
+            {% else %}<span class="muted">&ndash;</span>{% endfor %}
+          </td>
+          <td>
+            {% if run.provider %}
+              {{ run.provider }}{% if run.model %} / {{ run.model }}{% endif %}
+            {% else %}<span class="muted">no model</span>{% endif %}
+          </td>
+          <td class="cell-errors">
+            {% if run.errors %}
+              <details>
+                <summary>{{ run.errors | length }}</summary>
+                <ul>{% for error in run.errors[:20] %}<li>{{ error }}</li>{% endfor %}</ul>
+              </details>
+            {% else %}<span class="muted">none</span>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% if quarantined %}
+<section>
+  <h2>Notices that could not be read</h2>
+  <p class="muted">
+    Their payloads are kept so the current mapper can be run over them again.
+    They are not lost and they are not archived.
+  </p>
+  <ul>
+    {% for notice in quarantined %}
+      <li>
+        <strong>{{ notice.source.value | upper }} {{ notice.source_id }}</strong>
+        &mdash; {{ notice.error_type }}: {{ notice.error }}
+        <span class="muted">last seen {{ notice.last_seen_at | moment }}</span>
+      </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+{% endblock %}

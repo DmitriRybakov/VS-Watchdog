@@ -15,19 +15,25 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Callable, Iterable, Sequence
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel
 from sqlalchemy import Select, and_, func, inspect, nulls_last, or_, select, update
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
 from watchdog.core.clock import utc_now
 from watchdog.core.enums import RunKind, RunStatus, SourcePlatform
 from watchdog.core.models import (
     RANKING_FIELDS,
+    STALE_JOB_AFTER,
+    JobState,
     QuarantinedNotice,
+    RegisterFacets,
+    RegisterPage,
+    RegisterRow,
     Review,
     Run,
     SchemaCheck,
@@ -47,6 +53,8 @@ from watchdog.core.models import (
 from watchdog.storage.db import SessionFactory
 from watchdog.storage.tables import (
     Base,
+    DelimitedList,
+    JobLockRow,
     QuarantineRow,
     ReviewRow,
     RunRow,
@@ -115,8 +123,11 @@ SORT_KEYS: dict[str, InstrumentedAttribute[Any]] = {
     "first_seen_at": TenderRow.first_seen_at,
     "last_seen_at": TenderRow.last_seen_at,
     "title": TenderRow.title,
+    "buyer_name": TenderRow.buyer_name,
     "buyer_country": TenderRow.buyer_country,
     "score": ScreeningResultRow.score,
+    "band": ScreeningResultRow.band,
+    "confidence": ScreeningResultRow.confidence,
     # What the keyword rules alone claimed, 0 upwards. This is what the register
     # orders on when no model is configured: it grades "no evidence at all" below
     # "weak evidence", which `score` cannot, because there a 2 for an unscreened
@@ -284,9 +295,7 @@ class Repository:
 
         with self._session_factory() as session:
             total = session.scalar(
-                _latest_screening_join(select(func.count()).select_from(TenderRow)).where(
-                    *conditions
-                )
+                _register_joins(select(func.count()).select_from(TenderRow)).where(*conditions)
             )
 
             if sort_by == REGISTER_SORT:
@@ -297,7 +306,7 @@ class Repository:
 
             rows = (
                 session.execute(
-                    _latest_screening_join(select(TenderRow))
+                    _register_joins(select(TenderRow))
                     .where(*conditions)
                     # Unknown values sort last either way, and id breaks ties so
                     # paging cannot show the same notice twice.
@@ -329,6 +338,116 @@ class Repository:
                 .all()
             )
             return [TenderChange.model_validate(row) for row in rows]
+
+    # ----------------------------------------------------------------- register
+
+    def list_register(
+        self,
+        filters: TenderFilters | None = None,
+        *,
+        sort_by: str = REGISTER_SORT,
+        descending: bool = True,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> RegisterPage:
+        """One page of the register: notice, current screening and current review.
+
+        The three are fetched in one query so that a page of fifty rows is one
+        round trip rather than a hundred and one, and so that filtering on a
+        verdict is done by the database rather than by discarding rows afterwards.
+
+        Same contract as :meth:`list_tenders`: ``sort_by`` must be in ``SORT_KEYS``
+        or be ``REGISTER_SORT``, and ``limit`` is capped rather than refused.
+        """
+        _check_sort(sort_by)
+        limit = max(1, min(limit, MAX_PAGE_SIZE))
+        offset = max(0, offset)
+        conditions = _filter_conditions(filters or TenderFilters())
+
+        if sort_by == REGISTER_SORT:
+            ordering = _register_ordering(descending)
+        else:
+            column = SORT_KEYS[sort_by]
+            ordering = [nulls_last(column.desc() if descending else column.asc())]
+
+        with self._session_factory() as session:
+            total = session.scalar(
+                _register_joins(select(func.count()).select_from(TenderRow)).where(*conditions)
+            )
+
+            rows = session.execute(
+                _register_joins(select(TenderRow, ScreeningResultRow, ReviewRow))
+                .where(*conditions)
+                # id breaks ties so paging cannot show the same notice twice.
+                .order_by(*ordering, TenderRow.id.asc())
+                .limit(limit)
+                .offset(offset)
+            ).all()
+
+            return RegisterPage(
+                items=[_as_register_row(row) for row in rows],
+                total=total or 0,
+                limit=limit,
+                offset=offset,
+            )
+
+    def count_register(self, filters: TenderFilters | None = None) -> int:
+        """How many notices match. The header counts are each one of these.
+
+        Counted with exactly the filters the matching link carries, so a number on
+        screen and the view it opens can never disagree.
+        """
+        conditions = _filter_conditions(filters or TenderFilters())
+        with self._session_factory() as session:
+            total = session.scalar(
+                _register_joins(select(func.count()).select_from(TenderRow)).where(*conditions)
+            )
+            return total or 0
+
+    def get_register_row(self, tender_id: str) -> RegisterRow | None:
+        """One notice with its current screening and review, for the detail page."""
+        with self._session_factory() as session:
+            row = session.execute(
+                _register_joins(select(TenderRow, ScreeningResultRow, ReviewRow)).where(
+                    TenderRow.id == tender_id
+                )
+            ).first()
+            return _as_register_row(row) if row is not None else None
+
+    def register_facets(self) -> RegisterFacets:
+        """The values the left-rail dropdowns can offer, asked of the database.
+
+        Offering the whole vocabulary instead would put twenty-four countries in a
+        list where the register holds six, and a colleague choosing one of the
+        other eighteen would learn only that the tool found nothing.
+        """
+        with self._session_factory() as session:
+            sources = _scalars(session, select(TenderRow.source).distinct())
+            buyer_countries = _scalars(session, select(TenderRow.buyer_country).distinct())
+            performance = _scalars(
+                session, select(TenderRow.place_of_performance_country).distinct()
+            )
+            domains = _scalars(
+                session,
+                select(ScreeningResultRow.domains)
+                .distinct()
+                .where(ScreeningResultRow.superseded.is_(False)),
+            )
+            rules = _scalars(
+                session,
+                select(ScreeningResultRow.matched_rules)
+                .distinct()
+                .where(ScreeningResultRow.superseded.is_(False)),
+            )
+
+        return RegisterFacets(
+            sources=sorted(sources),
+            buyer_countries=sorted(buyer_countries),
+            # Stored as a delimited list, so one row can carry several codes.
+            performance_countries=sorted(_split_all(performance)),
+            domains=sorted(_split_all(domains)),
+            rule_ids=sorted(_split_all(rules)),
+        )
 
     # --------------------------------------------------------------- quarantine
 
@@ -510,6 +629,9 @@ class Repository:
                 reason_codes=list(result.reason_codes),
                 domain_strength_rank=result.domain_strength_rank,
                 domain_rules_matched=result.domain_rules_matched,
+                domains=[domain.value for domain in result.rules.domains_hit],
+                matched_rules=_distinct(match.rule_id for match in result.rules.matches),
+                reason_tags=_distinct(code.lower() for code in result.reason_codes),
                 rules=result.rules.model_dump(mode="json"),
                 assessment=(
                     result.assessment.model_dump(mode="json")
@@ -794,6 +916,197 @@ class Repository:
             )
             return [Run.model_validate(row) for row in rows]
 
+    def latest_run(self, kind: RunKind | None = None) -> Run | None:
+        """The most recent run, of one kind or of any. What the header reports."""
+        conditions = [RunRow.kind == kind.value] if kind is not None else []
+        with self._session_factory() as session:
+            row = (
+                session.execute(
+                    select(RunRow).where(*conditions).order_by(RunRow.started_at.desc()).limit(1)
+                )
+                .scalars()
+                .first()
+            )
+            return Run.model_validate(row) if row is not None else None
+
+    def recover_interrupted_runs(self) -> list[str]:
+        """Mark runs left behind by a dead process as INTERRUPTED, and free the lock.
+
+        Called once at startup, and written for a host that sleeps. A free
+        instance is stopped after a quarter of an hour with nobody on the page, so
+        a run can be killed in the middle with the lock still held - and a deploy
+        can start a new instance while the old one is still working.
+
+        Which is why "still RUNNING" is not enough to act on. A lock that is still
+        reporting progress belongs to somebody, possibly another instance, and
+        this leaves it and everything else alone. Only silence for longer than
+        ``STALE_JOB_AFTER`` counts as dead.
+
+        INTERRUPTED rather than FAILED on purpose: nothing reported an error, so
+        what it managed to write is unknown, not wrong. Everything it did write is
+        already committed, and the watermark only ever moves at the end of a
+        finished window, so the next run simply reads that window again.
+        """
+        now = utc_now()
+        cutoff = now - STALE_JOB_AFTER
+
+        with self._session_factory() as session:
+            alive = session.execute(
+                select(JobLockRow.name).where(
+                    JobLockRow.held.is_(True), JobLockRow.updated_at >= cutoff
+                )
+            ).first()
+            if alive is not None:
+                # Somebody is working. Nothing here is ours to clear.
+                return []
+
+            stranded = list(
+                session.execute(
+                    select(RunRow.run_id).where(
+                        RunRow.status == RunStatus.RUNNING.value, RunRow.started_at < cutoff
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            if stranded:
+                session.execute(
+                    update(RunRow)
+                    .where(RunRow.run_id.in_(stranded))
+                    .values(status=RunStatus.INTERRUPTED.value, finished_at=now)
+                )
+
+            session.execute(
+                update(JobLockRow)
+                .where(JobLockRow.held.is_(True), JobLockRow.updated_at < cutoff)
+                .values(
+                    held=False,
+                    status=RunStatus.INTERRUPTED.value,
+                    phase=None,
+                    error="The application restarted while this run was in progress.",
+                    finished_at=now,
+                    updated_at=now,
+                )
+            )
+            session.commit()
+
+        return stranded
+
+    # ---------------------------------------------------------------- job lock
+
+    def acquire_job(self, name: str, *, kind: RunKind) -> JobState | None:
+        """Take the lock, or return None because something else holds it.
+
+        The test and the take are one conditional UPDATE, so two people pressing
+        Update at the same moment cannot both start a run: the database decides
+        which, and the loser is told a run is already going.
+
+        A lock that has gone quiet for longer than ``STALE_JOB_AFTER`` can be
+        taken over. Without that, one killed run would disable the buttons until
+        somebody restarted the service - and on a host that stops itself, that is
+        a thing that happens on an ordinary afternoon.
+        """
+        now = utc_now()
+        stale_cutoff = now - STALE_JOB_AFTER
+        with self._session_factory() as session:
+            if session.get(JobLockRow, name) is None:
+                session.add(JobLockRow(name=name, held=False, counts={}, updated_at=now))
+                session.commit()
+
+            # One statement tests and takes the lock, so the database decides the
+            # winner rather than two requests both reading "not held".
+            taken = session.execute(
+                update(JobLockRow)
+                .where(
+                    JobLockRow.name == name,
+                    or_(JobLockRow.held.is_(False), JobLockRow.updated_at < stale_cutoff),
+                )
+                .values(
+                    held=True,
+                    kind=kind.value,
+                    run_id=None,
+                    phase="Starting",
+                    processed=0,
+                    total=0,
+                    counts={},
+                    status=RunStatus.RUNNING.value,
+                    error=None,
+                    started_at=now,
+                    finished_at=None,
+                    updated_at=now,
+                )
+            )
+
+            if not cast("CursorResult[Any]", taken).rowcount:
+                session.rollback()
+                return None
+
+            session.commit()
+            return JobState.model_validate(session.get(JobLockRow, name))
+
+    def update_job(
+        self,
+        name: str,
+        *,
+        phase: str | None = None,
+        processed: int | None = None,
+        total: int | None = None,
+        run_id: str | None = None,
+        counts: dict[str, int] | None = None,
+    ) -> None:
+        """Report progress. Only ever called by the job that holds the lock."""
+        values: dict[str, Any] = {"updated_at": utc_now()}
+        if phase is not None:
+            values["phase"] = phase
+        if processed is not None:
+            values["processed"] = processed
+        if total is not None:
+            values["total"] = total
+        if run_id is not None:
+            values["run_id"] = run_id
+        if counts is not None:
+            values["counts"] = dict(counts)
+
+        with self._session_factory() as session:
+            session.execute(
+                update(JobLockRow)
+                .where(JobLockRow.name == name, JobLockRow.held.is_(True))
+                .values(**values)
+            )
+            session.commit()
+
+    def release_job(
+        self,
+        name: str,
+        *,
+        status: RunStatus,
+        counts: dict[str, int] | None = None,
+        error: str | None = None,
+    ) -> None:
+        """Free the lock and leave behind what the run did, for the header to show."""
+        now = utc_now()
+        with self._session_factory() as session:
+            session.execute(
+                update(JobLockRow)
+                .where(JobLockRow.name == name)
+                .values(
+                    held=False,
+                    phase=None,
+                    status=status.value,
+                    counts=dict(counts or {}),
+                    error=error,
+                    finished_at=now,
+                    updated_at=now,
+                )
+            )
+            session.commit()
+
+    def get_job(self, name: str) -> JobState | None:
+        """What the status endpoint reads. Never absent once a run has been started."""
+        with self._session_factory() as session:
+            row = session.get(JobLockRow, name)
+            return JobState.model_validate(row) if row is not None else None
+
     # --------------------------------------------------------------- watermarks
 
     def get_watermark(self, source: SourcePlatform) -> Watermark | None:
@@ -828,6 +1141,58 @@ def _latest_screening_on() -> Any:
 
 def _latest_screening_join(stmt: Select[Any]) -> Select[Any]:
     return stmt.join(ScreeningResultRow, _latest_screening_on(), isouter=True)
+
+
+def _latest_review_on() -> Any:
+    """Join condition: a tender and the review that stands today, if any."""
+    return and_(
+        ReviewRow.tender_id == TenderRow.id,
+        ReviewRow.superseded.is_(False),
+    )
+
+
+def _register_joins(stmt: Select[Any]) -> Select[Any]:
+    """A tender with its current screening and its current review, both optional."""
+    return _latest_screening_join(stmt).join(ReviewRow, _latest_review_on(), isouter=True)
+
+
+def _check_sort(sort_by: str) -> None:
+    if sort_by not in SORT_KEYS and sort_by != REGISTER_SORT:
+        allowed = ", ".join(sorted([*SORT_KEYS, REGISTER_SORT]))
+        raise ValueError(f"unknown sort key {sort_by!r}; allowed: {allowed}")
+
+
+def _as_register_row(row: Any) -> RegisterRow:
+    tender, screening, review = row
+    return RegisterRow(
+        tender=Tender.model_validate(tender),
+        screening=ScreeningResult.model_validate(screening) if screening is not None else None,
+        review=Review.model_validate(review) if review is not None else None,
+    )
+
+
+def _scalars(session: Session, stmt: Select[Any]) -> set[str]:
+    """The distinct non-empty values of one column."""
+    values: set[str] = set()
+    for value in session.execute(stmt).scalars().all():
+        if isinstance(value, list):
+            values.update(item for item in value if item)
+        elif value:
+            values.add(str(value))
+    return values
+
+
+def _split_all(values: Iterable[str]) -> set[str]:
+    """Flatten delimited-list values that came back as one string each."""
+    found: set[str] = set()
+    for value in values:
+        found.update(item for item in str(value).split(DelimitedList.DELIMITER) if item)
+    return found
+
+
+def _distinct(values: Iterable[str]) -> list[str]:
+    """Deduplicate, keeping the order the values were produced in."""
+    return list(dict.fromkeys(value for value in values if value))
 
 
 def _register_ordering(descending: bool) -> list[Any]:
@@ -892,8 +1257,50 @@ def _filter_conditions(filters: TenderFilters) -> list[Any]:
         conditions.append(TenderRow.deadline <= filters.deadline_to)
     if filters.band is not None:
         conditions.append(ScreeningResultRow.band == filters.band.value)
+    if filters.bands:
+        conditions.append(ScreeningResultRow.band.in_([band.value for band in filters.bands]))
     if filters.min_score is not None:
         conditions.append(ScreeningResultRow.score >= filters.min_score)
+    if filters.max_score is not None:
+        conditions.append(ScreeningResultRow.score <= filters.max_score)
+    if filters.min_rules_score is not None:
+        # The rules grade where there is one, the score otherwise - the same
+        # coalesce the register order uses, so a filter and the order agree.
+        conditions.append(
+            func.coalesce(ScreeningResultRow.rules_only_score, ScreeningResultRow.score)
+            >= filters.min_rules_score
+        )
+    if filters.domain is not None:
+        conditions.append(contains_token(ScreeningResultRow.domains, filters.domain.value))
+    if filters.rule_id is not None:
+        conditions.append(contains_token(ScreeningResultRow.matched_rules, filters.rule_id))
+    if filters.reason_tag is not None:
+        conditions.append(
+            contains_token(ScreeningResultRow.reason_tags, filters.reason_tag.lower())
+        )
+    if filters.unscreened_only:
+        conditions.append(ScreeningResultRow.tender_id.is_(None))
+    if filters.verdict is not None:
+        conditions.append(ReviewRow.verdict == filters.verdict.value)
+    if filters.undecided_only:
+        conditions.append(ReviewRow.tender_id.is_(None))
+    if filters.first_seen_run_id is not None:
+        conditions.append(TenderRow.first_seen_run_id == filters.first_seen_run_id)
+
+    as_of = filters.as_of or utc_now().date()
+    if not filters.include_past_deadline:
+        # A notice with no deadline is kept. Unknown is not "in the past", and
+        # treating it as past would remove it with nothing on screen to say so.
+        conditions.append(or_(TenderRow.deadline_date >= as_of, TenderRow.deadline_date.is_(None)))
+    if filters.closing_within_days is not None:
+        # Bounded at both ends: "closing soon" cannot mean "closed weeks ago".
+        conditions.append(
+            and_(
+                TenderRow.deadline_date >= as_of,
+                TenderRow.deadline_date <= as_of + timedelta(days=filters.closing_within_days),
+            )
+        )
+
     if filters.text:
         pattern = f"%{_escape_like(filters.text)}%"
         conditions.append(

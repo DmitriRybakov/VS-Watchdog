@@ -16,6 +16,7 @@ from watchdog.core.logging import configure_logging, get_logger
 from watchdog.core.models import AxisScore, Run, SchemaCheck
 from watchdog.core.settings import get_settings
 from watchdog.services import ingest as ingest_service
+from watchdog.services import jobs
 from watchdog.services import screen as screen_service
 from watchdog.services import ted as ted_service
 
@@ -212,6 +213,11 @@ def ingest(
 
     Safe to run twice: the same notice keeps the same row, and nothing is ever
     deleted. If a run is interrupted, the next one repeats the same window.
+
+    It takes the same lock the Update button takes, so this and somebody pressing
+    Update in the browser cannot run over each other. A dry run takes nothing: it
+    stores nothing, so there is nothing for it to collide with, and blocking a
+    colleague's real update for a rehearsal would be the wrong way round.
     """
     settings = get_settings()
     configure_logging(settings.log_level, json_output=not settings.is_dev)
@@ -224,14 +230,25 @@ def ingest(
     config = _load_ted_config()
     backfill_from = _parse_date(full_backfill, "--full-backfill")
 
-    try:
-        outcome = ingest_service.ingest_ted(
+    def read(held: jobs.Held | None) -> ingest_service.IngestOutcome:
+        return ingest_service.ingest_ted(
             config=config,
             since_days=since_days,
             backfill_from=backfill_from,
             dry_run=dry_run,
-            on_progress=_report_progress,
+            on_progress=lambda counts: _report_progress(counts, held),
         )
+
+    try:
+        if dry_run:
+            outcome = read(None)
+        else:
+            with jobs.hold(jobs.CLI_INGEST) as held:
+                outcome = read(held)
+                held.finished(counts=outcome.counts.as_dict(), status=outcome.status)
+    except jobs.JobBusy as exc:
+        _report_busy(exc)
+        raise typer.Exit(code=1) from exc
     except ingest_service.DatabaseNotReady as exc:
         _report_schema_problem(exc.check)
         raise typer.Exit(code=1) from exc
@@ -274,6 +291,9 @@ def screen(
 
     Stage 2 assesses a sample and stores nothing. It exists so a person can read
     twenty assessments with --explain before anything is banded on them.
+
+    Stage 3 takes the same lock the Re-screen button takes, so this and the
+    browser cannot screen the same register at the same time.
     """
     settings = get_settings()
     configure_logging(settings.log_level, json_output=not settings.is_dev)
@@ -292,12 +312,20 @@ def screen(
         return
 
     try:
-        outcome = screen_service.screen_register(
-            limit=limit or None,
-            rescreen=rescreen,
-            use_cache=not no_cache,
-            on_progress=_screening_progress,
-        )
+        with jobs.hold(jobs.CLI_SCREEN) as held:
+            outcome = screen_service.screen_register(
+                limit=limit or None,
+                rescreen=rescreen,
+                use_cache=not no_cache,
+                on_progress=lambda done, total: _screening_progress(done, total, held),
+            )
+            held.finished(
+                counts={"screened": outcome.screened, "errors": len(outcome.errors)},
+                status=RunStatus.PARTIAL if outcome.errors else RunStatus.SUCCESS,
+            )
+    except jobs.JobBusy as exc:
+        _report_busy(exc)
+        raise typer.Exit(code=1) from exc
     except ingest_service.DatabaseNotReady as exc:
         _report_schema_problem(exc.check)
         raise typer.Exit(code=1) from exc
@@ -491,8 +519,22 @@ def _parse_date(value: str | None, option: str) -> date | None:
         raise typer.Exit(code=1) from exc
 
 
-def _report_progress(counts: ingest_service.IngestCounts) -> None:
+def _report_progress(counts: ingest_service.IngestCounts, held: jobs.Held | None = None) -> None:
     typer.echo(f"  {counts.fetched} notice(s) read so far...")
+    if held is not None:
+        # The same line, into the lock row: it is what the browser shows while this
+        # runs, and it is the heartbeat that says this command is still alive.
+        held.report(
+            "reading notices from TED",
+            processed=counts.stored,
+            total=counts.fetched,
+            counts=counts.as_dict(),
+        )
+
+
+def _report_busy(exc: jobs.JobBusy) -> None:
+    typer.secho(str(exc), fg=typer.colors.YELLOW)
+    typer.echo("Nothing was changed. The register is untouched.")
 
 
 def _report_outcome(outcome: ingest_service.IngestOutcome) -> None:
@@ -627,8 +669,10 @@ def _report_assessment(outcome: screen_service.SampleOutcome, *, explain: bool) 
         typer.echo("  Those notices are left unassessed and a later run will try them again.")
 
 
-def _screening_progress(done: int, total: int) -> None:
+def _screening_progress(done: int, total: int, held: jobs.Held | None = None) -> None:
     typer.echo(f"  screened {done} of {total}...")
+    if held is not None:
+        held.report("screening the register", processed=done, total=total)
 
 
 def _report_screening(outcome: screen_service.ScreenOutcome) -> None:

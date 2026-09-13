@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Register &middot; Watchdog{% endblock %}
+
+{% block content %}
+<div class="register"
+     id="register"
+     data-mode="{{ query.mode }}"
+     data-results-url="/register/results">
+
+  {# The header belt. It replaces itself while a run is going; see triage.js. #}
+  <div id="run-status">
+    {% include "partials/status.html" %}
+  </div>
+
+  <div id="reviewer">
+    {% include "partials/reviewer.html" %}
+  </div>
+
+  {% if not view.ai_enabled %}
+    <p class="notice notice-info" role="status">
+      <strong>AI assessment is off.</strong>
+      These are keyword and CPV matches ordered by evidence strength, not judged relevance.
+    </p>
+  {% endif %}
+
+  {% if view.empty_database %}
+    <section class="card empty">
+      <h2>No notices yet</h2>
+      <p>The register is empty. Press <strong>Update from TED</strong> above to read the
+         last few weeks of notices and screen them.</p>
+    </section>
+  {% else %}
+
+  <section class="counts" aria-label="Register summary">
+    {% for count in view.counts %}
+      <a class="count" href="/register?{{ count.query_string }}">
+        <span class="count-number">{{ count.count }}</span>
+        <span class="count-label">{{ count.label }}</span>
+        {% if count.note %}<span class="count-note">{{ count.note }}</span>{% endif %}
+      </a>
+    {% endfor %}
+  </section>
+
+  {% if view.unscreened %}
+    <p class="notice notice-warn" role="status">
+      {{ view.unscreened }} notice{{ '' if view.unscreened == 1 else 's' }} in the register
+      {{ 'has' if view.unscreened == 1 else 'have' }} never been screened.
+      Press <strong>Re-screen</strong> to grade them.
+      <a href="/register?unscreened=1&amp;band=all&amp;past=1">Show them</a>
+    </p>
+  {% endif %}
+
+  <nav class="views" aria-label="Saved views">
+    {% for saved in view.views %}
+      <a class="view-link {{ 'is-current' if query.view == saved.key else '' }}"
+         href="/register?{{ saved.query_string }}"
+         title="{{ saved.description }}">{{ saved.label }}</a>
+    {% endfor %}
+  </nav>
+
+  <div class="register-body">
+    {% include "partials/filters.html" %}
+
+    <div id="results" class="results" aria-live="polite">
+      {% if query.mode == 'table' %}
+        {% include "partials/table.html" %}
+      {% else %}
+        {% include "partials/triage.html" %}
+      {% endif %}
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+{% endblock %}

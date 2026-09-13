@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import hashlib
 from collections.abc import Sequence
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from decimal import Decimal
 from enum import StrEnum
 from typing import Annotated, Any, Protocol
@@ -591,9 +591,45 @@ class TenderFilters(BaseModel):
     deadline_to: UtcDatetime | None = None
     # Band and minimum score read the latest screening of each tender.
     band: Band | None = None
+    # Several bands at once, for the register's default working set. Applied as
+    # "any of these", and independently of ``band`` above.
+    bands: list[Band] = Field(default_factory=list)
     min_score: int | None = Field(default=None, ge=1, le=5)
-    # Case-insensitive substring of title or description.
+    max_score: int | None = Field(default=None, ge=1, le=5)
+    # The rules grade, 0 upwards. A different claim from the score: 0 means "no
+    # evidence at all", which no value of ``min_score`` can express.
+    min_rules_score: int | None = Field(default=None, ge=0, le=5)
+    # Case-insensitive substring of title, native title or description.
     text: str | None = None
+
+    # The three below read the columns on the latest screening result that mirror
+    # its JSON. A notice is matched by any one of its domains or matched rules.
+    domain: Domain | None = None
+    rule_id: str | None = None
+    reason_tag: str | None = None
+
+    # A colleague's decision, from the latest review. ``undecided_only`` and
+    # ``verdict`` are different questions and can be asked separately.
+    verdict: Verdict | None = None
+    undecided_only: bool = False
+
+    # Notices that have never been screened at all. Not the same as archived.
+    unscreened_only: bool = False
+
+    # Which ingest run first saw the notice. This is what "new since the last run"
+    # means, and it is exact - it does not guess from a timestamp.
+    first_seen_run_id: str | None = None
+
+    # A passed deadline is not established evidence that the procurement is
+    # closed, so nothing is hidden unless a caller asks. When False, a notice with
+    # NO deadline is kept: unknown is not "in the past". Treating it as past would
+    # make twenty-four review notices vanish with nothing on screen to say so.
+    include_past_deadline: bool = True
+    # Deadline no further away than this many days. Counts from ``as_of``.
+    closing_within_days: int | None = Field(default=None, ge=0)
+    # The date "past", "today" and "closing within" are measured from. Set by the
+    # caller so that a page and its export cannot disagree across midnight.
+    as_of: date | None = None
 
 
 class TenderPage(BaseModel):
@@ -603,6 +639,127 @@ class TenderPage(BaseModel):
     total: int = 0
     limit: int = 0
     offset: int = 0
+
+
+class RegisterRow(BaseModel):
+    """One line of the register: the notice, what screened it, and who decided.
+
+    The three are kept as separate objects rather than flattened, because they are
+    three different kinds of claim - a source fact, Watchdog's own intelligence and
+    a colleague's judgement - and a template that could not tell them apart would
+    eventually present one as another.
+    """
+
+    tender: Tender
+    screening: ScreeningResult | None = None
+    review: Review | None = None
+    # Whole days from the reference date to the deadline; negative once it has
+    # passed. None when no deadline is known, which is never "zero days left".
+    days_left: int | None = None
+
+    @property
+    def is_assessed(self) -> bool:
+        """True when a model judged this notice, rather than the rules alone."""
+        return self.screening is not None and self.screening.assessment is not None
+
+    @property
+    def evidence_grade(self) -> int | None:
+        """The rules-only grade, 0-3. None whenever a model produced the score."""
+        return self.screening.rules_only_score if self.screening is not None else None
+
+    @property
+    def domains(self) -> list[Domain]:
+        return list(self.screening.rules.domains_hit) if self.screening is not None else []
+
+    @property
+    def signals(self) -> list[RuleMatch]:
+        """The matched rules, strongest first, so a row shows its best evidence."""
+        if self.screening is None:
+            return []
+        order = {RuleStrength.HIGH: 0, RuleStrength.MEDIUM: 1, RuleStrength.SUPPORTING: 2}
+        return sorted(self.screening.rules.matches, key=lambda match: order[match.strength])
+
+
+class RegisterPage(BaseModel):
+    """One page of register rows, with the total the filters matched."""
+
+    items: list[RegisterRow] = Field(default_factory=list)
+    total: int = 0
+    limit: int = 0
+    offset: int = 0
+
+
+class RegisterFacets(BaseModel):
+    """The values the register actually holds, for the filter dropdowns.
+
+    Read from the database rather than from the vocabularies, so a list never
+    offers a choice that can only return nothing.
+    """
+
+    sources: list[str] = Field(default_factory=list)
+    buyer_countries: list[str] = Field(default_factory=list)
+    performance_countries: list[str] = Field(default_factory=list)
+    domains: list[str] = Field(default_factory=list)
+    rule_ids: list[str] = Field(default_factory=list)
+
+
+# How long a held job lock may go without a progress report before the run behind
+# it is treated as dead rather than slow. Generous on purpose: being wrong in this
+# direction leaves the buttons disabled a little longer, and being wrong in the
+# other direction lets one instance clear a run another instance is still doing.
+STALE_JOB_AFTER = timedelta(minutes=15)
+
+
+class JobState(BaseModel):
+    """Whether a pipeline run is in progress, and how far it has got.
+
+    This is what the header polls. It is the same row that stops a second run
+    starting, so the page can never show "idle" while something is running.
+
+    "In progress" is a claim with an expiry date on it, which is what
+    :attr:`stale` is for. A hosted instance can be stopped mid-run - a free host
+    sleeps after a quarter of an hour with nobody on the page - and a process
+    killed that way never gets to release anything. The lock it leaves behind
+    would otherwise say a run is going for ever, with the buttons disabled and
+    nothing on screen to press.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    name: str
+    held: bool = False
+    kind: RunKind | None = None
+    run_id: str | None = None
+    phase: str | None = None
+    processed: int = 0
+    # 0 means "not known yet", which is the honest answer early in an ingest.
+    total: int = 0
+    counts: dict[str, int] = Field(default_factory=dict)
+    status: RunStatus | None = None
+    # One sentence, for the person who pressed the button. Never a stack trace.
+    error: str | None = None
+    started_at: UtcDatetime | None = None
+    finished_at: UtcDatetime | None = None
+    # Moved by every progress report, so it doubles as the heartbeat: a lock whose
+    # updated_at has stopped moving is a lock whose process has stopped running.
+    updated_at: UtcDatetime = Field(default_factory=utc_now)
+
+    @property
+    def stale(self) -> bool:
+        """Held, but silent for long enough that nothing can still be working on it."""
+        return self.held and utc_now() - self.updated_at > STALE_JOB_AFTER
+
+    @property
+    def running(self) -> bool:
+        """Held *and* still reporting. What the page should show as in progress."""
+        return self.held and not self.stale
+
+    @property
+    def percent(self) -> int | None:
+        """How far through, or None while the total is still unknown."""
+        if not self.held or self.total <= 0:
+            return None
+        return min(100, round(100 * self.processed / self.total))
 
 
 class UpsertStats(BaseModel):

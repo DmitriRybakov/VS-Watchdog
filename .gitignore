@@ -19,6 +19,9 @@ htmlcov/
 .env
 .env.*
 !.env.example
+# Deployment secrets, held locally so that commands can be run against the
+# hosted database. Never committed; the example beside it is.
+deploy/.env.render
 
 # Local cache directory - may be deleted at any time
 data/*

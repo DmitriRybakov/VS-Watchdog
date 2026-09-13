@@ -11,10 +11,15 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from watchdog.core.settings import get_settings
+from watchdog.storage.db import normalise_database_url
 from watchdog.storage.tables import Base
 
 config = context.config
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
+# A percent sign in a URL-encoded password would otherwise be read as the start
+# of a ConfigParser interpolation and fail with a message about the wrong thing.
+config.set_main_option(
+    "sqlalchemy.url", normalise_database_url(get_settings().database_url).replace("%", "%%")
+)
 
 target_metadata = Base.metadata
 

@@ -1,12 +1,40 @@
 /* Watchdog stylesheet.
    Base: Pico CSS 2.0.6 classless build (MIT), vendored in this folder.
-   No remote asset is requested at runtime. */
+   No remote asset is requested at runtime.
+
+   Two rules this file keeps:
+   - Status is never carried by colour alone. Every chip, badge and pill has a
+     number or a word in it, so it survives a monochrome print, a projector and
+     colour-blindness.
+   - Focus is always visible. A keyboard-driven register with an invisible focus
+     ring is a register nobody can use without a mouse. */
 
 @import url("pico.classless.min.css");
 
 :root {
   --wd-gap: 1rem;
+  --wd-tight: 0.5rem;
+  --wd-rail: 17rem;
+
+  /* Paired with text wherever they are used, never carrying meaning alone. */
+  --wd-urgent-bg: #fff3cd;
+  --wd-urgent-fg: #664d03;
+  --wd-closed-bg: #e9ecef;
+  --wd-closed-fg: #41464b;
+  --wd-open-bg: #d1e7dd;
+  --wd-open-fg: #0a3622;
+  --wd-error-bg: #f8d7da;
+  --wd-error-fg: #58151c;
+  --wd-info-bg: #cfe2ff;
+  --wd-info-fg: #052c65;
 }
+
+:focus-visible {
+  outline: 3px solid var(--pico-primary);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------ chrome */
 
 .site-header {
   display: flex;
@@ -14,6 +42,7 @@
   gap: var(--wd-gap);
   padding: var(--wd-gap) 0;
   border-bottom: 1px solid var(--pico-muted-border-color);
+  flex-wrap: wrap;
 }
 
 .site-header .brand {
@@ -22,10 +51,43 @@
   text-decoration: none;
 }
 
+.site-nav {
+  margin-left: auto;
+  display: flex;
+  gap: var(--wd-gap);
+}
+
+/* Sign out is a form, not a link, because signing out changes something. It is
+   styled as a link so the header still reads as navigation. */
+.site-nav .sign-out {
+  margin: 0;
+}
+
+.link-button {
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--pico-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+}
+
 .site-header .subtitle,
 .muted {
   color: var(--pico-muted-color);
   font-size: 0.9rem;
+}
+
+.site-footer {
+  padding: var(--wd-gap) 0;
+  border-top: 1px solid var(--pico-muted-border-color);
+  color: var(--pico-muted-color);
+  font-size: 0.85rem;
+  display: flex;
+  gap: var(--wd-gap);
+  flex-wrap: wrap;
 }
 
 .card {
@@ -37,6 +99,666 @@
 
 .button {
   width: auto;
+  display: inline-block;
+}
+
+kbd {
+  font-size: 0.75em;
+  padding: 0.1em 0.35em;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 3px;
+}
+
+/* -------------------------------------------------------------------- belt */
+
+.belt {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--wd-tight) var(--wd-gap);
+  margin-block: var(--wd-tight);
+  display: flex;
+  gap: var(--wd-gap);
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.belt.is-running {
+  border-color: var(--wd-urgent-fg);
+  background: var(--wd-urgent-bg);
+  color: var(--wd-urgent-fg);
+}
+
+.belt-actions {
+  display: flex;
+  gap: var(--wd-tight);
+}
+
+.belt-actions form {
+  margin: 0;
+}
+
+.belt-state {
+  flex: 1 1 22rem;
+}
+
+.belt-state p {
+  margin: 0.2rem 0;
+}
+
+.belt progress {
+  margin: 0.2rem 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: wd-spin 0.8s linear infinite;
+}
+
+@keyframes wd-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation: none;
+  }
+}
+
+.notice {
+  padding: var(--wd-tight) var(--wd-gap);
+  border-radius: var(--pico-border-radius);
+  margin-block: var(--wd-tight);
+}
+
+.notice-info {
+  background: var(--wd-info-bg);
+  color: var(--wd-info-fg);
+}
+
+.notice-warn {
+  background: var(--wd-urgent-bg);
+  color: var(--wd-urgent-fg);
+}
+
+.notice-error {
+  background: var(--wd-error-bg);
+  color: var(--wd-error-fg);
+}
+
+/* ------------------------------------------------------------------ counts */
+
+.counts {
+  display: flex;
+  gap: var(--wd-tight);
+  flex-wrap: wrap;
+  margin-block: var(--wd-gap);
+}
+
+.count {
+  flex: 1 1 8rem;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--wd-tight);
+  text-decoration: none;
+  display: block;
+}
+
+.count:hover,
+.count:focus-visible {
+  border-color: var(--pico-primary);
+}
+
+.count-number {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.count-label {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.count-note {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--pico-muted-color);
+}
+
+.views {
+  display: flex;
+  gap: var(--wd-tight);
+  flex-wrap: wrap;
+  margin-block: var(--wd-tight);
+}
+.view-link {
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 999px;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.view-link.is-current {
+  background: var(--pico-primary);
+  color: var(--pico-primary-inverse);
+  border-color: var(--pico-primary);
+}
+
+/* ---------------------------------------------------------------- reviewer */
+
+.reviewer {
+  display: flex;
+  align-items: baseline;
+  gap: var(--wd-gap);
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  padding: var(--wd-tight) 0;
+}
+
+/* Unmissable until a name is set: nothing can be recorded without one. */
+.reviewer.needs-name {
+  background: var(--wd-info-bg);
+  color: var(--wd-info-fg);
+  border-radius: var(--pico-border-radius);
+  padding: var(--wd-tight) var(--wd-gap);
+}
+
+.reviewer p {
+  margin: 0;
+}
+
+.reviewer-form {
+  display: flex;
+  align-items: center;
+  gap: var(--wd-tight);
+  margin: 0;
+}
+
+.reviewer-form label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.reviewer-form input {
+  width: 14rem;
+  margin: 0;
+  padding: 0.15rem 0.4rem;
+  height: auto;
+}
+
+.reviewer-form button {
+  padding: 0.15rem 0.7rem;
+}
+
+.reviewer-change summary {
+  cursor: pointer;
+}
+
+/* ------------------------------------------------------------------ layout */
+
+.register-body {
+  display: grid;
+  grid-template-columns: var(--wd-rail) minmax(0, 1fr);
+  gap: var(--wd-gap);
+  align-items: start;
+}
+
+.filters {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--wd-tight);
+  position: sticky;
+  top: var(--wd-tight);
+  max-height: calc(100vh - 2rem);
+  overflow-y: auto;
+  font-size: 0.9rem;
+}
+
+.filters label,
+.filters fieldset {
+  margin-bottom: var(--wd-tight);
+}
+
+.filters .filter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.filters h2 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.filters p.muted {
+  font-size: 0.75rem;
+  margin: 0 0 var(--wd-tight);
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.results.htmx-request {
+  opacity: 0.55;
+}
+
+/* ----------------------------------------------------------------- toolbar */
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wd-tight);
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: var(--wd-tight);
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.toolbar-controls {
+  display: flex;
+  gap: var(--wd-gap);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar .inline {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.toolbar select,
+.pagination select {
+  width: auto;
+  margin: 0;
+  padding: 0.1rem 1.6rem 0.1rem 0.4rem;
+  font-size: 0.85rem;
+  height: auto;
+}
+
+.modes .mode {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--pico-muted-border-color);
+  text-decoration: none;
+}
+
+.modes .mode.is-current {
+  background: var(--pico-primary);
+  color: var(--pico-primary-inverse);
+}
+
+.exports {
+  display: flex;
+  gap: var(--wd-tight);
+}
+
+.keys {
+  flex-basis: 100%;
+  font-size: 0.78rem;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ triage */
+
+.triage {
+  display: grid;
+  grid-template-columns: minmax(14rem, 22rem) minmax(0, 1fr);
+  gap: var(--wd-gap);
+  align-items: start;
+  margin-top: var(--wd-tight);
+}
+
+.queue {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 78vh;
+  overflow-y: auto;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+}
+
+.queue-row {
+  display: flex;
+  gap: var(--wd-tight);
+  padding: 0.4rem var(--wd-tight);
+  border-bottom: 1px solid var(--pico-muted-border-color);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.queue-row.is-current {
+  background: var(--pico-primary-focus);
+  border-left: 4px solid var(--pico-primary);
+  padding-left: calc(var(--wd-tight) - 4px);
+}
+
+.queue-title {
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.queue-meta {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--pico-muted-color);
+}
+
+.decision-card {
+  margin: 0;
+}
+
+.decision-card.is-hidden {
+  display: none;
+}
+
+.card-head .card-title {
+  font-size: 1.15rem;
+  margin: 0.3rem 0;
+}
+
+.card-native {
+  margin: 0.2rem 0 var(--wd-tight);
+  font-size: 0.95rem;
+}
+
+.card-native .label {
+  color: var(--pico-muted-color);
+  font-size: 0.78rem;
+  display: block;
+}
+
+.card-score {
+  display: flex;
+  align-items: center;
+  gap: var(--wd-tight);
+  flex-wrap: wrap;
+}
+
+.chip-caption {
+  font-size: 0.78rem;
+  color: var(--pico-muted-color);
+}
+
+.card-facts,
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.4rem var(--wd-gap);
+  margin: var(--wd-tight) 0;
+}
+
+.card-facts dt,
+.facts dt {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--pico-muted-color);
+  margin: 0;
+}
+
+.card-facts dd,
+.facts dd {
+  margin: 0 0 0.3rem;
+}
+
+.evidence-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.evidence {
+  border-left: 3px solid var(--pico-muted-border-color);
+  padding: 0.3rem 0 0.3rem var(--wd-tight);
+  margin-bottom: var(--wd-tight);
+  font-size: 0.9rem;
+}
+
+.evidence-domain {
+  border-left-color: var(--pico-primary);
+}
+
+.evidence-exclusion {
+  border-left-color: var(--wd-error-fg);
+}
+
+.evidence-rule {
+  display: block;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.evidence-quote {
+  display: block;
+  margin: 0.2rem 0;
+}
+
+.card-actions {
+  border-top: 1px solid var(--pico-muted-border-color);
+  padding-top: var(--wd-tight);
+  margin-top: var(--wd-tight);
+}
+
+.verdict-buttons {
+  display: flex;
+  gap: var(--wd-tight);
+  flex-wrap: wrap;
+}
+
+.verdict-button {
+  font-size: 0.9rem;
+}
+
+.verdict-button.is-set {
+  outline: 2px solid var(--pico-primary);
+}
+
+.card-links {
+  margin-top: var(--wd-tight);
+  display: flex;
+  gap: var(--wd-gap);
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+
+/* -------------------------------------------------------------- chips, tags */
+
+.chip {
+  display: inline-block;
+  min-width: 1.9rem;
+  text-align: center;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--pico-border-radius);
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 2px solid currentColor;
+}
+
+/* An assessed score is a solid chip. */
+.chip-score {
+  background: var(--pico-primary);
+  color: var(--pico-primary-inverse);
+  border-color: var(--pico-primary);
+}
+
+/* A rules grade is a dashed outline with an E in it - never the same shape as a
+   score. They are different kinds of claim, and telling them apart at a glance
+   is the whole reason they are separate fields. */
+.chip-evidence {
+  background: transparent;
+  color: var(--pico-contrast);
+  border-style: dashed;
+}
+
+.chip-e0 {
+  opacity: 0.55;
+}
+
+.chip-none {
+  background: transparent;
+  color: var(--pico-muted-color);
+  border-style: dotted;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 999px;
+  font-size: 0.78rem;
+}
+
+.tag {
+  display: inline-block;
+  padding: 0.02rem 0.35rem;
+  margin: 0 0.15rem 0.15rem 0;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 3px;
+  font-size: 0.72rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.02rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge-urgent {
+  background: var(--wd-urgent-bg);
+  color: var(--wd-urgent-fg);
+}
+
+.badge-closed {
+  background: var(--wd-closed-bg);
+  color: var(--wd-closed-fg);
+}
+
+.badge-open {
+  background: var(--wd-open-bg);
+  color: var(--wd-open-fg);
+}
+
+.badge-unknown {
+  background: transparent;
+  color: var(--pico-muted-color);
+  border: 1px dashed var(--pico-muted-border-color);
+}
+
+.status {
+  font-weight: 600;
+}
+
+.status-failed {
+  color: var(--wd-error-fg);
+}
+
+.status-partial,
+.status-interrupted {
+  color: var(--wd-urgent-fg);
+}
+
+.ai-off {
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------- table */
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.register-table {
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+.register-table td,
+.register-table th {
+  padding: 0.35rem 0.4rem;
+  vertical-align: top;
+}
+
+.table-row.is-current {
+  background: var(--pico-primary-focus);
+}
+
+.cell-title {
+  min-width: 18rem;
+}
+
+.cell-sub {
+  display: block;
+  font-size: 0.72rem;
+}
+
+.pagination {
+  display: flex;
+  gap: var(--wd-gap);
+  align-items: center;
+  padding-top: var(--wd-tight);
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------------ detail */
+
+.detail .native {
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.detail .explanation {
+  border-left: 3px solid var(--pico-primary);
+  padding-left: var(--wd-tight);
+}
+
+.block-text {
+  white-space: pre-wrap;
+  font-size: 0.9rem;
+}
+
+.history {
+  font-size: 0.9rem;
+}
+
+/* ------------------------------------------------- tablet and narrow screens */
+
+@media (max-width: 1100px) {
+  .register-body,
+  .triage {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    position: static;
+    max-height: none;
+  }
+
+  .queue {
+    max-height: 30vh;
+  }
 }
 
 .ping {
@@ -45,11 +767,4 @@
 
 .ok {
   color: var(--pico-ins-color);
-}
-
-.site-footer {
-  padding: var(--wd-gap) 0;
-  border-top: 1px solid var(--pico-muted-border-color);
-  color: var(--pico-muted-color);
-  font-size: 0.85rem;
 }

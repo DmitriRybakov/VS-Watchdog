@@ -1,0 +1,147 @@
+{#
+  One decision card. It carries what a decision needs and nothing else; anything
+  a person might want but does not need to decide is on the detail page.
+
+  Order of the two titles is deliberate. The line is TED's composed title, whose
+  country and CPV category are English while the buyer's own words inside it stay
+  in the original language. It is not a translation and is never labelled as one.
+  The buyer's own title is shown underneath with its language named, because that
+  is the text the screening actually read.
+#}
+{% set badge = row.days_left | days_badge %}
+{% set link = row.tender.source_url | safe_url %}
+{% set query_here = query.query_string(cursor=loop.index0) %}
+
+<header class="card-head">
+  <div class="card-score">
+    {% if row.screening %}
+      {% if row.is_assessed %}
+        <span class="chip chip-score chip-{{ row.screening.score }}">{{ row.screening.score }}</span>
+        <span class="chip-caption">Score {{ row.screening.score }} of 5
+          &middot; {{ row.screening.axes_established }} of 3 axes established</span>
+      {% else %}
+        <span class="chip chip-evidence chip-e{{ row.evidence_grade }}">E{{ row.evidence_grade }}</span>
+        <span class="chip-caption">{{ row.evidence_grade | evidence_label }}
+          &middot; keyword and CPV match, not a judged score</span>
+      {% endif %}
+      <span class="pill pill-band">{{ row.screening.band.value | band_label }}</span>
+      <span class="pill">Confidence {{ row.screening.confidence | percent }}</span>
+    {% else %}
+      <span class="chip chip-none">&ndash;</span>
+      <span class="chip-caption">Never screened</span>
+    {% endif %}
+  </div>
+
+  <h2 class="card-title">
+    {% if link %}
+      <a href="{{ link }}" rel="noopener noreferrer" target="_blank">{{ row.tender.title }}</a>
+    {% else %}
+      {{ row.tender.title }}
+    {% endif %}
+  </h2>
+
+  {% if row.tender.title_native %}
+    <p class="card-native" lang="{{ row.tender.title_native_language or '' }}">
+      <span class="label">Buyer's own title
+        ({{ row.tender.title_native_language or 'language not stated' }}):</span>
+      {{ row.tender.title_native }}
+    </p>
+  {% endif %}
+</header>
+
+<dl class="card-facts">
+  <div><dt>Buyer</dt><dd>{{ row.tender.buyer_name or 'Not stated' }}</dd></div>
+  <div><dt>Buyer country</dt><dd>{{ row.tender.buyer_country or 'Not stated' }}</dd></div>
+  <div>
+    <dt>Country of performance</dt>
+    <dd>{{ row.tender.place_of_performance_country | join(', ') or 'Not stated' }}</dd>
+  </div>
+  <div><dt>Published</dt><dd>{{ row.tender.published_date | day }}</dd></div>
+  <div>
+    <dt>{{ row.tender.deadline_type.value | deadline_type }}</dt>
+    <dd>
+      {{ row.tender.deadline_date | day }}
+      <span class="badge badge-{{ badge.state }}">{{ badge.text }}</span>
+    </dd>
+  </div>
+</dl>
+
+{% if row.screening and row.signals %}
+  <section class="card-evidence">
+    <h3>What matched, in the buyer's words</h3>
+    <ul class="evidence-list">
+      {% for match in row.signals[:4] %}
+        <li class="evidence evidence-{{ match.signal.value }}">
+          <span class="evidence-rule">
+            {{ match.rule_id }}
+            <span class="muted">({{ match.signal.value }}, {{ match.strength.value | strength_label }})</span>
+          </span>
+          <q class="evidence-quote">{{ match.evidence }}</q>
+          <span class="muted">matched &ldquo;{{ match.alias_matched }}&rdquo; in {{ match.field }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+    {% if row.signals | length > 4 %}
+      <p class="muted">{{ row.signals | length - 4 }} more on the detail page.</p>
+    {% endif %}
+  </section>
+{% elif row.screening %}
+  <section class="card-evidence">
+    <h3>What matched</h3>
+    <p class="muted">
+      Nothing in our vocabulary matched this notice. That is not evidence it is
+      irrelevant &mdash; our terms are English and notices arrive in every EU language.
+    </p>
+  </section>
+{% endif %}
+
+{% if row.screening and row.is_assessed %}
+  <section class="card-assessment">
+    <h3>What the assessment said</h3>
+    <p>{{ row.screening.assessment.short_reason }}</p>
+    <ul class="axes">
+      {% for name, axis in row.screening.assessment.axes %}
+        <li>
+          <span class="axis-name">{{ name | words }}</span>
+          <span class="axis-score">{{ axis.score if axis.score is not none else 'not established' }}</span>
+          <span class="muted">{{ axis.label.value | words }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
+
+<footer class="card-actions">
+  <div class="verdict-buttons" role="group" aria-label="Record a decision">
+    {% for choice, key in [('relevant', 'y'), ('not_relevant', 'n'), ('unsure', 'u')] %}
+      <button type="button"
+              class="button verdict-button verdict-{{ choice }}{{ ' is-set' if row.review and row.review.verdict.value == choice else '' }}"
+              data-verdict="{{ choice }}"
+              {% if not reviewer %}disabled title="Put your name in the 'Recording as' box first"{% endif %}
+              hx-post="/register/{{ row.tender.id }}/verdict?{{ query_here }}"
+              hx-vals='{"verdict": "{{ choice }}"}'
+              hx-target="#results"
+              hx-swap="innerHTML">
+        {{ choice | verdict_label }} <kbd>{{ key }}</kbd>
+      </button>
+    {% endfor %}
+    {% if not reviewer %}
+      <span class="muted">Name required before a decision can be recorded.</span>
+    {% endif %}
+  </div>
+
+  <div class="card-links">
+    <a href="/register/notice/{{ row.tender.id }}?{{ query_here }}">Full detail <kbd>Enter</kbd></a>
+    {% if link %}
+      <a href="{{ link }}" rel="noopener noreferrer" target="_blank">Open on {{ row.tender.source.value | upper }}</a>
+    {% endif %}
+  </div>
+
+  {% if row.review %}
+    <p class="card-review">
+      Recorded as <strong>{{ row.review.verdict.value | verdict_label }}</strong>
+      by {{ row.review.reviewed_by }} on {{ row.review.reviewed_at | moment }}.
+      {% if row.review.owner %}Owner: {{ row.review.owner }}.{% endif %}
+    </p>
+  {% endif %}
+</footer>

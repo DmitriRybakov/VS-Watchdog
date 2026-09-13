@@ -65,3 +65,18 @@ or bundler, and there must never be one.
 The database holds everything durable, including raw source payloads. `data/` is a cache and may be
 deleted at any time. Nothing is ever deleted from the database: a tender that vanished from the
 source, a rejected notice and a superseded score all remain, archived and searchable.
+
+## Hosted mode
+
+The same process, told by environment variables that it is not on a laptop. Two things then become
+compulsory, and neither has a fallback, because the fallback for each looks exactly like success:
+a shared sign-in, and a PostgreSQL `DATABASE_URL`. `create_app()` refuses to start without them.
+
+The sign-in lives entirely in `web/`: a signed cookie, no session table, and one ASGI middleware in
+`web/security.py` in front of every route except `/health`. No other layer knows it exists, and a
+laptop with none of it configured behaves exactly as it did before.
+
+A hosted instance can be stopped mid-run - a free host sleeps when nobody is looking at it. So a job
+lock is a claim with an expiry on it: every progress report moves a heartbeat, silence for longer
+than `STALE_JOB_AFTER` means the process is gone, and a lock that is still reporting is never
+touched by another instance.

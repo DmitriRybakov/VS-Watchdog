@@ -25,6 +25,7 @@ dependencies = [
     "pyyaml",
     "structlog",
     "tenacity",
+    "openpyxl",
 ]
 
 [project.optional-dependencies]
@@ -81,6 +82,13 @@ ignore_missing_imports = true
 # A checkout without it must still type-check.
 [[tool.mypy.overrides]]
 module = "openai.*"
+ignore_missing_imports = true
+
+# openpyxl ships no type information. Only services/export.py imports it, and it
+# writes every cell through one typed helper, so a stub package would restate
+# what that helper already checks.
+[[tool.mypy.overrides]]
+module = "openpyxl.*"
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
