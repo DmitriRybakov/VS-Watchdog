@@ -14,21 +14,14 @@
 
 <header class="card-head">
   <div class="card-score">
+    {% with caption = true %}{% include "partials/score_chip.html" %}{% endwith %}
     {% if row.screening %}
-      {% if row.is_assessed %}
-        <span class="chip chip-score chip-{{ row.screening.score }}">{{ row.screening.score }}</span>
-        <span class="chip-caption">Score {{ row.screening.score }} of 5
-          &middot; {{ row.screening.axes_established }} of 3 axes established</span>
-      {% else %}
-        <span class="chip chip-evidence chip-e{{ row.evidence_grade }}">E{{ row.evidence_grade }}</span>
-        <span class="chip-caption">{{ row.evidence_grade | evidence_label }}
-          &middot; keyword and CPV match, not a judged score</span>
-      {% endif %}
       <span class="pill pill-band">{{ row.screening.band.value | band_label }}</span>
-      <span class="pill">Confidence {{ row.screening.confidence | percent }}</span>
-    {% else %}
-      <span class="chip chip-none">&ndash;</span>
-      <span class="chip-caption">Never screened</span>
+      {% if row.is_assessed %}
+        <span class="pill">Confidence {{ row.screening.confidence | percent }}</span>
+      {% else %}
+        <span class="pill">{{ NOT_ASSESSED }}</span>
+      {% endif %}
     {% endif %}
   </div>
 

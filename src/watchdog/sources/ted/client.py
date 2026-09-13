@@ -31,6 +31,12 @@ from tenacity import RetryCallState, Retrying, retry_if_exception_type, stop_aft
 
 from watchdog.core.logging import get_logger
 from watchdog.sources.errors import InvalidPayloadError, QueryError, TransportError
+from watchdog.sources.ted.config import (
+    MAX_FIELDS_PER_PAGE,
+    MAX_PAGE_SIZE,
+    fields_per_page,
+    max_page_size,
+)
 
 log = get_logger(__name__)
 
@@ -38,9 +44,6 @@ TED_SEARCH_URL = "https://api.ted.europa.eu/v3/notices/search"
 
 # Worth trying again: the request may succeed unchanged a moment later.
 RETRYABLE_STATUSES = frozenset({408, 425, 429, 500, 502, 503, 504})
-
-# TED rejects anything larger outright.
-MAX_PAGE_SIZE = 250
 
 # The marker in the 400 body that precedes the full list of valid field names.
 _SUPPORTED_VALUES_MARKER = "supported values are:"
@@ -139,7 +142,12 @@ class TedClient:
     # -------------------------------------------------------------------- public
 
     def validate_query(
-        self, query: str, fields: Sequence[str], *, run_id: str | None = None
+        self,
+        query: str,
+        fields: Sequence[str],
+        *,
+        run_id: str | None = None,
+        page_size: int = 1,
     ) -> None:
         """Ask TED to check the query without running it.
 
@@ -147,12 +155,17 @@ class TedClient:
         notices and a null total. A malformed query is a 400 either way, so this
         turns a configuration mistake into an immediate, named error instead of an
         empty result set nobody notices.
+
+        ``page_size`` is sent so the fields-per-page cap is checked too. Verified
+        13 September 2026: a validate-only request at 55 fields is a 200 at limit
+        175 and a 400 ``SEARCH_FIELDS_PER_PAGE_EXCEEDS_MAX_LIMIT`` at limit 250,
+        so the real request's shape can be confirmed without fetching a notice.
         """
         self._request(
             {
                 "query": query,
                 "fields": list(fields),
-                "limit": 1,
+                "limit": page_size,
                 "page": 1,
                 "checkQuerySyntax": True,
             },
@@ -238,6 +251,16 @@ class TedClient:
             raise QueryError("the field list is empty; TED requires at least one field")
         if page_size > MAX_PAGE_SIZE:
             raise QueryError(f"page size {page_size} exceeds TED's maximum of {MAX_PAGE_SIZE}")
+
+        cost = fields_per_page(len(fields), page_size)
+        if cost > MAX_FIELDS_PER_PAGE:
+            # Refused here rather than at TED so the run fails before it starts,
+            # with a page size that would work, instead of on the first 400.
+            raise QueryError(
+                f"{len(fields)} fields at page size {page_size} would cost {cost} "
+                f"fields per page, over TED's limit of {MAX_FIELDS_PER_PAGE}; "
+                f"lower page_size to {max_page_size(len(fields))} or request fewer fields"
+            )
 
         started = time.monotonic()
         token: str | None = None

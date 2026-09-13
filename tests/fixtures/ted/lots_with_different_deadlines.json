@@ -80,8 +80,382 @@
   "main-classification-proc": [
     "77211400"
   ],
+  "submission-url-lot": [
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl",
+    "https://swpp2.gkpge.pl"
+  ],
   "place-of-performance-country-proc": [
     "POL"
+  ],
+  "contract-duration-period-lot": [
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    },
+    {
+      "value": "10",
+      "unit": "MONTH"
+    }
   ],
   "document-url-lot": [
     "https://swpp2.gkpge.pl",
@@ -164,7 +538,6 @@
   ],
   "notice-subtype": "17",
   "publication-date": "2026-09-07+02:00",
-  "contract-nature-main-proc": "services",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/613229-2026/xml"
@@ -251,6 +624,83 @@
       "SWE": "https://ted.europa.eu/sv/notice/613229-2026/html"
     }
   },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001",
+    "LOT-0002",
+    "LOT-0003",
+    "LOT-0004",
+    "LOT-0005",
+    "LOT-0006",
+    "LOT-0007",
+    "LOT-0008",
+    "LOT-0009",
+    "LOT-0010",
+    "LOT-0011",
+    "LOT-0012",
+    "LOT-0013",
+    "LOT-0014",
+    "LOT-0015",
+    "LOT-0016",
+    "LOT-0017",
+    "LOT-0018",
+    "LOT-0019",
+    "LOT-0020",
+    "LOT-0021",
+    "LOT-0022",
+    "LOT-0023",
+    "LOT-0024",
+    "LOT-0025",
+    "LOT-0026",
+    "LOT-0027",
+    "LOT-0028",
+    "LOT-0029",
+    "LOT-0030",
+    "LOT-0031",
+    "LOT-0032",
+    "LOT-0033",
+    "LOT-0034",
+    "LOT-0035",
+    "LOT-0036",
+    "LOT-0037",
+    "LOT-0038",
+    "LOT-0039",
+    "LOT-0040",
+    "LOT-0041",
+    "LOT-0042",
+    "LOT-0043",
+    "LOT-0044",
+    "LOT-0045",
+    "LOT-0046",
+    "LOT-0047",
+    "LOT-0048",
+    "LOT-0049",
+    "LOT-0050",
+    "LOT-0051",
+    "LOT-0052",
+    "LOT-0053",
+    "LOT-0054",
+    "LOT-0055",
+    "LOT-0056",
+    "LOT-0057",
+    "LOT-0058",
+    "LOT-0059",
+    "LOT-0060",
+    "LOT-0061",
+    "LOT-0062",
+    "LOT-0063",
+    "LOT-0064",
+    "LOT-0065",
+    "LOT-0066",
+    "LOT-0067",
+    "LOT-0068",
+    "LOT-0069",
+    "LOT-0070",
+    "LOT-0071",
+    "LOT-0072",
+    "LOT-0073",
+    "LOT-0074"
+  ],
   "notice-identifier": "d7ae5df2-f1b2-4030-a95d-e3379ab91639",
   "place-of-performance": [
     "PL712",
@@ -483,7 +933,238 @@
   "title-proc": {
     "pol": "Wykonanie usługi wycinki drzew, krzewów, podrostów i gałęzi oraz odtworzenie pasa technologicznego w pobliżu czynnych linii elektroenergetycznych WN i SN na obszarze działania PGE Dystrybucja S.A. Oddział Łódź i Oddziału Skarżysko-Kamienna w podziale na 74 części"
   },
+  "dps-usage-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
   "main-classification-type-proc": "cpv",
+  "renewal-maximum-lot": [
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0",
+    "0"
+  ],
+  "framework-agreement-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
+  "main-activity": [
+    "electricity"
+  ],
   "change-notice-version-identifier": "587974-2026",
   "buyer-country": [
     "POL"
@@ -718,6 +1399,7 @@
     "09:00:00+02:00",
     "09:00:00+02:00"
   ],
+  "procedure-type": "open",
   "classification-cpv": [
     "77211400",
     "77211400",
@@ -877,6 +1559,82 @@
       "PGE Dystrybucja S.A."
     ]
   },
+  "submission-language": [
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL"
+  ],
   "notice-title": {
     "hun": "Lengyelország – Favágási szolgáltatások – Wykonanie usługi wycinki drzew, krzewów, podrostów i gałęzi oraz odtworzenie pasa technologicznego w pobliżu czynnych linii elektroenergetycznych WN i SN na obszarze działania PGE Dystrybucja S.A. Oddział Łódź i Oddziału Skarżysko-Kamienna w podziale na 74 części",
     "lav": "Polija – Koku izciršanas pakalpojumi – Wykonanie usługi wycinki drzew, krzewów, podrostów i gałęzi oraz odtworzenie pasa technologicznego w pobliżu czynnych linii elektroenergetycznych WN i SN na obszarze działania PGE Dystrybucja S.A. Oddział Łódź i Oddziału Skarżysko-Kamienna w podziale na 74 części",

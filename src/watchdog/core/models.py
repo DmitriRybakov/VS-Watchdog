@@ -24,6 +24,7 @@ from typing import Annotated, Any, Protocol
 from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
 
 from watchdog.core.clock import ensure_utc, utc_now
+from watchdog.core.codelists import has_qualification_stage, is_utility_activity
 from watchdog.core.enums import (
     Band,
     BidRoute,
@@ -38,6 +39,7 @@ from watchdog.core.enums import (
     RuleStrength,
     RunKind,
     RunStatus,
+    ScreeningState,
     ServiceType,
     SourcePlatform,
     Verdict,
@@ -56,6 +58,11 @@ _HASH_SEPARATOR = "\x1f"
 _HASH_NULL = "\x00"
 
 ID_SEPARATOR = ":"
+
+# The reason code a screening carries when a model was asked and did not answer.
+# It lives here rather than beside the scoring policy because the register has to
+# recognise that state to render it, and core may not import screening.
+ASSESSMENT_FAILED = "ASSESSMENT_FAILED"
 
 
 def make_tender_id(source: SourcePlatform, source_id: str) -> str:
@@ -110,6 +117,49 @@ def content_hash(screening_text: str, cpv_all: Sequence[str]) -> str:
         ",".join(sorted(cpv_all)),
     ]
     return hashlib.sha256(_HASH_SEPARATOR.join(parts).encode("utf-8")).hexdigest()
+
+
+class AwardCriterion(BaseModel):
+    """One award criterion, as the notice states it. Never tied to a lot.
+
+    The number and its meaning are two facts. TED writes a 40% weight, a 40-point
+    score and a rank of 1 all as bare numbers, and only ``number_kind`` says
+    which. See docs/decisions/0008 and ``core.codelists``.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    # price | quality | cost, as the source states it.
+    type: str | None = None
+    name: str | None = None
+    description: str | None = None
+    # The figure exactly as it arrived, including any trailing zeros.
+    number: str | None = None
+    # per-exa, poi-exa, ord-imp and so on. None means TED did not say what the
+    # number is, and it must then be shown bare.
+    number_kind: str | None = None
+
+
+class SelectionCriterion(BaseModel):
+    """One qualification requirement, as the notice states it. Never tied to a lot."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    type: str | None = None
+    description: str | None = None
+
+
+class ContractDuration(BaseModel):
+    """How long a contract runs, with the unit the source gave.
+
+    A bare 10 is meaningless: TED sends ``{"value": "10", "unit": "MONTH"}`` and
+    both halves are kept together for that reason.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    value: str
+    unit: str | None = None
 
 
 class Tender(BaseModel):
@@ -180,10 +230,55 @@ class Tender(BaseModel):
 
     estimated_value: Decimal | None = None
     currency: str | None = None
+    # Which source field the value was read from, verbatim. A procedure-level
+    # estimate and a single lot's estimate are different facts, and the register
+    # has to be able to say which one it is showing.
+    estimated_value_source: str | None = None
+    # Every distinct lot estimate, in the order the source gave them, when the
+    # notice states values per lot. Never summed: 532622-2026 carries four values
+    # for five lots, so a total would be confidently short.
+    lot_values: list[Decimal] = Field(default_factory=list)
+    lot_value_currency: str | None = None
 
-    documents_url: str | None = None
+    # Every distinct document link on the notice, not only the first.
+    document_urls: list[str] = Field(default_factory=list)
     languages: list[str] = Field(default_factory=list)
+
+    # ------------------------------------------------------------------ lots
+    #
+    # Lot identifiers exactly as TED gave them, which is the ONLY authoritative
+    # statement of how many lots there are. They are not necessarily contiguous:
+    # 458521-2026 carries LOT-0001 and LOT-0003 and nothing between them.
+    #
+    # Nothing below this line is attributed to an individual lot. The search API
+    # flattens every lot-scoped field into one array and states no ordering, so a
+    # value can be reported as belonging to the notice but never to a lot. See
+    # docs/decisions/0008.
+    lot_ids: list[str] = Field(default_factory=list)
     multi_lot: bool = False
+
+    # Procedure-level facts, one value for the whole notice.
+    procedure_type: str | None = None
+    main_activity: str | None = None
+    performance_cities: list[str] = Field(default_factory=list)
+
+    # Facts stated per lot and held here as the distinct set across all lots. A
+    # notice offering Catalan on one lot and Spanish on another lists both, and
+    # the display says "across lots" rather than implying either covers them all.
+    submission_languages: list[str] = Field(default_factory=list)
+    submission_urls: list[str] = Field(default_factory=list)
+    framework_agreements: list[str] = Field(default_factory=list)
+    dps_usages: list[str] = Field(default_factory=list)
+    contract_durations: list[ContractDuration] = Field(default_factory=list)
+    contract_start_dates: list[date] = Field(default_factory=list)
+    renewal_maximums: list[str] = Field(default_factory=list)
+
+    award_criteria: list[AwardCriterion] = Field(default_factory=list)
+    selection_criteria: list[SelectionCriterion] = Field(default_factory=list)
+    # True when TED's parallel arrays for the criteria disagreed in length, so the
+    # parts could not be read as one list and none were paired. Measured at 2.5%
+    # of notices carrying award criteria; the raw arrays are still in ``raw``.
+    criteria_unpaired: bool = False
 
     # The original text the screening reads, one block per field and language.
     screening_blocks: list[TextBlock] = Field(default_factory=list)
@@ -217,6 +312,32 @@ class Tender(BaseModel):
     def is_services(self) -> bool:
         """True when the notice mentions services anywhere, not only as its main nature."""
         return ContractNature.SERVICES in self.contract_natures
+
+    @property
+    def documents_url(self) -> str | None:
+        """One document link, for a template that has room for a single href."""
+        return self.document_urls[0] if self.document_urls else None
+
+    @property
+    def lot_count(self) -> int | None:
+        """How many lots the notice has, or None when TED did not say.
+
+        Derived from ``lot_ids`` rather than stored, so the count and the
+        identifiers cannot come to disagree. Never inferred from the length of
+        some other array: arrays disagreeing in length means we cannot associate
+        their values, which is a different fact from how many lots there are.
+        """
+        return len(self.lot_ids) or None
+
+    @property
+    def has_qualification_stage(self) -> bool | None:
+        """True when a bidder must get through a stage before tendering."""
+        return has_qualification_stage(self.procedure_type)
+
+    @property
+    def buyer_is_utility(self) -> bool | None:
+        """True when the buyer is a utility rather than a general authority."""
+        return is_utility_activity(self.main_activity)
 
     @property
     def multi_country(self) -> bool:
@@ -661,6 +782,29 @@ class RegisterRow(BaseModel):
     def is_assessed(self) -> bool:
         """True when a model judged this notice, rather than the rules alone."""
         return self.screening is not None and self.screening.assessment is not None
+
+    @property
+    def screening_state(self) -> ScreeningState:
+        """Which of the five things the register can honestly say about this notice.
+
+        There are more than the obvious three, and the two extra ones have no
+        number attached. A failed assessment has no assessment *and* no rules
+        grade, because a model was supposed to produce the score; an exclusion has
+        neither either. Branching on ``is_assessed`` alone leaves both rendering
+        the word "None" where a grade belongs.
+
+        Derived from what the result actually carries rather than from a list of
+        reason codes, so a path added to the policy later cannot reintroduce that.
+        """
+        if self.screening is None:
+            return ScreeningState.UNSCREENED
+        if self.screening.assessment is not None:
+            return ScreeningState.ASSESSED
+        if self.screening.rules_only_score is not None:
+            return ScreeningState.GRADED
+        if ASSESSMENT_FAILED in self.screening.reason_codes:
+            return ScreeningState.ASSESSMENT_FAILED
+        return ScreeningState.UNGRADED
 
     @property
     def evidence_grade(self) -> int | None:

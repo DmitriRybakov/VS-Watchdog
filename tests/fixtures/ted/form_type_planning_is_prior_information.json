@@ -17,6 +17,9 @@
     "31527200",
     "50232110"
   ],
+  "main-activity": [
+    "gen-pub"
+  ],
   "buyer-country": [
     "ESP"
   ],
@@ -35,13 +38,12 @@
   "contract-nature": [
     "services"
   ],
-  "publication-date": "2026-08-31+02:00",
   "buyer-name": {
     "spa": [
       "Junta de Gobierno del Ayuntamiento de Alcobendas"
     ]
   },
-  "contract-nature-main-proc": "services",
+  "publication-date": "2026-08-31+02:00",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/596426-2026/xml"
@@ -128,6 +130,7 @@
       "SWE": "https://ted.europa.eu/sv/notice/596426-2026/html"
     }
   },
+  "contract-nature-main-proc": "services",
   "notice-title": {
     "hun": "Spanyolország – Elektronikai szolgáltatások – La adjudicación de los servicios de iluminación ornamental urbana en navidad, reyes y fiestas patronales en el municipio de Alcobendas.",
     "lav": "Spānija – Elektropakalpojumi – La adjudicación de los servicios de iluminación ornamental urbana en navidad, reyes y fiestas patronales en el municipio de Alcobendas.",

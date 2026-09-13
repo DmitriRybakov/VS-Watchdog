@@ -22,17 +22,7 @@
           data-index="{{ loop.index0 }}"
           aria-selected="{{ 'true' if loop.index0 == view.cursor else 'false' }}">
         <span class="queue-mark">
-          {% if row.screening %}
-            {% if row.is_assessed %}
-              <span class="chip chip-score chip-{{ row.screening.score }}"
-                    title="Assessed score">{{ row.screening.score }}</span>
-            {% else %}
-              <span class="chip chip-evidence chip-e{{ row.evidence_grade }}"
-                    title="Rules evidence grade, not a judged score">E{{ row.evidence_grade }}</span>
-            {% endif %}
-          {% else %}
-            <span class="chip chip-none" title="Never screened">&ndash;</span>
-          {% endif %}
+          {% include "partials/score_chip.html" %}
         </span>
         <span class="queue-text">
           <span class="queue-title">{{ row.tender.title }}</span>

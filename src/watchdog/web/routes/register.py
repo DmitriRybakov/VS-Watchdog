@@ -143,7 +143,7 @@ def record(
 @router.get("/register/notice/{tender_id:path}", response_class=HTMLResponse)
 def detail(request: Request, tender_id: str, store: Store, reviewer: Reviewer) -> HTMLResponse:
     """Everything about one notice, including what the card deliberately leaves out."""
-    row = store.get_register_row(tender_id)
+    row = query_service.notice(tender_id, repository=store)
     if row is None:
         return _problem(
             request,

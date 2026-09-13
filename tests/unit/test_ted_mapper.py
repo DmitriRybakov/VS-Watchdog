@@ -13,6 +13,7 @@ import pytest
 from tests.conftest import load_ted_fixture
 
 from watchdog.core.enums import ContractNature, DeadlineType, NoticeStage, SourcePlatform
+from watchdog.core.models import ContractDuration
 from watchdog.sources.errors import MappingError
 from watchdog.sources.ted.mapper import REJECTED_DEADLINE_FIELDS, map_notice
 
@@ -245,6 +246,40 @@ def test_the_offset_is_honoured_and_not_assumed() -> None:
     tender = map_notice(notice)
 
     assert tender.deadline == datetime(2026, 9, 28, 8, 15, tzinfo=UTC)
+    assert tender.deadline_date == date(2026, 9, 28)
+
+
+def test_a_deadline_just_after_midnight_lands_on_the_previous_day_in_utc() -> None:
+    """00:30 in Warsaw on the 28th is 22:30 on the 27th in UTC.
+
+    Both facts are kept and they are different: ``deadline`` is the real moment,
+    converted, and ``deadline_date`` is the calendar date the buyer wrote. A
+    cross-check on TED's own page has to show the buyer's date, and a filter on
+    "has it passed" has to use the moment.
+    """
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "deadline-receipt-tender-date-lot": ["2026-09-28+02:00"],
+        "deadline-receipt-tender-time-lot": ["00:30:00+02:00"],
+    }
+    tender = map_notice(notice)
+
+    assert tender.deadline == datetime(2026, 9, 27, 22, 30, tzinfo=UTC)
+    assert tender.deadline.date() == date(2026, 9, 27), "the UTC day is the day before"
+    assert tender.deadline_date == date(2026, 9, 28), "the buyer's stated day is unchanged"
+
+
+def test_a_deadline_late_in_the_evening_west_of_greenwich_lands_on_the_next_day() -> None:
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "deadline-receipt-tender-date-lot": ["2026-09-28-05:00"],
+        "deadline-receipt-tender-time-lot": ["23:59:00-05:00"],
+    }
+    tender = map_notice(notice)
+
+    assert tender.deadline == datetime(2026, 9, 29, 4, 59, tzinfo=UTC)
     assert tender.deadline_date == date(2026, 9, 28)
 
 
@@ -530,6 +565,239 @@ def test_a_single_lot_notice_is_not_marked_multi_lot() -> None:
     }
 
     assert map_notice(notice).multi_lot is False
+
+
+# ------------------------------------------------------------ lot association
+
+
+def test_the_lot_count_comes_from_teds_own_identifiers() -> None:
+    notice = load_ted_fixture("six_lots_with_unaligned_parallel_arrays")
+    tender = map_notice(notice)
+
+    assert notice["identifier-lot"] == [f"LOT-000{n}" for n in range(1, 7)]
+    assert tender.lot_ids == notice["identifier-lot"]
+    assert tender.lot_count == 6
+    assert tender.multi_lot is True
+
+
+def test_lot_identifiers_are_not_necessarily_contiguous() -> None:
+    """458521-2026 carries LOT-0001 and LOT-0003. Position is not a lot number."""
+    notice = load_ted_fixture("two_lots_seven_award_criteria")
+    tender = map_notice(notice)
+
+    assert tender.lot_ids == ["LOT-0001", "LOT-0003"]
+    assert tender.lot_count == 2
+
+
+def test_arrays_disagreeing_in_length_do_not_make_a_notice_multi_lot() -> None:
+    # Two different facts. A mismatch says we cannot associate the values; it does
+    # not say how many lots there are, and TED's identifiers already did.
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "identifier-lot": ["LOT-0001"],
+        "submission-language": ["ENG", "FRA", "DEU"],
+        "document-url-lot": ["https://a.example", "https://b.example"],
+    }
+    tender = map_notice(notice)
+
+    assert tender.lot_count == 1
+    assert tender.multi_lot is False
+    assert tender.submission_languages == ["ENG", "FRA", "DEU"]
+
+
+def test_the_lot_arrays_stand_in_only_when_there_are_no_identifiers() -> None:
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "description-lot": {"eng": ["one", "two", "three"]},
+    }
+    tender = map_notice(notice)
+
+    assert tender.lot_ids == []
+    assert tender.lot_count is None
+    assert tender.multi_lot is True
+
+
+def test_nothing_lot_scoped_is_attributed_to_a_lot() -> None:
+    """The whole of decision 0008, on the notice that motivated it.
+
+    532622-2026 has five lots, four estimated values, one currency and eight
+    submission languages. Every count differs, and no field says which lot any of
+    them belongs to, so the mapper holds them as sets across lots and the Tender
+    has nowhere to put a per-lot value even if someone wanted to.
+    """
+    notice = load_ted_fixture("lot_values_and_languages_do_not_match_the_lots")
+    tender = map_notice(notice)
+
+    assert tender.lot_count == 5
+    assert len(notice["estimated-value-lot"]) == 4
+    assert len(notice["submission-language"]) == 8
+
+    assert len(tender.lot_values) == 4, "kept as they arrived, not padded to the lot count"
+    assert tender.submission_languages == ["CAT", "SPA"], "the distinct set, across lots"
+    assert not hasattr(tender, "lots"), "there is no per-lot structure to fill in wrongly"
+
+
+def test_lot_values_are_never_summed_into_a_procedure_total() -> None:
+    notice = load_ted_fixture("lot_values_and_languages_do_not_match_the_lots")
+    tender = map_notice(notice)
+
+    total = sum(tender.lot_values)
+    assert tender.estimated_value is not None
+    assert tender.estimated_value != total, "four lot values are not the five-lot procedure"
+    assert str(tender.estimated_value) == notice["estimated-value-proc"]
+
+
+# --------------------------------------------------------------- the criteria
+
+
+def test_award_criteria_are_read_by_position_when_the_arrays_agree() -> None:
+    """458521-2026: seven criteria over two lots, four then three.
+
+    The pairing claim is only that one criterion's own parts line up, and the
+    values show it: "Honorar" is the cost criterion in both groups and carries 40
+    in the first and 50 in the second. No criterion is attached to a lot.
+    """
+    tender = map_notice(load_ted_fixture("two_lots_seven_award_criteria"))
+
+    assert tender.criteria_unpaired is False
+    assert len(tender.award_criteria) == 7
+    assert tender.lot_count == 2, "seven criteria, two lots, and no way to group them"
+
+    first = tender.award_criteria[0]
+    assert first.type == "cost"
+    assert first.name == "Honorar"
+    assert first.number == "40"
+    assert first.number_kind == "per-exa"
+
+    fifth = tender.award_criteria[4]
+    assert fifth.name == "Honorar"
+    assert fifth.number == "50"
+
+    assert [c.type for c in tender.award_criteria].count("quality") == 5
+
+
+def test_criterion_arrays_that_disagree_are_not_paired_at_all() -> None:
+    # 2.5% of notices carrying award criteria look like this. A criterion wearing
+    # another criterion's weight is plausible enough never to be noticed.
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "award-criterion-type-lot": ["price", "quality", "quality"],
+        "award-criterion-number-lot": ["60", "40"],
+    }
+    tender = map_notice(notice)
+
+    assert tender.criteria_unpaired is True
+    assert tender.award_criteria == []
+    assert tender.raw["award-criterion-type-lot"] == ["price", "quality", "quality"]
+
+
+def test_selection_criteria_carry_the_qualification_bar() -> None:
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "selection-criterion-lot": ["tp-abil", "ef-stand"],
+        "selection-criterion-description-lot": {"eng": ["Three similar projects", "Turnover"]},
+    }
+    tender = map_notice(notice)
+
+    assert tender.criteria_unpaired is False
+    assert [c.type for c in tender.selection_criteria] == ["tp-abil", "ef-stand"]
+    assert tender.selection_criteria[0].description == "Three similar projects"
+
+
+# ----------------------------------------------- what the wider projection adds
+
+
+def test_the_submission_language_is_not_the_publication_language() -> None:
+    """The register's language column wants the language a bid may be written in.
+
+    They are different facts and the notice states both. 532622-2026 is published
+    in Spanish and accepts bids in Catalan or Spanish.
+    """
+    tender = map_notice(load_ted_fixture("lot_values_and_languages_do_not_match_the_lots"))
+
+    assert tender.languages == ["SPA"]
+    assert tender.submission_languages == ["CAT", "SPA"]
+
+
+def test_the_procedure_and_the_buyers_sector_are_read(competition: dict) -> None:
+    tender = map_notice(competition)
+
+    assert tender.procedure_type == competition["procedure-type"]
+    assert tender.main_activity == competition["main-activity"][0]
+
+
+def test_a_contract_length_keeps_its_unit() -> None:
+    notice = load_ted_fixture("lots_with_different_deadlines")
+    tender = map_notice(notice)
+
+    assert notice["contract-duration-period-lot"][0] == {"value": "10", "unit": "MONTH"}
+    # Repeated once per lot in the source; one fact here.
+    assert tender.contract_durations == [ContractDuration(value="10", unit="MONTH")]
+
+
+def test_every_document_link_is_kept_not_only_the_first() -> None:
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "document-url-lot": ["https://a.example", "https://b.example", "https://a.example"],
+    }
+    tender = map_notice(notice)
+
+    assert tender.document_urls == ["https://a.example", "https://b.example"]
+    assert tender.documents_url == "https://a.example", "one link for a template with room for one"
+
+
+def test_a_single_lot_value_fills_the_notice_value_when_the_procedure_states_none() -> None:
+    # 55 notices over 1 July to 11 September read "Not stated" for exactly this.
+    # With one lot there is nothing to attribute wrongly.
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "identifier-lot": ["LOT-0001"],
+        "estimated-value-lot": ["450000"],
+        "estimated-value-cur-lot": ["EUR"],
+    }
+    tender = map_notice(notice)
+
+    assert tender.estimated_value == Decimal("450000")
+    assert tender.currency == "EUR"
+    assert tender.estimated_value_source == "estimated-value-lot"
+
+
+def test_several_lot_values_never_fill_the_notice_value() -> None:
+    notice = {
+        "publication-number": "1-2026",
+        "notice-title": {"eng": "x"},
+        "identifier-lot": ["LOT-0001", "LOT-0002"],
+        "estimated-value-lot": ["100", "200"],
+        "estimated-value-cur-lot": ["EUR"],
+    }
+    tender = map_notice(notice)
+
+    assert tender.estimated_value is None
+    assert tender.estimated_value_source is None
+    assert tender.lot_values == [Decimal("100"), Decimal("200")]
+    assert tender.lot_value_currency == "EUR"
+
+
+def test_a_procedure_value_is_always_preferred_and_says_so(competition: dict) -> None:
+    tender = map_notice(competition)
+
+    if tender.estimated_value is not None:
+        assert tender.estimated_value_source == "estimated-value-proc"
+
+
+def test_identical_lot_values_are_all_kept() -> None:
+    # Four lots priced the same are four facts; collapsing them would make a
+    # six-lot notice look like a three-lot one.
+    tender = map_notice(load_ted_fixture("six_lots_with_unaligned_parallel_arrays"))
+
+    assert len(tender.lot_values) == 6
+    assert tender.lot_values.count(Decimal("7000000")) == 4
 
 
 # ---------------------------------------------------------- shapes and links

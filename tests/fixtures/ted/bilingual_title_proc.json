@@ -3,9 +3,24 @@
     "2026-11-17+01:00"
   ],
   "notice-type": "cn-standard",
+  "award-criterion-description-lot": {
+    "fra": [
+      "EQUIPE et EXPERTISE (40/100 points)",
+      "COMPREHENSION de la mission et METHODOLOGIE (30/100 points)",
+      "PRIX (30/100 points)"
+    ],
+    "nld": [
+      "TEAM en EXPERTISE (40/100 punten)",
+      "BEGRIP van de opdracht en METHODIEK (30/100 punten)",
+      "PRIJS (30/100 punten)"
+    ]
+  },
   "publication-number": "622963-2026",
   "main-classification-proc": [
     "71000000"
+  ],
+  "submission-url-lot": [
+    "https://www.publicprocurement.be/supplier/enterprises/0/tendering-workspaces/publication-workspace-detail/3ffc8455-2c7d-4e80-92ea-5b533ba9188f/general"
   ],
   "place-of-performance-country-proc": [
     "BEL"
@@ -13,13 +28,17 @@
   "document-url-lot": [
     "https://www.publicprocurement.be/publication-workspaces/3ffc8455-2c7d-4e80-92ea-5b533ba9188f/documents"
   ],
+  "award-criterion-number-lot": [
+    "40",
+    "30",
+    "30"
+  ],
   "official-language": [
     "FRA",
     "NLD"
   ],
   "notice-subtype": "16",
   "publication-date": "2026-09-10+02:00",
-  "contract-nature-main-proc": "services",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/622963-2026/xml"
@@ -107,6 +126,10 @@
       "SWE": "https://ted.europa.eu/sv/notice/622963-2026/html"
     }
   },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001"
+  ],
   "notice-identifier": "50ab29bd-6b53-4dfc-9f39-986968dca6c6",
   "place-of-performance": [
     "BE100",
@@ -121,9 +144,28 @@
     "fra": "6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
     "nld": "6.25.1.9 Ontwerpopdracht voor de restauratie van de gevels van het Museum Kunst en Geschiedenis in de Jubelpark in Brussel - Dienstenopdracht - Openbare Procedure"
   },
+  "dps-usage-lot": [
+    "none"
+  ],
   "main-classification-type-proc": "cpv",
+  "award-criterion-type-lot": [
+    "quality",
+    "quality",
+    "price"
+  ],
+  "framework-agreement-lot": [
+    "none"
+  ],
+  "main-activity": [
+    "gen-pub"
+  ],
   "buyer-country": [
     "BEL"
+  ],
+  "award-criterion-number-weight-lot": [
+    "per-exa",
+    "per-exa",
+    "per-exa"
   ],
   "description-lot": {
     "fra": [
@@ -139,6 +181,7 @@
   "deadline-receipt-tender-time-lot": [
     "11:00:00+01:00"
   ],
+  "procedure-type": "open",
   "classification-cpv": [
     "71000000",
     "71000000"
@@ -155,6 +198,10 @@
       "FOD Mobiliteit en Vervoer"
     ]
   },
+  "submission-language": [
+    "FRA",
+    "NLD"
+  ],
   "notice-title": {
     "hun": "Belgium – Építészeti, építési, mérnöki és vizsgálati szolgáltatások – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",
     "lav": "Beļģija – Arhitektūras, būvniecības, inženiertehniskie un pārbaudes pakalpojumi – 6.25.1.9 Mission d’auteur de projet pour la restauration des façades du Musée Art et Histoire dans le Parc du Cinquantenaire à Bruxelles – Marché de services - Procédure ouverte",

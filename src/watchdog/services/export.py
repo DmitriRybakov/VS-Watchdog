@@ -39,7 +39,8 @@ from openpyxl.cell.cell import Cell
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
-from watchdog.core.models import RegisterRow
+from watchdog.core.codelists import award_criterion_type_label, criterion_number
+from watchdog.core.models import RegisterRow, Tender
 
 # Characters that make a spreadsheet read a cell as a formula rather than text.
 # The two whitespace ones matter because a leading tab or carriage return is
@@ -90,6 +91,20 @@ COLUMN_KINDS: tuple[tuple[str, Kind], ...] = (
     ("cpv_main", Kind.CODE),
     ("estimated_value", Kind.MONEY),
     ("currency", Kind.CODE),
+    # The "_across_lots" suffix is not decoration. TED states these per lot and
+    # says nothing about which lot each belongs to, so a column headed
+    # "submission_language" holding "CAT SPA" would read as both being accepted
+    # for every lot. See docs/decisions/0008.
+    ("lot_count", Kind.WHOLE),
+    ("submission_languages_across_lots", Kind.CODE),
+    ("procedure_type", Kind.TEXT),
+    ("qualification_stage", Kind.TEXT),
+    ("main_activity", Kind.TEXT),
+    ("performance_city", Kind.TEXT),
+    ("framework_agreement_across_lots", Kind.TEXT),
+    ("contract_duration_across_lots", Kind.TEXT),
+    ("award_criteria_across_lots", Kind.TEXT),
+    ("submission_url_across_lots", Kind.TEXT),
     ("score", Kind.WHOLE),
     ("score_kind", Kind.TEXT),
     ("evidence_grade", Kind.WHOLE),
@@ -131,6 +146,31 @@ def guard(value: str) -> str:
     return GUARD + value if value.startswith(FORMULA_PREFIXES) else value
 
 
+def _yes_no(value: bool | None) -> str | None:
+    """A tri-state as a word. None stays empty rather than becoming "no"."""
+    if value is None:
+        return None
+    return "yes" if value else "no"
+
+
+def _criteria(tender: Tender) -> str | None:
+    """The award criteria as one cell, each number carrying its verified meaning.
+
+    Empty when TED's arrays disagreed and nothing could be read as one list: a
+    partial pairing in a spreadsheet is a wrong weight nobody would question.
+    """
+    if tender.criteria_unpaired or not tender.award_criteria:
+        return None
+
+    parts: list[str] = []
+    for item in tender.award_criteria:
+        label = award_criterion_type_label(item.type) or item.type or "criterion"
+        number = criterion_number(item.number, item.number_kind)
+        name = item.name or label
+        parts.append(name if number is None else f"{name} {number}")
+    return " | ".join(parts)
+
+
 def values(row: RegisterRow) -> dict[str, Any]:
     """One register row as its real values, untyped and unformatted.
 
@@ -160,6 +200,19 @@ def values(row: RegisterRow) -> dict[str, Any]:
         "cpv_main": tender.cpv_main,
         "estimated_value": tender.estimated_value,
         "currency": tender.currency,
+        "lot_count": tender.lot_count,
+        "submission_languages_across_lots": " ".join(tender.submission_languages),
+        "procedure_type": tender.procedure_type,
+        "qualification_stage": _yes_no(tender.has_qualification_stage),
+        "main_activity": tender.main_activity,
+        "performance_city": " ".join(tender.performance_cities),
+        "framework_agreement_across_lots": " ".join(tender.framework_agreements),
+        "contract_duration_across_lots": " ".join(
+            f"{item.value}{'' if item.unit is None else ' ' + item.unit}"
+            for item in tender.contract_durations
+        ),
+        "award_criteria_across_lots": _criteria(tender),
+        "submission_url_across_lots": " ".join(tender.submission_urls),
         "source_url": tender.source_url,
     }
 

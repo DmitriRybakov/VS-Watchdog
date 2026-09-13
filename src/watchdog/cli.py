@@ -90,17 +90,20 @@ def config_show() -> None:
 
 @config_app.command("validate")
 def config_validate() -> None:
-    """Check the TED field list and query against the live API.
+    """Check the TED field list, page size and query against the live API.
 
     TED requires a field list and rejects the whole request if one name is wrong,
-    which otherwise shows up as an empty result set rather than as an error.
+    which otherwise shows up as an empty result set rather than as an error. It
+    also prices a request as fields per page, so a projection that is too wide for
+    the configured page size fails every run until somebody notices.
     """
     settings = get_settings()
     configure_logging(settings.log_level, json_output=not settings.is_dev)
 
     config = _load_ted_config()
+    fields = len(ted_service.REQUESTED_FIELDS)
 
-    typer.echo(f"Checking {len(ted_service.REQUESTED_FIELDS)} TED fields against the live API...")
+    typer.echo(f"Checking {fields} TED fields at page size {config.page_size}...")
 
     try:
         result = ted_service.check_fields(config)
@@ -108,6 +111,25 @@ def config_validate() -> None:
         typer.secho(f"Could not reach TED: {exc}", fg=typer.colors.RED)
         typer.echo("Check the network connection and try again. Nothing was changed.")
         raise typer.Exit(code=1) from exc
+
+    if not result.fits_offline:
+        typer.secho(
+            f"{fields} fields at page size {result.page_size} would cost "
+            f"{result.cost} fields per page, over TED's limit of {result.cost_limit}.",
+            fg=typer.colors.RED,
+        )
+        typer.echo(
+            f"Set page_size to {result.largest_page_size} or less in config/sources/ted.yaml, "
+            "or request fewer fields in src/watchdog/sources/ted/mapper.py (REQUESTED_FIELDS)."
+        )
+        typer.echo("Nothing was sent to TED.")
+        raise typer.Exit(code=1)
+
+    typer.secho(
+        f"Page size fits: {result.cost} of {result.cost_limit} fields per page "
+        f"(up to {result.largest_page_size} notices per request at this width).",
+        fg=typer.colors.GREEN,
+    )
 
     if result.unknown:
         typer.secho("TED does not recognise these fields:", fg=typer.colors.RED)
@@ -119,11 +141,12 @@ def config_validate() -> None:
     typer.secho("All requested fields are valid.", fg=typer.colors.GREEN)
 
     if not result.query_valid:
-        typer.secho(f"TED rejected the query: {result.query_error}", fg=typer.colors.RED)
+        typer.secho(f"TED rejected the request: {result.query_error}", fg=typer.colors.RED)
         typer.echo("Check cpv_prefixes, buyer_countries and extra_query in config/sources/ted.yaml")
+        typer.echo("If it names the fields-per-page limit, lower page_size there.")
         raise typer.Exit(code=1)
 
-    typer.secho("The configured query is valid.", fg=typer.colors.GREEN)
+    typer.secho("TED accepted the query at the configured page size.", fg=typer.colors.GREEN)
     typer.echo(f"  {result.query}")
 
 

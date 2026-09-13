@@ -14,6 +14,13 @@ import respx
 
 from watchdog.sources.errors import InvalidPayloadError, QueryError, TransportError
 from watchdog.sources.ted.client import TED_SEARCH_URL, TedClient
+from watchdog.sources.ted.config import (
+    MAX_FIELDS_PER_PAGE,
+    fields_per_page,
+    load_ted_config,
+    max_page_size,
+)
+from watchdog.sources.ted.mapper import REQUESTED_FIELDS
 
 FIELDS = ("publication-number", "notice-title")
 
@@ -149,6 +156,45 @@ def test_a_page_size_above_the_maximum_is_refused_before_any_request(client: Ted
         list(client.iter_notices("q", FIELDS, page_size=251))
 
     assert respx.calls.call_count == 0
+
+
+@respx.mock
+def test_a_projection_over_the_fields_cap_is_refused_before_any_request(
+    client: TedClient,
+) -> None:
+    # TED prices a request as fields per page and refuses one over 10,000 with a
+    # 400 on the very first call. Caught here instead, so the failure names a page
+    # size that would work rather than arriving as a rejected query mid-run.
+    many = tuple(f"field-{index}" for index in range(55))
+
+    with pytest.raises(QueryError) as caught:
+        list(client.iter_notices("q", many, page_size=250))
+
+    assert respx.calls.call_count == 0
+    assert "fields per page" in str(caught.value)
+    assert "175" in str(caught.value), "it says what page size would fit"
+
+
+@respx.mock
+def test_the_shipped_field_list_and_page_size_are_allowed_through(client: TedClient) -> None:
+    # The pair that actually ships has to pass its own guard, or every run fails.
+    respx.post(TED_SEARCH_URL).mock(return_value=httpx.Response(200, json=page([], None)))
+    config = load_ted_config("config/sources/ted.yaml")
+
+    list(client.iter_notices("q", REQUESTED_FIELDS, page_size=config.page_size))
+
+    assert respx.calls.call_count == 1
+
+
+def test_the_offline_guard_is_never_looser_than_what_ted_measured() -> None:
+    """55 fields were accepted at page size 181 and refused at 182, live.
+
+    The local arithmetic is a precaution rather than a proven formula - one TED
+    field name was found to cost more than one - so it has to sit on the safe side
+    of the measurement, never past it.
+    """
+    assert max_page_size(55) <= 181
+    assert fields_per_page(55, 175) <= MAX_FIELDS_PER_PAGE
 
 
 def test_an_empty_field_list_is_refused_before_any_request(client: TedClient) -> None:

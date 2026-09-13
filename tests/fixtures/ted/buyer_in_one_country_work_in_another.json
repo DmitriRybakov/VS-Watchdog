@@ -7,12 +7,21 @@
   "main-classification-proc": [
     "90713000"
   ],
+  "submission-url-lot": [
+    "https://www.marches-publics.gouv.fr/?page=Entreprise.EntrepriseAdvancedSearch&AllCons&id=3063429&orgAcronyme=s2d"
+  ],
   "additional-classification-proc": [
     "90500000",
     "71313000"
   ],
   "place-of-performance-country-proc": [
     "AGO"
+  ],
+  "contract-duration-period-lot": [
+    {
+      "value": "8",
+      "unit": "MONTH"
+    }
   ],
   "document-url-lot": [
     "https://www.marches-publics.gouv.fr/?page=Entreprise.EntrepriseAdvancedSearch&AllCons&id=3063429&orgAcronyme=s2d"
@@ -22,7 +31,6 @@
   ],
   "notice-subtype": "16",
   "publication-date": "2026-09-09+02:00",
-  "contract-nature-main-proc": "services",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/619675-2026/xml"
@@ -109,6 +117,10 @@
       "SWE": "https://ted.europa.eu/sv/notice/619675-2026/html"
     }
   },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001"
+  ],
   "notice-identifier": "a282f06f-8e08-471b-b3d8-32c407e56aad",
   "place-of-performance": [
     "AGO",
@@ -120,7 +132,16 @@
   "title-proc": {
     "fra": "INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE"
   },
+  "dps-usage-lot": [
+    "none"
+  ],
   "main-classification-type-proc": "cpv",
+  "framework-agreement-lot": [
+    "none"
+  ],
+  "main-activity": [
+    "gen-pub"
+  ],
   "buyer-country": [
     "FRA"
   ],
@@ -135,6 +156,7 @@
   "deadline-receipt-tender-time-lot": [
     "14:00:00+02:00"
   ],
+  "procedure-type": "open",
   "classification-cpv": [
     "90713000",
     "90500000",
@@ -152,6 +174,9 @@
       "EXPERTISE FRANCE"
     ]
   },
+  "submission-language": [
+    "ENG"
+  ],
   "notice-title": {
     "hun": "Franciaország – Környezetvédelmi tanácsadási szolgáltatások – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",
     "lav": "Francija – Vides jautājumu konsultāciju pakalpojumi – INTEGRATED DIAGNOSTIC AND STRATEGIC ROADMAP FOR SOLID WASTE MANAGEMENT AND CIRCULAR ECONOMY IN LUANDA PROVINCE",

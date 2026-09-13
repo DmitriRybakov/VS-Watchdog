@@ -25,7 +25,7 @@ variable and nothing to keep out of a log.
 | Key | What we send | Notes |
 | --- | --- | --- |
 | `query` | the expert query | Built by `query.build_query`. See the query language section. |
-| `fields` | `REQUESTED_FIELDS` | **Mandatory and non-empty.** An empty or absent list is a 400. |
+| `fields` | `REQUESTED_FIELDS` | **Mandatory and non-empty.** An empty or absent list is a 400. How many names it may hold depends on `limit`; see the field list. |
 | `limit` | 250 | **250 is the maximum.** 251 is refused with `SEARCH_EXCEEDS_MAX_LIMIT`. |
 | `paginationMode` | `ITERATION` | See paging. |
 | `iterationNextToken` | the previous page's token | Omitted on the first request. |
@@ -57,6 +57,10 @@ With it set, a valid request answers 200 with `notices: []` and `totalNoticeCoun
 **not** enable validation - a malformed query is a 400 either way. What it does is let us check a
 query without running it, which is what `validate_query` and `watchdog config validate` use.
 
+**The fields-per-page cap applies to it too**, so sending the configured `limit` on a validate-only
+request tests the exact shape of the next run's request without fetching a notice. Verified: 55 fields
+is a 200 at limit 175 and a 400 at limit 250, with and without `checkQuerySyntax`.
+
 ## The field list
 
 `fields` is mandatory, and **one unrecognised name fails the whole request**. The 400 lists all 1830
@@ -72,8 +76,9 @@ These are the fields we request:
 ```
 publication-number  notice-identifier  change-notice-version-identifier
 notice-title  title-proc  title-lot  description-proc  description-lot
-buyer-name  buyer-country
+buyer-name  buyer-country  main-activity
 place-of-performance  place-of-performance-country-proc  place-of-performance-country-lot
+place-of-performance-city-proc
 publication-date
 deadline-receipt-tender-date-lot       deadline-receipt-tender-time-lot
 deadline-receipt-request-date-lot      deadline-receipt-request-time-lot
@@ -81,15 +86,92 @@ deadline-receipt-expressions-date-lot  deadline-receipt-expressions-time-lot
 deadline-receipt-request
 classification-cpv  main-classification-proc  main-classification-type-proc
 additional-classification-proc  contract-nature  contract-nature-main-proc
-notice-type  form-type  notice-subtype
+notice-type  form-type  notice-subtype  procedure-type
 estimated-value-proc  estimated-value-cur-proc  estimated-value-lot  estimated-value-cur-lot
+identifier-lot
+submission-language  submission-url-lot  framework-agreement-lot  dps-usage-lot
+contract-duration-period-lot  contract-duration-start-date-lot  renewal-maximum-lot
+award-criterion-type-lot  award-criterion-name-lot  award-criterion-description-lot
+award-criterion-number-lot  award-criterion-number-weight-lot
+selection-criterion-lot  selection-criterion-description-lot
 document-url-lot  links  official-language
 ```
 
-Three names that look right and are not: there is no `buyer-country`-style
-`place-performance-country-lot` (it is `place-of-performance-country-lot`), no `publication-language`
-(it is `official-language`), and `classification-cpv` is not split into main and additional (those
-are `main-classification-proc` and `additional-classification-proc`).
+Names that look right and are not:
+
+- there is no `buyer-country`-style `place-performance-country-lot` (it is `place-of-performance-country-lot`)
+- no `publication-language` (it is `official-language`)
+- `classification-cpv` is not split into main and additional (those are `main-classification-proc` and `additional-classification-proc`)
+- **no `award-criterion-weight-lot`.** The name is `award-criterion-number-weight-lot`, and it is not a
+  weight - see the criterion numbers section below.
+- `contract-duration-period-lot` already carries its unit, as `{"value": "10", "unit": "MONTH"}`, so
+  `duration-period-value-lot` and `duration-period-unit-lot` are not needed.
+
+### The field list has a ceiling, and it is not the formula this document used to state
+
+TED prices a request as **fields per page** and refuses one over **10,000** with a 400 of type
+**`SEARCH_FIELDS_PER_PAGE_EXCEEDS_MAX_LIMIT`**. The error body states the number it computed, which is
+the only reliable way to find out what a request costs:
+
+```json
+{ "message": "Value (13750) of parameter 'Fields per page' exceeds maximum allowed value (10000)",
+  "error": { "type": "SEARCH_FIELDS_PER_PAGE_EXCEEDS_MAX_LIMIT",
+             "fieldsPerPage": 13750, "maxFieldsPerPage": 10000 } }
+```
+
+**An earlier version of this section said `(fields + 2) x limit <= 10000` and gave a table showing 39
+fields at limit 250 as a 400. Re-measured on 13 September 2026, that request is a 200.** Anyone using
+the old table to decide what would fit would have under-requested fields. What was measured instead:
+
+| Field list | `limit` | TED's `fieldsPerPage` | Per notice | Result |
+| --- | --- | --- | --- | --- |
+| our 55 names | 250 | 13,750 | 55.0 | 400 |
+| our 55 names | 182 | - | - | 400 |
+| our 55 names | **181** | - | - | **200** |
+| our 55 names | 175 | 9,975 assumed | - | 200 |
+| 40 `organisation-*-lot` names | 250 | 10,250 | **41.0** | 400 |
+| 41 `organisation-*-lot` names | 250 | 10,500 | 42.0 | 400 |
+| 50 `organisation-*-lot` names | 250 | 12,750 | 51.0 | 400 |
+
+Read those last three rows carefully. **The cost is per field name, but not every field name costs
+one.** Our own 55-name list is charged 55.0 per notice; a 40-name list built from `organisation-*-lot`
+names is charged 41.0. At least one TED field name costs more than the others, which we could not
+identify and which means **no local arithmetic can be trusted as a universal formula**.
+
+**So the cap is enforced twice, and neither check is called a formula.**
+
+1. **Offline, as a precaution.** `watchdog.sources.ted.config.fields_per_page` assumes
+   `(fields + 1 spare) x page_size`, i.e. `FIELD_COST = 2`. That is deliberately more pessimistic than
+   the 55.0 measured for our list, so it errs towards refusing a page size TED would have accepted
+   rather than letting one through that TED will refuse. `TedClient.iter_notices` raises before any
+   request, naming a page size that would fit.
+2. **Live, as confirmation for this specific request.** `watchdog config validate` sends the real
+   field list at the configured page size with `checkQuerySyntax: true`. **The cap applies to
+   validate-only requests** - verified: 55 fields is a 200 at limit 175 and a 400 at limit 250 - so
+   the exact shape of the next run's request is tested without fetching a single notice.
+
+**Where that leaves the shipped configuration.** 55 fields at `page_size: 175` costs 9,975 of 10,000
+under the offline assumption and 9,625 by TED's own measured rate, against a real ceiling of 181. Run
+`watchdog config validate` after changing either the field list or `page_size` in
+`config/sources/ted.yaml`; they are two halves of one setting.
+
+A request that exceeds the cap is a hard 400 on the first page of the run. The watermark does not
+advance, the run is recorded as failed with the reason, and the next run asks for the same window
+again - see `tests/integration/test_ingest.py::test_an_oversized_projection_fails_the_run_and_holds_the_watermark`.
+
+### What the wider projection costs in requests
+
+Page size falls as the field list grows, so the same window needs more pages:
+
+| | 37 fields at 250 | 55 fields at 175 |
+| --- | --- | --- |
+| A daily run (2-day overlap, ~65 notices) | 1 page | 1 page |
+| 2,158 notices (1 Jul - 11 Sep) | 9 pages | 13 pages |
+| 3,080 notices (1 Jun - 13 Sep) | 13 pages | 18 pages |
+
+Plus one terminating request in each case. Pacing is unchanged: sequential, one page at a time, one
+second between pages, which is about 0.5 requests a second against a limit of roughly twelve unpaced.
+A full 3,080-notice read measured 24.8 seconds over 14 paced pages with no 429.
 
 ## The query language
 
@@ -238,9 +320,22 @@ looks complete is exactly how a notice gets missed for good.
 | `contract-nature` | `contract_natures` | The deduplicated list. **What every filter reads.** |
 | `form-type` -> `notice-type` | `notice_stage` | See the stage table. |
 | `notice-subtype` | `notice_subtype` | Opaque passthrough: `"16"`, `"E1"`, `"T01"`. Never interpreted. |
-| `estimated-value-proc` + `estimated-value-cur-proc` | `estimated_value`, `currency` | Notice level only. A value with no currency is not stored. |
-| `document-url-lot` | `documents_url` | |
-| `official-language` | `languages` | |
+| `estimated-value-proc` + `estimated-value-cur-proc` | `estimated_value`, `currency`, `estimated_value_source` | Preferred. `estimated_value_source` names the field it came from. |
+| `estimated-value-lot` | `lot_values`, `lot_value_currency` | Every value, duplicates kept. Promoted to `estimated_value` only when there is exactly one lot. Never summed. |
+| `identifier-lot` | `lot_ids`, `multi_lot` | TED's own lot identifiers and the only authoritative lot count. Not necessarily contiguous. |
+| `procedure-type` | `procedure_type` | Open, restricted, negotiated with a call, and so on. `Tender.has_qualification_stage` reads it. |
+| `main-activity` | `main_activity` | The buyer's sector. `Tender.buyer_is_utility` reads it. |
+| `place-of-performance-city-proc` | `performance_cities` | Procedure level. Present on a third of notices; the only town name TED gives us. |
+| `submission-language` | `submission_languages` | **The language a bid may be written in.** A different fact from `official-language`. Distinct set across lots. |
+| `submission-url-lot` | `submission_urls` | The bidding portal. Distinct set across lots. |
+| `framework-agreement-lot`, `dps-usage-lot` | `framework_agreements`, `dps_usages` | Commercial model. Distinct sets across lots. |
+| `contract-duration-period-lot` | `contract_durations` | `{"value": "10", "unit": "MONTH"}`; the unit arrives with it. |
+| `contract-duration-start-date-lot` | `contract_start_dates` | |
+| `renewal-maximum-lot` | `renewal_maximums` | |
+| `award-criterion-*-lot` | `award_criteria`, `criteria_unpaired` | Paired by position only when every array present has the same length. Never attached to a lot. |
+| `selection-criterion-lot`, `-description-lot` | `selection_criteria` | The qualification bar. Never attached to a lot. |
+| `document-url-lot` | `document_urls` | Every distinct link, not only the first. |
+| `official-language` | `languages` | The language the **notice** was published in. |
 | whole payload | `raw` | Lot arrays, every language variant, and the fields we chose not to read. |
 
 Any field that is absent, empty or unparseable becomes `None`. A notice that cannot be mapped raises
@@ -305,8 +400,9 @@ field. If the lengths ever disagree, the time is dropped rather than guessed.
 made-up time would look real to a filter and to an export. The register computes urgency from
 `deadline_date`; the detail page shows a time only when there is one.
 
-Where lots have different deadlines the **earliest** wins, `multi_lot` is set and the full set stays
-in `raw` (**613229-2026**, 74 lots, two distinct dates).
+Where lots have different deadlines the **earliest** wins and the full set stays in `raw`
+(**613229-2026**, 74 lots, two distinct dates). The deadline is not attached to a lot, and differing
+deadlines do not set `multi_lot` - `identifier-lot` decides that.
 
 ### The stage vocabulary
 
@@ -320,15 +416,51 @@ in `raw` (**613229-2026**, 74 lots, two distinct dates).
 `form-type` is the reliable axis and separates prior information from market consultation cleanly.
 `notice-type` is only consulted when `form-type` says nothing.
 
-### Lot arrays are not aligned
+### Lot arrays carry no lot reference at all
 
-Notice **598884-2026** has six `estimated-value-lot` entries and **one** `estimated-value-cur-lot`.
-Its `classification-cpv` has 35 entries for six lots, and `place-of-performance` mixes NUTS regions
-and country codes. Nothing zips lot arrays together. Notice-level values are mapped, lot arrays stay
-in `raw`, and `multi_lot` is set.
+This is the most important thing in this document, because getting it wrong is silent.
 
-`multi_lot` is decided on the raw array lengths, before deduplication: six identical lot descriptions
-are still six lots (**406326-2026**).
+Every lot-scoped field is flattened into one array per notice, and **nothing in a search response says
+which lot an entry belongs to**. `identifier-lot` gives the lot identifiers and the lot count, and that
+is all the lot structure there is.
+
+Notice **458521-2026** is the proof: two lots, `["LOT-0001", "LOT-0003"]` - not contiguous - and seven
+award criteria, four belonging to the first lot and three to the second, with nothing marking the
+boundary and seven not divisible by two. Notice **532622-2026** has five lots, four
+`estimated-value-lot` entries, one `estimated-value-cur-lot` and eight `submission-language` values.
+Notice **598884-2026** has six `estimated-value-lot` entries and one `estimated-value-cur-lot`.
+
+Equal lengths do not help: the API guarantees no ordering, and a value shown against the wrong lot
+looks exactly like one shown against the right lot. So **nothing is attributed to a lot**. Lot-scoped
+values are stored as the distinct set across lots and displayed as such; a single-lot notice
+attributes to that lot because there is only one. The full reasoning and the measurements are
+docs/decisions/0008.
+
+`multi_lot` is `len(lot_ids) > 1`. Arrays disagreeing in length is never consulted: that says we
+cannot associate the values, which is a different fact from how many lots exist. The old
+array-length heuristic remains only for the 3.1% of notices carrying no `identifier-lot`, counted
+before deduplication because six identical lot descriptions are still six lots (**406326-2026**).
+
+### The number beside an award criterion is not a percentage
+
+`award-criterion-number-lot` is the figure; `award-criterion-number-weight-lot` is a **code saying what
+kind of number it is**. Verified against real notices, because a rank shown as a percentage looks
+entirely reasonable:
+
+| Code | Meaning | Evidence | Share |
+| --- | --- | --- | --- |
+| `per-exa` | a percentage | 596416-2026 states "waga 100%" beside number 100; 313 single-code notices total exactly 100 | 1,478 |
+| `poi-exa` | points | 541548-2026 names its criterion "Hinnan maksimipistemäärä", the maximum points for price; totals of 1000 and 0 also occur | 1,068 |
+| `ord-imp` | a rank | 534739-2026 scores Prijs 1 and Dienstverlening 2 | 16 |
+| `dec-exa` | a decimal fraction | 565418-2026 uses 0.8 and 0.2 | 15 |
+
+A code we do not recognise means the number is shown exactly as it arrived, with a note that TED did
+not say what it means. `core.codelists` holds the mapping and nothing else interprets these codes.
+
+Note also that `-number-weight-lot` is only one of three qualifiers TED has - the others are
+`-number-fixed-lot` and `-number-threshold-lot`, which we do not request. A number with no
+`-number-weight-lot` beside it may therefore be a fixed value or a threshold rather than a weight, and
+is never labelled as one.
 
 ### The two geography fields
 

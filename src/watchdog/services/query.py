@@ -397,7 +397,7 @@ def build(
         offset=query.offset,
     )
     for row in page.items:
-        row.days_left = _days_left(row, today)
+        prepare(row, as_of=today)
 
     total_held = repository.count_register(TenderFilters(as_of=today))
     last_ingest = repository.latest_run(RunKind.INGEST)
@@ -421,6 +421,30 @@ def build(
         unscreened=repository.count_register(TenderFilters(unscreened_only=True, as_of=today)),
         as_of=today,
     )
+
+
+def prepare(row: RegisterRow, *, as_of: date) -> RegisterRow:
+    """The one place a stored row becomes a row a page can render.
+
+    Every surface goes through here - the table, the triage card, the detail page
+    and the export - so that a value the templates rely on cannot be present on
+    one of them and silently absent on another. ``days_left`` was exactly that:
+    left unset it reads as "No deadline given" beside a stated deadline, in the
+    same words a genuinely undated notice uses.
+    """
+    row.days_left = _days_left(row, as_of)
+    return row
+
+
+def notice(
+    tender_id: str,
+    *,
+    repository: Repository,
+    as_of: date | None = None,
+) -> RegisterRow | None:
+    """One notice, prepared for display. None when the register does not hold it."""
+    row = repository.get_register_row(tender_id)
+    return None if row is None else prepare(row, as_of=as_of or utc_now().date())
 
 
 def header_counts(
@@ -633,7 +657,7 @@ def rows_for_export(
             break
 
     for row in collected[:cap]:
-        row.days_left = _days_left(row, today)
+        prepare(row, as_of=today)
     return collected[:cap]
 
 

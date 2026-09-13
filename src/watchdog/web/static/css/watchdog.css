@@ -621,6 +621,45 @@ kbd {
   border-style: dotted;
 }
 
+/* A model was asked and did not answer. Neither a score nor a grade, so it is
+   neither shape: a solid warning outline carrying a symbol, not a number. The
+   symbol matters - colour alone would say nothing to anyone who cannot see it,
+   and the tooltip and caption carry the words. */
+.chip-failed {
+  background: transparent;
+  color: var(--wd-warning, #a35c00);
+  border-color: currentColor;
+  border-style: solid;
+}
+
+.criteria {
+  list-style: none;
+  padding-left: 0;
+}
+
+.criteria li {
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.criterion-type {
+  font-weight: 600;
+  margin-right: 0.4rem;
+}
+
+.criterion-weight {
+  display: inline-block;
+  margin-left: 0.4rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.criterion-text {
+  display: block;
+  color: var(--pico-muted-color);
+  font-size: 0.9rem;
+}
+
 .pill {
   display: inline-block;
   padding: 0.05rem 0.5rem;
@@ -732,6 +771,18 @@ kbd {
 .detail .explanation {
   border-left: 3px solid var(--pico-primary);
   padding-left: var(--wd-tight);
+}
+
+/* The buyer's own words, set to read rather than to scan. Line breaks inside a
+   paragraph are the source's own and are kept. */
+.source-text {
+  white-space: pre-line;
+  max-width: 60rem;
+}
+
+.description-more > summary {
+  cursor: pointer;
+  font-weight: 600;
 }
 
 .block-text {

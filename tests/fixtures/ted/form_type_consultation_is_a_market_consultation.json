@@ -1,23 +1,8 @@
 {
-  "notice-identifier": "965f18ac-8104-46ef-aa31-56ddc8600970",
-  "place-of-performance": [
-    "FIN",
-    "FIN"
-  ],
-  "title-proc": {
-    "fin": "Kutsu markkinavuoropuheluun: Digipatologian järjestelmäkokonaisuus"
-  },
   "notice-type": "pmc",
   "publication-number": "597019-2026",
-  "main-classification-type-proc": "cpv",
   "main-classification-proc": [
     "38000000"
-  ],
-  "buyer-country": [
-    "FIN",
-    "FIN",
-    "FIN",
-    "FIN"
   ],
   "place-of-performance-country-proc": [
     "FIN"
@@ -25,36 +10,11 @@
   "document-url-lot": [
     "https://tarjouspalvelu.fi/siunsote?id=625871&tpk=e3626744-d0e0-42cf-a482-a8160d8f0350"
   ],
-  "description-lot": {
-    "fin": [
-      "Pohjois-Karjalan, Keski-Suomen, Pohjois-Savon ja Etelä-Savon hyvinvointialueet valmistelevat digipatologian järjestelmäkokonaisuuden hankintaa yhteistyössä. Alustavasti tavoitteena on aloittaa kilpailutus Q4/2026 aikana ja saattaa loppuun Q1/2027 mennessä. Hankintayksikkö haluaa kartoittaa digipatologian markkinaa ja käydä markkinavuoropuhelua ennen tarjouspyynnön laatimista. Kiinnostus osallistua markkinavuoropuheluun pyydetään ilmoittamaan sähköpostilla osoitteeseen emma.niskasaari@nhg.fi. Määräaika ilmoittautumiselle on 14.9.2026. Ilmoittautumisen yhteydessä pyydämme kertomaan, miten tarjoomanne vastaa tietopyynnön liitteenä olevaan hankinnan kohteen kuvaukseen."
-    ]
-  },
-  "place-of-performance-country-lot": [
-    "FIN"
-  ],
   "official-language": [
     "FIN"
   ],
-  "classification-cpv": [
-    "38000000",
-    "38000000"
-  ],
   "notice-subtype": "E1",
-  "contract-nature": [
-    "supplies",
-    "supplies"
-  ],
   "publication-date": "2026-08-31+02:00",
-  "buyer-name": {
-    "fin": [
-      "Pohjois-Karjalan hyvinvointialue",
-      "Keski-Suomen hyvinointialue",
-      "Etelä-Savon hyvinvointialue",
-      "Pohjois-Savon hyvinointialue"
-    ]
-  },
-  "contract-nature-main-proc": "supplies",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/597019-2026/xml"
@@ -141,6 +101,55 @@
       "SWE": "https://ted.europa.eu/sv/notice/597019-2026/html"
     }
   },
+  "contract-nature-main-proc": "supplies",
+  "identifier-lot": [
+    "LOT-0000"
+  ],
+  "notice-identifier": "965f18ac-8104-46ef-aa31-56ddc8600970",
+  "place-of-performance": [
+    "FIN",
+    "FIN"
+  ],
+  "title-proc": {
+    "fin": "Kutsu markkinavuoropuheluun: Digipatologian järjestelmäkokonaisuus"
+  },
+  "main-classification-type-proc": "cpv",
+  "main-activity": [
+    "health"
+  ],
+  "buyer-country": [
+    "FIN",
+    "FIN",
+    "FIN",
+    "FIN"
+  ],
+  "description-lot": {
+    "fin": [
+      "Pohjois-Karjalan, Keski-Suomen, Pohjois-Savon ja Etelä-Savon hyvinvointialueet valmistelevat digipatologian järjestelmäkokonaisuuden hankintaa yhteistyössä. Alustavasti tavoitteena on aloittaa kilpailutus Q4/2026 aikana ja saattaa loppuun Q1/2027 mennessä. Hankintayksikkö haluaa kartoittaa digipatologian markkinaa ja käydä markkinavuoropuhelua ennen tarjouspyynnön laatimista. Kiinnostus osallistua markkinavuoropuheluun pyydetään ilmoittamaan sähköpostilla osoitteeseen emma.niskasaari@nhg.fi. Määräaika ilmoittautumiselle on 14.9.2026. Ilmoittautumisen yhteydessä pyydämme kertomaan, miten tarjoomanne vastaa tietopyynnön liitteenä olevaan hankinnan kohteen kuvaukseen."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "FIN"
+  ],
+  "classification-cpv": [
+    "38000000",
+    "38000000"
+  ],
+  "contract-nature": [
+    "supplies",
+    "supplies"
+  ],
+  "buyer-name": {
+    "fin": [
+      "Pohjois-Karjalan hyvinvointialue",
+      "Keski-Suomen hyvinointialue",
+      "Etelä-Savon hyvinvointialue",
+      "Pohjois-Savon hyvinointialue"
+    ]
+  },
+  "submission-language": [
+    "FIN"
+  ],
   "notice-title": {
     "hun": "Finnország – Laboratóriumi, optikai és precíziós felszerelések (kivéve szemüvegek) – Kutsu markkinavuoropuheluun: Digipatologian järjestelmäkokonaisuus",
     "lav": "Somija – Laboratorijas, optiskās un precīzijas ierīces (izņemot brilles) – Kutsu markkinavuoropuheluun: Digipatologian järjestelmäkokonaisuus",

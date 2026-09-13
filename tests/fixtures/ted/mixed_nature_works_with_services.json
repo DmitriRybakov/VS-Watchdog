@@ -1,8 +1,19 @@
 {
   "notice-type": "cn-standard",
   "publication-number": "563282-2026",
+  "selection-criterion-description-lot": {
+    "fra": [
+      "Les informations suivantes sont demandées : 1/ Chiffres d’affaires global du candidat s'il se présente seul ou de chaque membre en cas de groupement, sur les 3 derniers exercices disponibles; Le candidat devra justifier d'un Chiffre d'affaires global d'au moins 16 millions€ HT par an sur les trois dernies exercices.",
+      "Références des réalisations du candidat (et de chaque membre en cas de groupement) avec les montants et les natures des prestations réalisées similaires à l'objet du marché.",
+      "Le candidat (et de chaque membre en cas de groupement) devra préciser le nombre de ses effectifs moyen annuel sur les trois derniers exercices.",
+      "Le candidat devra notamment préciser dans la Fiche de Renseignements des Entreprises (FRE) son chiffre d'affaires global des 3 dernières exercices ainsi que son chiffre d'affaires des trois dernières années réalisé en effectuant des prestations similaires à celles objet du marché. Les documents à remettre pour faire acte de candidature sont: — la Fiche de renseignements entreprise (FRE) téléchargeable sur https:// fournisseursaeroportsdeparis.fr (à remplir intégralement par le candidat sur son compte en ligne); — le K bis de moins de trois mois ou équivalent ; — les déclarations fiscales et sociales à jour ; — l'engagement par lequel le candidat certifie qu'il n'entre pas dans l'un des cas visés par le Règlement (UE) 2022/576 du Conseil du 8 avril 2022 modifiant le règlement (UE) n° 833/2014 concernant des mesures restrictives eu égard aux actions de la Russie déstabilisant la situation en Ukraine, en particulier les dispositions du 1) de l'article 5 duodecies dudit règlement ; — l'engagement par lequel le candidat certifie qu'il respecte les régimes d'interdiction d'importation de produits en provenance de Russie ou de Biélorussie en vertu des règlements (UE) 833/2014 du 31 juillet 2014 et le règlement (UE) 765/2006 du Conseil du 18 mai 2006"
+    ]
+  },
   "main-classification-proc": [
     "45000000"
+  ],
+  "submission-url-lot": [
+    "https://fournisseurs.aeroportsdeparis.fr/"
   ],
   "additional-classification-proc": [
     "71241000",
@@ -14,12 +25,23 @@
   "place-of-performance-country-proc": [
     "FRA"
   ],
+  "contract-duration-period-lot": [
+    {
+      "value": "60",
+      "unit": "MONTH"
+    }
+  ],
+  "selection-criterion-lot": [
+    "slc-stand-to-gen",
+    "slc-abil-ref-services",
+    "slc-abil-staff-yrly-avg-mp",
+    "slc-stand-other"
+  ],
   "official-language": [
     "FRA"
   ],
   "notice-subtype": "17",
   "publication-date": "2026-08-13+02:00",
-  "contract-nature-main-proc": "works",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/563282-2026/xml"
@@ -106,6 +128,10 @@
       "SWE": "https://ted.europa.eu/sv/notice/563282-2026/html"
     }
   },
+  "contract-nature-main-proc": "works",
+  "identifier-lot": [
+    "LOT-0001"
+  ],
   "deadline-receipt-request-date-lot": [
     "2025-12-19+01:00"
   ],
@@ -122,7 +148,22 @@
   "title-proc": {
     "fra": "MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE"
   },
+  "dps-usage-lot": [
+    "none"
+  ],
   "main-classification-type-proc": "cpv",
+  "renewal-maximum-lot": [
+    "0"
+  ],
+  "framework-agreement-lot": [
+    "none"
+  ],
+  "place-of-performance-city-proc": [
+    "Tremblay-en-France"
+  ],
+  "main-activity": [
+    "airport"
+  ],
   "change-notice-version-identifier": "832207-2025",
   "buyer-country": [
     "FRA"
@@ -138,6 +179,7 @@
   "place-of-performance-country-lot": [
     "FRA"
   ],
+  "procedure-type": "neg-w-call",
   "classification-cpv": [
     "45000000",
     "71241000",
@@ -163,6 +205,9 @@
       "Aéroports de Paris"
     ]
   },
+  "submission-language": [
+    "FRA"
+  ],
   "notice-title": {
     "hun": "Franciaország – Építési munkák – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",
     "lav": "Francija – Celtniecības darbi – MARCHE DE CONCEPTION­ ET REALISATION EN VUE DE L'AUGMENTATION DE CAPACITE DU SYSTEME DE TRANSPORT CDGVAL DE LA PLATEFORME DE L'AÉROPORT DE PARIS-CHARLES DE GAULLE",

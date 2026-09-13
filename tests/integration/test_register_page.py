@@ -8,11 +8,13 @@ from __future__ import annotations
 
 import csv
 import io
+import re
 import zipfile
 from datetime import UTC, date, datetime
 
 import pytest
 from fastapi.testclient import TestClient
+from tests.conftest import load_ted_fixture
 
 from watchdog.core.enums import (
     Band,
@@ -32,6 +34,7 @@ from watchdog.core.models import (
     Tender,
     TextBlock,
 )
+from watchdog.sources.ted import map_notice
 from watchdog.storage.repository import Repository
 
 RUN = "run-page-test"
@@ -102,6 +105,33 @@ def _result(tender: Tender, *, evidence: str = "Forundersogelse af brintanlaeg")
         explanation="Rules-only grade 3.",
         screened_content_hash=tender.content_hash,
         provider="disabled",
+        rules_version="3",
+        policy_version="1",
+        profile_version="1",
+    )
+
+
+def _failed_assessment(tender: Tender) -> ScreeningResult:
+    """What `_assessment_failed` stores: a model was asked and did not answer.
+
+    No assessment and no rules grade - the rules were never going to produce the
+    score, a model was. Both of the obvious branches are therefore false, which
+    is how "ENone" got onto the screen.
+    """
+    return ScreeningResult(
+        tender_id=tender.id,
+        score=3,
+        band=Band.REVIEW,
+        rules_only_score=None,
+        confidence=0.4,
+        reason_codes=["ASSESSMENT_FAILED"],
+        rules=RulesResult(tender_id=tender.id, route=RulesRoute.ASSESS, rules_version="3"),
+        assessment=None,
+        explanation="The assessment did not come back.",
+        ai_enabled=True,
+        screened_content_hash=tender.content_hash,
+        provider="azure_openai",
+        model="gpt-4o",
         rules_version="3",
         policy_version="1",
         profile_version="1",
@@ -312,6 +342,243 @@ def test_the_detail_page_never_calls_the_composed_line_a_translation(
     html = client.get("/register/notice/ted:1-2026").text
 
     assert "not translated" in html
+
+
+# ------------------------------------------------------- the detail page proper
+
+
+def _badge(html: str) -> str:
+    """The first deadline badge on a page, as a colleague reads it."""
+    found = re.search(r'<span class="badge badge-\w+">([^<]+)</span>', html)
+    assert found is not None, "no deadline badge on the page"
+    return found.group(1).strip()
+
+
+def test_the_deadline_chip_is_the_same_on_the_register_and_on_the_detail_page(
+    client: TestClient, loaded: Repository
+) -> None:
+    """The detail page used to say "No deadline given" beside a stated deadline."""
+    register = client.get("/register?past=1").text
+    detail = client.get("/register/notice/ted:1-2026").text
+
+    assert "No deadline given" not in detail
+    assert _badge(register) == _badge(detail)
+
+
+def test_a_notice_with_no_deadline_says_so_in_its_own_words(
+    client: TestClient, repository: Repository
+) -> None:
+    tender = _tender(source_id="2-2026", deadline=None)
+    repository.upsert_tenders([tender], run_id=RUN)
+    repository.save_screening_result(_result(tender))
+
+    html = client.get(f"/register/notice/{tender.id}").text
+
+    assert "No deadline of any kind" in html
+
+
+def test_the_deadline_time_is_shown_with_its_zone_when_there_is_one(
+    client: TestClient, repository: Repository
+) -> None:
+    tender = _tender(source_id="3-2026").model_copy(
+        update={"deadline": datetime(2026, 9, 30, 12, 0, tzinfo=UTC)}
+    )
+    repository.upsert_tenders([tender], run_id=RUN)
+    repository.save_screening_result(_result(tender))
+
+    html = client.get(f"/register/notice/{tender.id}").text
+
+    assert "2026-09-30 12:00 UTC" in html
+
+
+def test_the_description_is_shown_whole_with_an_expander_for_the_rest(
+    client: TestClient, repository: Repository
+) -> None:
+    paragraphs = ["First paragraph. " + "a" * 700, "Second. " + "b" * 700, "Third. " + "c" * 700]
+    tender = _tender(source_id="4-2026").model_copy(update={"description": "\n\n".join(paragraphs)})
+    repository.upsert_tenders([tender], run_id=RUN)
+    repository.save_screening_result(_result(tender))
+
+    html = client.get(f"/register/notice/{tender.id}").text
+
+    assert "Show the rest of the description" in html
+    assert "2 more paragraphs" in html
+    for paragraph in paragraphs:
+        assert paragraph in html, "a description is folded, never cut"
+
+
+def test_work_outside_the_buyers_country_is_stated_and_countries_are_named(
+    client: TestClient, repository: Repository
+) -> None:
+    """619675-2026: a French buyer procuring a waste roadmap for Angola."""
+    tender = _tender(source_id="619675-2026").model_copy(
+        update={"buyer_country": "FRA", "place_of_performance_country": ["AGO"]}
+    )
+    repository.upsert_tenders([tender], run_id=RUN)
+    repository.save_screening_result(_result(tender))
+
+    html = client.get(f"/register/notice/{tender.id}").text
+
+    assert "Work outside the buyer's country" in html
+    assert "France" in html
+    assert "Angola" in html
+    assert ">FRA<" not in html
+
+
+def test_the_three_empty_states_read_differently(
+    client: TestClient, repository: Repository
+) -> None:
+    tender = _tender(source_id="5-2026").model_copy(
+        update={"description": None, "buyer_name": None}
+    )
+    repository.upsert_tenders([tender], run_id=RUN)
+    repository.save_screening_result(_result(tender))
+
+    html = client.get(f"/register/notice/{tender.id}").text
+
+    assert "Not provided in the retrieved data" in html, "the platform sent no value"
+    assert "Not retrieved yet" in html, "we have not read the documents"
+    assert "AI assessment has not run" in html, "no judgement was made"
+
+
+def test_no_confidence_percentage_is_shown_when_nothing_judged_the_notice(
+    client: TestClient, loaded: Repository
+) -> None:
+    """A percentage beside three unestablished axes reads as a chance of relevance."""
+    html = client.get("/register/notice/ted:1-2026").text
+
+    assert "Keyword evidence: strong, 3 of 3" in html
+    assert "AI assessment has not run" in html
+    assert "60%" not in html
+
+
+# ------------------------------------------------------- the failed assessment
+
+
+@pytest.fixture
+def failed(repository: Repository) -> Tender:
+    tender = _tender(source_id="9-2026")
+    repository.upsert_tenders([tender], run_id=RUN)
+    repository.save_screening_result(_failed_assessment(tender))
+    return tender
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "/register?past=1&band=all",
+        "/register?past=1&band=all&mode=table",
+        "/register?past=1&band=all&mode=triage",
+        "/register/notice/ted:9-2026",
+    ],
+    ids=["card", "table", "triage", "detail"],
+)
+def test_a_failed_assessment_never_renders_as_a_grade(
+    client: TestClient, failed: Tender, url: str
+) -> None:
+    """The bug this replaces printed the chip as "ENone" on three screens at once.
+
+    A model ran and did not answer, so there is no assessment and no rules grade.
+    Read as a grade it looks like the lowest mark there is, which is a claim about
+    the notice rather than about our own failure.
+    """
+    html = client.get(url).text
+
+    assert "ENone" not in html
+    assert ">None<" not in html
+    assert "Assessment failed" in html or "did not come back" in html
+
+
+def test_the_failed_assessment_chip_is_neither_a_score_nor_a_grade(
+    client: TestClient, failed: Tender
+) -> None:
+    html = client.get("/register?past=1&band=all").text
+
+    assert "chip-failed" in html
+    assert "chip-evidence" not in html, "it must not wear the rules-grade shape"
+    assert "chip-score" not in html, "and it must not wear the assessed-score shape"
+
+
+def test_a_rules_grade_still_reads_as_a_grade(client: TestClient, loaded: Repository) -> None:
+    # The guard above must not have been bought by breaking the ordinary case.
+    html = client.get("/register?past=1&band=all").text
+
+    assert "chip-evidence" in html
+    assert "E3" in html
+    assert "chip-failed" not in html
+
+
+def test_the_detail_page_explains_a_failed_assessment_and_says_it_is_retried(
+    client: TestClient, failed: Tender
+) -> None:
+    html = client.get("/register/notice/ted:9-2026").text
+
+    assert "did not come back" in html
+    assert "retried on the next screening run" in html
+    assert "%" not in html.split("Reason codes")[0].split("Band")[-1]
+
+
+# ------------------------------------------- the wider projection, end to end
+
+
+@pytest.fixture
+def multi_lot(repository: Repository) -> Tender:
+    """A real recorded notice, mapped and stored, not a hand-built one.
+
+    This is the only test that takes the new fields through the database. The
+    list columns hold Decimals and dates, which JSON cannot, so a round trip is
+    the thing that would break rather than the mapping.
+    """
+    tender = map_notice(load_ted_fixture("lot_values_and_languages_do_not_match_the_lots"))
+    repository.upsert_tenders([tender], run_id=RUN)
+    repository.save_screening_result(_result(tender))
+    return tender
+
+
+def test_the_new_fields_survive_the_database(repository: Repository, multi_lot: Tender) -> None:
+    stored = repository.get_tender(multi_lot.id)
+
+    assert stored is not None
+    assert stored.lot_ids == multi_lot.lot_ids
+    assert stored.lot_values == multi_lot.lot_values, "Decimals through a JSON column"
+    assert stored.contract_start_dates == multi_lot.contract_start_dates, "dates likewise"
+    assert stored.submission_languages == ["CAT", "SPA"]
+    assert stored.award_criteria == multi_lot.award_criteria
+    assert stored.estimated_value == multi_lot.estimated_value
+
+
+def test_the_detail_page_says_a_lot_value_is_across_lots_not_for_one(
+    client: TestClient, multi_lot: Tender
+) -> None:
+    html = client.get(f"/register/notice/{multi_lot.id}").text
+
+    assert "5 lots" in html
+    assert "across lots" in html
+    assert "Catalan, Spanish" in html
+    # The claim that must never appear: a language against a particular lot.
+    assert "LOT-0001: Catalan" not in html
+    assert "not matched to particular lots" in html
+
+
+def test_the_detail_page_names_the_procedure_and_the_sector(
+    client: TestClient, multi_lot: Tender
+) -> None:
+    html = client.get(f"/register/notice/{multi_lot.id}").text
+
+    assert "Open - anyone may tender" in html
+    assert "there is no separate qualification stage" in html
+
+
+def test_the_register_export_labels_an_across_lots_column_as_one(
+    client: TestClient, multi_lot: Tender
+) -> None:
+    rows = list(csv.reader(io.StringIO(client.get("/register/export.csv?band=all&past=1").text)))
+    header, values = rows[0], rows[1]
+    cells = dict(zip(header, values, strict=True))
+
+    assert "submission_languages_across_lots" in header
+    assert cells["submission_languages_across_lots"] == "CAT SPA"
+    assert cells["lot_count"] == "5"
 
 
 # --------------------------------------------------------------------- exports

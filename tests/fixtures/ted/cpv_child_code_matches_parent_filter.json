@@ -3,9 +3,27 @@
     "2026-09-28+02:00"
   ],
   "notice-type": "cn-standard",
+  "award-criterion-description-lot": {
+    "spa": [
+      "CONOCIMIENTO DE IDIOMAS DE LAS JEFATURAS TÉCNICAS Y LAS JEFATURAS DE SALA.",
+      "FORMACIÓN ADICIONAL DE LAS JEFATURAS TÉCNICAS.",
+      "INCREMENTO DEL NÚMERO DE REVISIONES ANUALES CLÁUSULA 2.4) DEL PPT.",
+      "MEJORAS: ADSCRIPCIÓN DE MATERIAL TÉCNICO A LA EJECUCIÓN DEL CONTRATO.",
+      "MENOR PRECIO OFERTADO."
+    ]
+  },
   "publication-number": "597239-2026",
+  "selection-criterion-description-lot": {
+    "spa": [
+      "Cifra anual de negocio",
+      "Trabajos realizados"
+    ]
+  },
   "main-classification-proc": [
     "51300000"
+  ],
+  "submission-url-lot": [
+    "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=FDheKYlddWrkY6rls5tG9A%3D%3D"
   ],
   "additional-classification-proc": [
     "51313000",
@@ -18,8 +36,25 @@
   "place-of-performance-country-proc": [
     "ESP"
   ],
+  "contract-duration-period-lot": [
+    {
+      "unit": "MONTH",
+      "value": "11"
+    }
+  ],
   "document-url-lot": [
     "https://contrataciondelestado.es/wps/poc?uri=deeplink:detalle_licitacion&idEvl=FDheKYlddWrkY6rls5tG9A%3D%3D"
+  ],
+  "selection-criterion-lot": [
+    "slc-stand-to-gen",
+    "slc-abil-ref-services"
+  ],
+  "award-criterion-number-lot": [
+    "12",
+    "20",
+    "10",
+    "9",
+    "49"
   ],
   "official-language": [
     "SPA"
@@ -27,7 +62,6 @@
   "notice-subtype": "16",
   "publication-date": "2026-08-31+02:00",
   "estimated-value-proc": "1495499.49",
-  "contract-nature-main-proc": "services",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/597239-2026/xml"
@@ -114,6 +148,10 @@
       "SWE": "https://ted.europa.eu/sv/notice/597239-2026/html"
     }
   },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0000"
+  ],
   "notice-identifier": "d724bb06-82ac-4869-aa77-3f99ead5cb4c",
   "place-of-performance": [
     "ES523",
@@ -127,10 +165,33 @@
   "title-proc": {
     "spa": "Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant."
   },
+  "dps-usage-lot": [
+    "none"
+  ],
   "main-classification-type-proc": "cpv",
+  "award-criterion-type-lot": [
+    "quality",
+    "quality",
+    "quality",
+    "quality",
+    "price"
+  ],
+  "framework-agreement-lot": [
+    "none"
+  ],
   "estimated-value-cur-proc": "EUR",
+  "main-activity": [
+    "gen-pub"
+  ],
   "buyer-country": [
     "ESP"
+  ],
+  "award-criterion-number-weight-lot": [
+    "poi-exa",
+    "poi-exa",
+    "poi-exa",
+    "poi-exa",
+    "poi-exa"
   ],
   "description-lot": {
     "spa": [
@@ -143,6 +204,7 @@
   "deadline-receipt-tender-time-lot": [
     "23:59:00+02:00"
   ],
+  "procedure-type": "open",
   "classification-cpv": [
     "51300000",
     "51313000",
@@ -168,6 +230,9 @@
       "Junta de Gobierno del Ajuntament de València"
     ]
   },
+  "submission-language": [
+    "SPA"
+  ],
   "notice-title": {
     "hun": "Spanyolország – Hírközlési berendezéssel kapcsolatos szerelési szolgáltatások – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",
     "lav": "Spānija – Sakaru iekārtu uzstādīšanas pakalpojumi – Servicio de asistencia técnica de los teatros municipales de gestión directa: el Teatro el Musical y el Auditori la Mutant.",

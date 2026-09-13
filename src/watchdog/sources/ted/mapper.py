@@ -1,6 +1,6 @@
 """Mapping one TED notice onto the canonical Tender. Pure: no network, no clock.
 
-The four things here that are not obvious, all of them read off live responses:
+The five things here that are not obvious, all of them read off live responses:
 
 **Two multilingual shapes.** ``notice-title`` and ``description-proc`` are
 ``{lang: "text"}``. ``title-lot``, ``description-lot`` and ``buyer-name`` are
@@ -14,10 +14,22 @@ would make an activity rule fire on every notice. ``title-proc`` is what the
 buyer wrote, in the buyer's own language, and was present on 750 of 750 notices
 sampled. Screening reads ``title-proc``; the composed title is for display only.
 
-**Parallel arrays are not aligned.** Notice 598884-2026 has six
-``estimated-value-lot`` entries and one ``estimated-value-cur-lot``. Nothing here
-zips lot arrays together. Notice-level values are mapped; lot arrays stay in
-``raw`` and set ``multi_lot``.
+**Nothing is ever attributed to a lot.** The search API flattens every lot-scoped
+field into one array and states no ordering, so which lot a value belongs to
+cannot be established from a search response at all. Notice 458521-2026 has two
+lots - ``LOT-0001`` and ``LOT-0003``, not even contiguous - and seven award
+criteria, four belonging to the first lot and three to the second, with nothing
+marking the boundary. Equal lengths would not help either: they do not prove
+equal ordering. So lot-scoped values are held as the distinct set across lots and
+labelled that way, and lot-level attribution, if it is ever needed, comes from the
+notice XML. See docs/decisions/0008.
+
+**The criterion arrays are paired with each other only when they agree.** An
+award criterion's type, name, number and number kind arrive as parallel arrays.
+They disagree in length on 2.5% of notices carrying them (395741-2026: 113 types
+against 157 numbers), so they are read by position only when every array that is
+present has the same length, exactly as the deadline date and time arrays are.
+Otherwise nothing is paired and ``criteria_unpaired`` says so.
 
 **Dates carry an offset without a time.** ``publication-date`` is
 ``2026-06-15+02:00``: a calendar date, not a moment, and not parseable by
@@ -36,7 +48,13 @@ from typing import Any
 from watchdog.core.cpv import normalise_cpv, normalise_cpv_list
 from watchdog.core.enums import ContractNature, DeadlineType, SourcePlatform
 from watchdog.core.logging import get_logger
-from watchdog.core.models import Tender, TextBlock
+from watchdog.core.models import (
+    AwardCriterion,
+    ContractDuration,
+    SelectionCriterion,
+    Tender,
+    TextBlock,
+)
 from watchdog.sources.errors import MappingError
 from watchdog.sources.ted.vocabulary import CPV_SCHEME, contract_nature_for, stage_for
 
@@ -45,6 +63,10 @@ log = get_logger(__name__)
 # Exactly what we ask TED for. Every name was checked against the live endpoint;
 # one unrecognised name fails the whole request, so `watchdog config validate`
 # checks this list. Order is for reading, not for meaning.
+#
+# The length of this list is not free: TED prices a request as fields per page and
+# refuses one over 10,000, so adding a name costs page size. See
+# docs/TED_API_CONTRACT.md and `watchdog.sources.ted.config.fields_per_page`.
 REQUESTED_FIELDS: tuple[str, ...] = (
     # identity and version
     "publication-number",
@@ -59,9 +81,11 @@ REQUESTED_FIELDS: tuple[str, ...] = (
     # buyer and place
     "buyer-name",
     "buyer-country",
+    "main-activity",
     "place-of-performance",
     "place-of-performance-country-proc",
     "place-of-performance-country-lot",
+    "place-of-performance-city-proc",
     # dates
     "publication-date",
     "deadline-receipt-tender-date-lot",
@@ -82,11 +106,30 @@ REQUESTED_FIELDS: tuple[str, ...] = (
     "notice-type",
     "form-type",
     "notice-subtype",
+    "procedure-type",
     # value
     "estimated-value-proc",
     "estimated-value-cur-proc",
     "estimated-value-lot",
     "estimated-value-cur-lot",
+    # lots: the identifiers are the only authoritative lot count
+    "identifier-lot",
+    # how to bid, and under what terms
+    "submission-language",
+    "submission-url-lot",
+    "framework-agreement-lot",
+    "dps-usage-lot",
+    "contract-duration-period-lot",
+    "contract-duration-start-date-lot",
+    "renewal-maximum-lot",
+    # how a bid is judged, and who may bid at all
+    "award-criterion-type-lot",
+    "award-criterion-name-lot",
+    "award-criterion-description-lot",
+    "award-criterion-number-lot",
+    "award-criterion-number-weight-lot",
+    "selection-criterion-lot",
+    "selection-criterion-description-lot",
     # links
     "document-url-lot",
     "links",
@@ -123,14 +166,30 @@ DEADLINE_UNION_FIELD = "deadline-receipt-request"
 # 2026-09-07. A deadline three weeks early is worse than no deadline.
 REJECTED_DEADLINE_FIELDS: tuple[str, ...] = ("deadline", "deadline-date-lot")
 
-# Lot-level arrays. Their lengths say how many lots there are; their contents are
-# not zipped together with anything.
+# Lot-level arrays consulted only when `identifier-lot` is missing, which was the
+# case on 67 of 2,158 notices. Their lengths say how many lots there are; their
+# contents are never zipped together with anything.
 LOT_ARRAY_FIELDS: tuple[str, ...] = (
     "title-lot",
     "description-lot",
     "estimated-value-lot",
     "deadline-receipt-tender-date-lot",
     "document-url-lot",
+)
+
+# One award criterion's parts, in the order they are read. Paired by position
+# only when every part that is present has the same length.
+AWARD_CRITERION_FIELDS: tuple[tuple[str, str], ...] = (
+    ("type", "award-criterion-type-lot"),
+    ("name", "award-criterion-name-lot"),
+    ("description", "award-criterion-description-lot"),
+    ("number", "award-criterion-number-lot"),
+    ("number_kind", "award-criterion-number-weight-lot"),
+)
+
+SELECTION_CRITERION_FIELDS: tuple[tuple[str, str], ...] = (
+    ("type", "selection-criterion-lot"),
+    ("description", "selection-criterion-description-lot"),
 )
 
 ENGLISH = "eng"
@@ -149,7 +208,6 @@ class _Deadline:
     day: date | None = None
     source: str | None = None
     kind: DeadlineType = DeadlineType.UNKNOWN
-    several: bool = False
 
 
 def map_notice(
@@ -218,8 +276,10 @@ def _map(
     buyer_name = _first(buyers.get(buyer_language)) if buyer_language else None
 
     deadline = _map_deadline(payload)
-    value, currency = _map_value(payload, source_id)
+    value = _map_value(payload, source_id)
     natures = _map_contract_natures(payload)
+    lot_ids = _codes(payload.get("identifier-lot"), upper=False)
+    award_criteria, selection_criteria, unpaired = _map_criteria(payload, source_id)
 
     return Tender(
         source=source,
@@ -233,8 +293,10 @@ def _map(
         description=description,
         buyer_name=buyer_name,
         buyer_country=_text(_first(payload.get("buyer-country"))),
+        main_activity=_text(_first(payload.get("main-activity"))),
         place_of_performance=_place_of_performance(payload),
         place_of_performance_country=_place_of_performance_country(payload),
+        performance_cities=_distinct_text(payload.get("place-of-performance-city-proc")),
         published_date=_map_published_date(payload),
         deadline=deadline.moment,
         deadline_date=deadline.day,
@@ -245,16 +307,31 @@ def _map(
             _text(_first(payload.get("notice-type"))),
         ),
         notice_subtype=_text(_first(payload.get("notice-subtype"))),
+        procedure_type=_text(_first(payload.get("procedure-type"))),
         contract_nature=_map_main_nature(payload, natures),
         contract_natures=natures,
         cpv_main=_map_cpv_main(payload),
         cpv_additional=normalise_cpv_list(_as_list(payload.get("additional-classification-proc"))),
         cpv_all=_map_cpv_all(payload),
-        estimated_value=value,
-        currency=currency,
-        documents_url=_text(_first(payload.get("document-url-lot"))),
+        estimated_value=value.amount,
+        currency=value.currency,
+        estimated_value_source=value.source,
+        lot_values=list(value.lot_values),
+        lot_value_currency=value.lot_currency,
+        document_urls=_distinct_text(payload.get("document-url-lot")),
         languages=official_languages,
-        multi_lot=_is_multi_lot(payload) or deadline.several,
+        lot_ids=lot_ids,
+        multi_lot=_is_multi_lot(payload, lot_ids),
+        submission_languages=_codes(payload.get("submission-language")),
+        submission_urls=_distinct_text(payload.get("submission-url-lot")),
+        framework_agreements=_distinct_text(payload.get("framework-agreement-lot")),
+        dps_usages=_distinct_text(payload.get("dps-usage-lot")),
+        contract_durations=_map_durations(payload),
+        contract_start_dates=_map_start_dates(payload),
+        renewal_maximums=_distinct_text(payload.get("renewal-maximum-lot")),
+        award_criteria=award_criteria,
+        selection_criteria=selection_criteria,
+        criteria_unpaired=unpaired,
         screening_blocks=_screening_blocks(payload),
         # Everything the source sent, so a mapping can be re-checked or redone
         # later: lot arrays, every language variant, the fields we chose not to read.
@@ -323,7 +400,6 @@ def _map_deadline(payload: dict[str, Any]) -> _Deadline:
             continue
 
         times = _parse_times(_as_list(payload.get(time_field)))
-        several = len(_unique(days)) > 1 or len(_unique(times)) > 1
 
         moments: list[datetime] = []
         if len(times) == len(days):
@@ -339,7 +415,6 @@ def _map_deadline(payload: dict[str, Any]) -> _Deadline:
                 day=earliest_moment.date(),
                 source=f"{date_field}+{time_field}",
                 kind=kind,
-                several=several,
             )
 
         return _Deadline(
@@ -347,7 +422,6 @@ def _map_deadline(payload: dict[str, Any]) -> _Deadline:
             day=min(days).date(),
             source=date_field,
             kind=kind,
-            several=several,
         )
 
     moments = _parse_moments(_as_list(payload.get(DEADLINE_UNION_FIELD)))
@@ -359,7 +433,6 @@ def _map_deadline(payload: dict[str, Any]) -> _Deadline:
             source=DEADLINE_UNION_FIELD,
             # The union field does not distinguish the three kinds it merges.
             kind=DeadlineType.UNKNOWN,
-            several=len(_unique(moments)) > 1,
         )
 
     return _Deadline()
@@ -516,31 +589,88 @@ def _map_main_nature(payload: dict[str, Any], natures: Sequence[ContractNature])
 # ----------------------------------------------------------------- value, place
 
 
-def _map_value(payload: dict[str, Any], source_id: str) -> tuple[Decimal | None, str | None]:
-    """The notice-level estimate and its currency, or nothing.
+@dataclass(frozen=True)
+class _Value:
+    """What we could establish about money, and which field each part came from."""
 
-    Notice-level only: lot values and lot currencies are not aligned - six values
-    against one currency on 598884-2026 - so pairing them by position would invent
-    a fact. A value with no currency is not stored, because a bare number reads as
-    euros to whoever sees it next.
+    amount: Decimal | None = None
+    currency: str | None = None
+    source: str | None = None
+    lot_values: tuple[Decimal, ...] = ()
+    lot_currency: str | None = None
+
+
+def _map_value(payload: dict[str, Any], source_id: str) -> _Value:
+    """The estimate, its currency, and the field it was read from.
+
+    The procedure-level estimate is preferred. When there is none, a notice with
+    exactly one lot still states a value we can report as the notice's own: there
+    is only one lot, so there is nothing to attribute wrongly. 55 notices over
+    1 July to 11 September showed "Not stated" for exactly this reason.
+
+    With several lots the values are kept as a list and nothing is promoted.
+    They are never summed: 532622-2026 carries four values for five lots, so a
+    total would be confidently short, and they are never paired with a lot.
+
+    A value with no currency is not stored, because a bare number reads as euros
+    to whoever sees it next. ``estimated-value-cur-lot`` is a single entry against
+    six values on 598884-2026, so it is used only when it names one currency.
     """
+    lot_values = _decimals(payload.get("estimated-value-lot"), source_id)
+    lot_currencies = _codes(payload.get("estimated-value-cur-lot"))
+    lot_currency = lot_currencies[0] if len(lot_currencies) == 1 else None
+
+    procedure_currency = _text(_first(payload.get("estimated-value-cur-proc")))
     raw_value = _text(_first(payload.get("estimated-value-proc")))
-    currency = _text(_first(payload.get("estimated-value-cur-proc")))
 
-    if raw_value is None:
-        return (None, None)
+    if raw_value is not None:
+        try:
+            amount = Decimal(raw_value)
+        except (InvalidOperation, ValueError):
+            log.warning("ted_unparseable_estimated_value", source_id=source_id)
+        else:
+            if procedure_currency is None:
+                log.warning("ted_value_without_currency", source_id=source_id)
+            else:
+                return _Value(
+                    amount=amount,
+                    currency=procedure_currency,
+                    source="estimated-value-proc",
+                    lot_values=lot_values,
+                    lot_currency=lot_currency,
+                )
 
-    try:
-        value = Decimal(raw_value)
-    except (InvalidOperation, ValueError):
-        log.warning("ted_unparseable_estimated_value", source_id=source_id)
-        return (None, None)
+    currency = procedure_currency or lot_currency
 
-    if currency is None:
-        log.warning("ted_value_without_currency", source_id=source_id)
-        return (None, None)
+    if len(lot_values) == 1 and currency is not None:
+        return _Value(
+            amount=lot_values[0],
+            currency=currency,
+            source="estimated-value-lot",
+            lot_values=lot_values,
+            lot_currency=lot_currency,
+        )
 
-    return (value, currency)
+    return _Value(lot_values=lot_values, lot_currency=lot_currency)
+
+
+def _decimals(value: Any, source_id: str) -> tuple[Decimal, ...]:
+    """Every parseable number in a list, in order, duplicates kept.
+
+    Duplicates are real: four lots priced at 7,000,000 each on 598884-2026 are
+    four facts, and collapsing them would make a six-lot notice look like a
+    three-lot one.
+    """
+    amounts: list[Decimal] = []
+    for item in _as_list(value):
+        text = _text(item)
+        if text is None:
+            continue
+        try:
+            amounts.append(Decimal(text))
+        except (InvalidOperation, ValueError):
+            log.warning("ted_unparseable_lot_value", source_id=source_id)
+    return tuple(amounts)
 
 
 def _place_of_performance(payload: dict[str, Any]) -> str | None:
@@ -599,12 +729,20 @@ def _notice_url(payload: dict[str, Any]) -> str | None:
     return None
 
 
-def _is_multi_lot(payload: dict[str, Any]) -> bool:
-    """True when any lot-level array holds more than one entry.
+def _is_multi_lot(payload: dict[str, Any], lot_ids: Sequence[str]) -> bool:
+    """True when the notice really has more than one lot.
 
-    Counted before deduplication: six identical lot descriptions are still six
-    lots, which is what 406326-2026 looks like.
+    ``identifier-lot`` is TED's own list of lot identifiers and settles the
+    question outright; it was present on 2,091 of 2,158 notices. Only when it is
+    absent do the lot-level arrays stand in, counted before deduplication because
+    six identical lot descriptions are still six lots (406326-2026).
+
+    Arrays disagreeing in *length* is never consulted. That means we cannot
+    associate their values, which is a different fact from how many lots exist.
     """
+    if lot_ids:
+        return len(lot_ids) > 1
+
     for field in LOT_ARRAY_FIELDS:
         value = payload.get(field)
         if isinstance(value, dict):
@@ -613,6 +751,115 @@ def _is_multi_lot(payload: dict[str, Any]) -> bool:
         elif len(_as_list(value)) > 1:
             return True
     return False
+
+
+# ------------------------------------------------------------- across the lots
+
+
+def _map_durations(payload: dict[str, Any]) -> list[ContractDuration]:
+    """Every distinct contract length the notice states, value and unit together.
+
+    TED sends ``{"value": "10", "unit": "MONTH"}``, so the two halves arrive
+    already joined and the separate ``duration-period-value-lot`` and
+    ``duration-period-unit-lot`` fields are not requested. A bare 10 would be
+    meaningless and a guessed unit would be worse.
+    """
+    durations: list[ContractDuration] = []
+    for item in _as_list(payload.get("contract-duration-period-lot")):
+        if not isinstance(item, dict):
+            continue
+        value = _text(item.get("value"))
+        if value is None:
+            continue
+        duration = ContractDuration(value=value, unit=_text(item.get("unit")))
+        if duration not in durations:
+            durations.append(duration)
+    return durations
+
+
+def _map_start_dates(payload: dict[str, Any]) -> list[date]:
+    """Every distinct contract start date, in the order given, earliest kept as given."""
+    days: list[date] = []
+    for parsed in _parse_dates(_as_list(payload.get("contract-duration-start-date-lot"))):
+        day = parsed.date()
+        if day not in days:
+            days.append(day)
+    return days
+
+
+def _map_criteria(
+    payload: dict[str, Any], source_id: str
+) -> tuple[list[AwardCriterion], list[SelectionCriterion], bool]:
+    """The award and selection criteria, paired by position only when it is safe.
+
+    Each criterion's parts arrive as parallel arrays. They are read by position
+    only when every array that is present has the same length - the same rule the
+    deadline date and time arrays follow. Measured over 3,080 notices, the award
+    arrays disagree on 2.5% of the notices carrying them and the selection arrays
+    on none; 395741-2026 is the worst, 113 types against 157 numbers.
+
+    Where they disagree nothing is paired, because a criterion carrying another
+    criterion's weight looks entirely plausible and would never be caught. The
+    arrays stay in ``raw`` and the caller is told.
+    """
+    award, award_ok = _pair(payload, AWARD_CRITERION_FIELDS, AwardCriterion)
+    selection, selection_ok = _pair(payload, SELECTION_CRITERION_FIELDS, SelectionCriterion)
+
+    unpaired = not (award_ok and selection_ok)
+    if unpaired:
+        log.warning("ted_criterion_arrays_disagree", source_id=source_id)
+
+    return award, selection, unpaired
+
+
+def _pair[ModelT](
+    payload: dict[str, Any],
+    fields: Sequence[tuple[str, str]],
+    model: type[ModelT],
+) -> tuple[list[ModelT], bool]:
+    """Build one record per position, or nothing at all. False means nothing was built."""
+    columns: dict[str, list[str | None]] = {}
+    for attribute, field in fields:
+        values = _entries(payload.get(field))
+        if values is not None:
+            columns[attribute] = values
+
+    if not columns:
+        return ([], True)
+
+    lengths = {len(values) for values in columns.values()}
+    if len(lengths) > 1:
+        return ([], False)
+
+    count = lengths.pop()
+    return (
+        [
+            model(**{name: values[index] for name, values in columns.items()})
+            for index in range(count)
+        ],
+        True,
+    )
+
+
+def _entries(value: Any) -> list[str | None] | None:
+    """One field's values in order, or None when the field is absent.
+
+    A multilingual field contributes one language only - the alphabetically first,
+    so the choice is repeatable. Positions are preserved, including empty ones, so
+    that a blank in the middle does not shift every criterion after it.
+    """
+    if value is None:
+        return None
+
+    if isinstance(value, dict):
+        by_language = _language_map(value)
+        language = _alphabetically_first(by_language)
+        if language is None:
+            return None
+        return [_text(item) for item in by_language[language]]
+
+    items = _as_list(value)
+    return [_text(item) for item in items] if items else None
 
 
 # --------------------------------------------------------------- shape helpers
@@ -682,6 +929,33 @@ def _as_list(value: Any) -> list[Any]:
     if isinstance(value, list):
         return value
     return [value]
+
+
+def _distinct_text(value: Any) -> list[str]:
+    """Every distinct non-empty string in a field, in the order the source gave them.
+
+    Lot-scoped fields repeat once per lot - six identical document links on
+    598884-2026 - and the notice states one set of facts, not six.
+    """
+    seen: list[str] = []
+    for item in _as_list(value):
+        text = _text(item)
+        if text is not None and text not in seen:
+            seen.append(text)
+    return seen
+
+
+def _codes(value: Any, *, upper: bool = True) -> list[str]:
+    """Distinct codes, upper-cased by default because TED is inconsistent about case."""
+    codes: list[str] = []
+    for item in _as_list(value):
+        text = _text(item)
+        if text is None:
+            continue
+        code = text.upper() if upper else text
+        if code not in codes:
+            codes.append(code)
+    return codes
 
 
 def _first(value: Any) -> Any:

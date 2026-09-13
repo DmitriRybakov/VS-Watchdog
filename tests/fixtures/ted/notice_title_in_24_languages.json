@@ -1,83 +1,73 @@
 {
-  "notice-identifier": "cce1d46f-8c1e-4085-97af-56042cfbb35f",
-  "place-of-performance": [
-    "FR101",
-    "FRA",
-    "FR101",
-    "FR101",
-    "FR101",
-    "FR101",
-    "FR101",
-    "FR101",
-    "FRA",
-    "FRA",
-    "FRA",
-    "FRA",
-    "FRA",
-    "FRA"
-  ],
-  "title-proc": {
-    "fra": "ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS."
-  },
   "notice-type": "can-standard",
+  "award-criterion-description-lot": {
+    "fra": [
+      "Le critère Valeur technique de l'offre a été analysé sur la base du CRT. Ce critère est subdivisé en deux sous-critères : Sous-critère 1 (pondéré à 60%) : Moyens humains dédiés au marché. Sous-critère 2 (pondéré à 40%) : Méthodologie pour l'exécution des prestations.",
+      "Le critère Prix des prestations a été jugé sur la base de la Décomposition du Prix Global et Forfaitaire (DPGF).",
+      "Le critère Valeur technique de l'offre a été analysé sur la base du CRT. Ce critère est subdivisé en deux sous-critères : Sous-critère 1 (pondéré à 60%) : Moyens humains dédiés au marché. Sous-critère 2 (pondéré à 40%) : Méthodologie pour l'exécution des prestations.",
+      "Le critère Prix des prestations a été jugé sur la base de la synthèse comprenant la Décomposition du Prix Global et Forfaitaire (DPGF) et du Détail Quantitatif Estimatif (DQE).",
+      "Le critère Valeur technique de l'offre a été analysé sur la base du CRT. Ce critère est subdivisé en deux sous-critères : Sous-critère 1 (pondéré à 60%) : Moyens humains dédiés au marché. Sous-critère 2 (pondéré à 40%) : Méthodologie pour l'exécution des prestations.",
+      "Le critère Prix des prestations a été jugé sur la base de la Décomposition du Prix Global et Forfaitaire (DPGF).",
+      "Le critère Valeur technique de l'offre a été analysé sur la base du CRT. Ce critère est subdivisé en deux sous-critères : Sous-critère 1 (pondéré à 60%) : Moyens humains dédiés au marché. Sous-critère 2 (pondéré à 40%) : Méthodologie pour l'exécution des prestations.",
+      "Le critère Prix des prestations a été jugé sur la base de la Décomposition du Prix Global et Forfaitaire (DPGF).",
+      "Le critère Valeur technique de l'offre a été analysé sur la base du CRT. Ce critère est subdivisé en deux sous-critères : Sous-critère 1 (pondéré à 60%) : Moyens humains dédiés au marché. Sous-critère 2 (pondéré à 40%) : Méthodologie pour l'exécution des prestations.",
+      "Le critère Prix des prestations a été jugé sur la base du Détail Quantitatif Estimatif (DQE).",
+      "Le critère Valeur technique de l'offre a été analysé sur la base du CRT. Ce critère est subdivisé en deux sous-critères : Sous-critère 1 (pondéré à 60%) : Moyens humains dédiés au marché. Sous-critère 2 (pondéré à 40%) : Méthodologie pour l'exécution des prestations.",
+      "Le critère Prix des prestations a été jugé sur la base de la Décomposition du Prix Global et Forfaitaire (DPGF)."
+    ]
+  },
   "publication-number": "406326-2026",
-  "main-classification-type-proc": "cpv",
   "main-classification-proc": [
     "71241000"
-  ],
-  "buyer-country": [
-    "FRA"
   ],
   "place-of-performance-country-proc": [
     "FRA"
   ],
-  "description-lot": {
-    "fra": [
-      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
-      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
-      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
-      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
-      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
-      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes."
-    ]
-  },
-  "place-of-performance-country-lot": [
-    "FRA",
-    "FRA",
-    "FRA",
-    "FRA",
-    "FRA",
-    "FRA"
+  "contract-duration-period-lot": [
+    {
+      "value": "4",
+      "unit": "YEAR"
+    },
+    {
+      "value": "4",
+      "unit": "YEAR"
+    },
+    {
+      "value": "4",
+      "unit": "YEAR"
+    },
+    {
+      "value": "4",
+      "unit": "YEAR"
+    },
+    {
+      "value": "4",
+      "unit": "YEAR"
+    },
+    {
+      "value": "4",
+      "unit": "YEAR"
+    }
+  ],
+  "award-criterion-number-lot": [
+    "60",
+    "40",
+    "60",
+    "40",
+    "60",
+    "40",
+    "60",
+    "40",
+    "60",
+    "40",
+    "60",
+    "40"
   ],
   "official-language": [
     "FRA"
   ],
-  "classification-cpv": [
-    "71241000",
-    "71241000",
-    "71241000",
-    "71241000",
-    "71241000",
-    "71241000",
-    "71241000"
-  ],
   "notice-subtype": "29",
-  "contract-nature": [
-    "services",
-    "services",
-    "services",
-    "services",
-    "services",
-    "services",
-    "services"
-  ],
   "publication-date": "2026-06-15+02:00",
-  "buyer-name": {
-    "fra": [
-      "Centre d'Action Sociale de la Ville de Paris (CASVP)"
-    ]
-  },
-  "contract-nature-main-proc": "services",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/406326-2026/xml"
@@ -163,6 +153,136 @@
       "FIN": "https://ted.europa.eu/fi/notice/406326-2026/html",
       "SWE": "https://ted.europa.eu/sv/notice/406326-2026/html"
     }
+  },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001",
+    "LOT-0013",
+    "LOT-0014",
+    "LOT-0015",
+    "LOT-0016",
+    "LOT-0017"
+  ],
+  "notice-identifier": "cce1d46f-8c1e-4085-97af-56042cfbb35f",
+  "place-of-performance": [
+    "FR101",
+    "FRA",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FR101",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA"
+  ],
+  "title-proc": {
+    "fra": "ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS."
+  },
+  "dps-usage-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
+  "main-classification-type-proc": "cpv",
+  "renewal-maximum-lot": [
+    "1",
+    "1",
+    "1",
+    "1",
+    "1",
+    "3"
+  ],
+  "award-criterion-type-lot": [
+    "quality",
+    "price",
+    "quality",
+    "price",
+    "quality",
+    "price",
+    "quality",
+    "price",
+    "quality",
+    "price",
+    "quality",
+    "price"
+  ],
+  "framework-agreement-lot": [
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc"
+  ],
+  "main-activity": [
+    "gen-pub"
+  ],
+  "buyer-country": [
+    "FRA"
+  ],
+  "award-criterion-number-weight-lot": [
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa"
+  ],
+  "description-lot": {
+    "fra": [
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes.",
+      "Le présent accord-cadre a pour objet de recourir aux missions d'Assistance à Maîtrise d'Ouvrage (AMO) pour l'exploitation des installations techniques de tous les établissements du Centre d'Action Sociale de la Ville de Paris (CASVP). La description des prestations ainsi que leurs spécifications techniques sont indiquées dans le Cahier des Clauses techniques Particulières (CCTP) et ses annexes."
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA",
+    "FRA"
+  ],
+  "procedure-type": "open",
+  "classification-cpv": [
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000",
+    "71241000"
+  ],
+  "contract-nature": [
+    "services",
+    "services",
+    "services",
+    "services",
+    "services",
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "fra": [
+      "Centre d'Action Sociale de la Ville de Paris (CASVP)"
+    ]
   },
   "notice-title": {
     "hun": "Franciaország – Megvalósíthatósági tanulmány, tanácsadó szolgáltatás, elemzés – ASSISTANCE A MAITRISE D'OUVRAGE (AMO) POUR L'EXPLOITATION DES INSTALLATIONS TECHNIQUES DE TOUS LES ETABLISSEMENTS DU CENTRE D'ACTION SOCIALE DE LA VILLE DE PARIS.",

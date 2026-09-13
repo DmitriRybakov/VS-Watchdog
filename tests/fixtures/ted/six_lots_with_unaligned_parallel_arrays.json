@@ -1,8 +1,34 @@
 {
+  "contract-duration-start-date-lot": [
+    "2026-08-28+02:00",
+    "2026-08-28+02:00",
+    "2026-08-28+02:00",
+    "2026-08-28+02:00",
+    "2026-08-28+02:00",
+    "2026-08-28+02:00"
+  ],
   "notice-type": "cn-standard",
+  "award-criterion-description-lot": {
+    "swe": [
+      "Pris",
+      "Enligt upphandlingsdokument",
+      "Enligt upphandlingsdokumentet",
+      "Enligt upphandlingsdokument",
+      "Enligt upphandlingsdokument",
+      "Enligt upphandlingsdokument"
+    ]
+  },
   "publication-number": "598884-2026",
   "main-classification-proc": [
     "71311300"
+  ],
+  "submission-url-lot": [
+    "https://www.kommersannons.se/fmv/Notice/NoticeDispatch.aspx?NoticeId=56795",
+    "https://www.kommersannons.se/fmv/Notice/NoticeDispatch.aspx?NoticeId=56795",
+    "https://www.kommersannons.se/fmv/Notice/NoticeDispatch.aspx?NoticeId=56795",
+    "https://www.kommersannons.se/fmv/Notice/NoticeDispatch.aspx?NoticeId=56795",
+    "https://www.kommersannons.se/fmv/Notice/NoticeDispatch.aspx?NoticeId=56795",
+    "https://www.kommersannons.se/fmv/Notice/NoticeDispatch.aspx?NoticeId=56795"
   ],
   "additional-classification-proc": [
     "71000000",
@@ -47,7 +73,6 @@
   "notice-subtype": "18",
   "publication-date": "2026-08-31+02:00",
   "estimated-value-proc": "1",
-  "contract-nature-main-proc": "services",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/598884-2026/xml"
@@ -134,6 +159,15 @@
       "SWE": "https://ted.europa.eu/sv/notice/598884-2026/html"
     }
   },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001",
+    "LOT-0002",
+    "LOT-0003",
+    "LOT-0004",
+    "LOT-0005",
+    "LOT-0006"
+  ],
   "deadline-receipt-request-date-lot": [
     "2026-09-30+02:00",
     "2026-09-30+02:00",
@@ -450,6 +484,14 @@
   "title-proc": {
     "swe": "Tekniska konsulter för Garnisonsanläggningar 3.0"
   },
+  "dps-usage-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
   "estimated-value-lot": [
     "250000000",
     "400000000",
@@ -459,10 +501,37 @@
     "7000000"
   ],
   "main-classification-type-proc": "cpv",
+  "renewal-maximum-lot": [
+    "4",
+    "4",
+    "4",
+    "4",
+    "4",
+    "4"
+  ],
+  "award-criterion-type-lot": [
+    "price",
+    "price",
+    "price",
+    "price",
+    "price",
+    "price"
+  ],
   "estimated-value-cur-lot": [
     "SEK"
   ],
+  "framework-agreement-lot": [
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc",
+    "fa-wo-rc"
+  ],
   "estimated-value-cur-proc": "SEK",
+  "main-activity": [
+    "defence"
+  ],
   "buyer-country": [
     "SWE"
   ],
@@ -612,6 +681,7 @@
     "SWE",
     "SWE"
   ],
+  "procedure-type": "neg-w-call",
   "classification-cpv": [
     "71311300",
     "71000000",
@@ -663,6 +733,14 @@
       "FMV"
     ]
   },
+  "submission-language": [
+    "SWE",
+    "SWE",
+    "SWE",
+    "SWE",
+    "SWE",
+    "SWE"
+  ],
   "notice-title": {
     "hun": "Svédország – Infrastruktúrával kapcsolatos tanácsadói szolgáltatások – Tekniska konsulter för Garnisonsanläggningar 3.0",
     "lav": "Zviedrija – Infrastruktūras darbu konsultāciju pakalpojumi – Tekniska konsulter för Garnisonsanläggningar 3.0",

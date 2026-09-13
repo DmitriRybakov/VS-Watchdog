@@ -8,7 +8,7 @@ active source, only this module changes.
 from __future__ import annotations
 
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, timedelta
 from pathlib import Path
 
@@ -22,7 +22,12 @@ from watchdog.sources.ted import (
     TedSourceConfig,
     load_ted_config,
 )
-from watchdog.sources.ted.config import DEFAULT_CONFIG_PATH
+from watchdog.sources.ted.config import (
+    DEFAULT_CONFIG_PATH,
+    MAX_FIELDS_PER_PAGE,
+    fields_per_page,
+    max_page_size,
+)
 from watchdog.sources.ted.query import QueryProfile, build_query
 
 
@@ -36,9 +41,22 @@ class FieldCheck:
     query_valid: bool
     query_error: str | None = None
 
+    # The fields-per-page cap, checked twice: once offline so an oversized
+    # projection fails here rather than on the first request of the next update,
+    # and once at TED so a field name that costs more than our arithmetic assumes
+    # is still caught.
+    page_size: int = 0
+    cost: int = 0
+    cost_limit: int = MAX_FIELDS_PER_PAGE
+    largest_page_size: int = 0
+
+    @property
+    def fits_offline(self) -> bool:
+        return self.cost <= self.cost_limit
+
     @property
     def ok(self) -> bool:
-        return not self.unknown and self.query_valid
+        return not self.unknown and self.query_valid and self.fits_offline
 
 
 @dataclass(frozen=True)
@@ -102,33 +120,55 @@ def check_fields(
     days: int = 1,
     client: TedClient | None = None,
 ) -> FieldCheck:
-    """Check the field list and the query against the live endpoint.
+    """Check the field list, the page size and the query against the live endpoint.
 
     ``fields`` is mandatory at TED and one unrecognised name fails the whole
     request, so an untested list fails as an empty result set rather than as an
     error. This turns that into a named problem before a run depends on it.
+
+    The fields-per-page cap is checked before anything is sent, so a projection
+    that cannot work is reported without a network call at all. TED then confirms
+    it: the validate-only mode applies the cap, so the real request's shape is
+    tested without fetching a single notice.
     """
     window_from, window_to = window_for(days)
+    query = build_query(config, window_from, window_to)
+    count = len(REQUESTED_FIELDS)
+    cost = fields_per_page(count, config.page_size)
+
+    check = FieldCheck(
+        requested=REQUESTED_FIELDS,
+        unknown=(),
+        query=query,
+        query_valid=True,
+        page_size=config.page_size,
+        cost=cost,
+        largest_page_size=max_page_size(count),
+    )
+
+    if not check.fits_offline:
+        return check
+
     owned = client is None
     ted = client or TedClient()
 
     try:
         unknown = ted.unknown_fields(REQUESTED_FIELDS, run_id=None)
-        query = build_query(config, window_from, window_to)
 
         query_valid = True
         query_error: str | None = None
         if not unknown:
             try:
-                ted.validate_query(query, REQUESTED_FIELDS)
+                # The configured page size, so TED prices the request we will
+                # actually send rather than a one-notice version of it.
+                ted.validate_query(query, REQUESTED_FIELDS, page_size=config.page_size)
             except Exception as exc:
                 query_valid = False
                 query_error = str(exc)
 
-        return FieldCheck(
-            requested=REQUESTED_FIELDS,
+        return replace(
+            check,
             unknown=tuple(unknown),
-            query=query,
             query_valid=query_valid,
             query_error=query_error,
         )

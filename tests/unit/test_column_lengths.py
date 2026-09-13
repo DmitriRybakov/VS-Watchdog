@@ -49,7 +49,6 @@ def test_the_mapped_notice_fits_every_declared_column_length(ted_fixture_name: s
         "place_of_performance",
         "deadline_source",
         "source_url",
-        "documents_url",
     ],
 )
 def test_free_text_columns_carry_no_length_bound(name: str) -> None:

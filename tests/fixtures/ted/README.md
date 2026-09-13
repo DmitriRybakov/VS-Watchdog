@@ -1,10 +1,14 @@
 # Recorded TED responses
 
 Tests never call the network; they read these files. Each one is a single notice as the live search
-endpoint returned it on 12 September 2026, requested with exactly the field list in
-`REQUESTED_FIELDS` (`src/watchdog/sources/ted/mapper.py`). Nothing has been edited: the bodies are
-public procurement notices, so there is nothing to redact, and trimming them would destroy the very
-shapes they exist to prove.
+endpoint returned it, requested with exactly the field list in `REQUESTED_FIELDS`
+(`src/watchdog/sources/ted/mapper.py`). Nothing has been edited: the bodies are public procurement
+notices, so there is nothing to redact, and trimming them would destroy the very shapes they exist to
+prove.
+
+Re-recorded on 13 September 2026 when the projection widened from 37 fields to 55. A fixture recorded
+under a narrower projection cannot prove anything about the one we actually send, so they are
+re-recorded together whenever `REQUESTED_FIELDS` changes.
 
 Each file is named for the one thing it proves. If you add one, name it the same way.
 
@@ -15,6 +19,8 @@ Each file is named for the one thing it proves. If you add one, name it the same
 | `description_proc_is_a_string_description_lot_is_a_list` | 612558-2026 | The two multilingual shapes in one response: `{lang: "text"}` and `{lang: ["text", ...]}`. |
 | `cpv_child_code_matches_parent_filter` | 597239-2026 | Carries `71318100` and no other 713 code, and TED returns it for `71318000`, `71310000` and `71000000` but not `45000000`. The evidence that CPV matching is hierarchical. |
 | `six_lots_with_unaligned_parallel_arrays` | 598884-2026 | Six `estimated-value-lot` entries against one `estimated-value-cur-lot`. Lot arrays must never be zipped together. |
+| `two_lots_seven_award_criteria` | 458521-2026 | Two lots, `LOT-0001` and `LOT-0003` - **not contiguous** - and seven award criteria, four belonging to the first and three to the second, with nothing marking the boundary. The evidence for docs/decisions/0008. |
+| `lot_values_and_languages_do_not_match_the_lots` | 532622-2026 | Five lots, four `estimated-value-lot` entries, one `estimated-value-cur-lot`, eight `submission-language` values. Every count differs; nothing may be attributed to a lot, and the values are never summed. |
 | `lots_with_different_deadlines` | 613229-2026 | 74 lots whose tender deadlines are not all the same. The earliest wins and `multi_lot` is set. |
 | `no_deadline_of_any_kind` | 612645-2026 | None of the deadline fields are present. Every deadline field on the tender stays null. |
 | `mixed_nature_works_with_services` | 563282-2026 | `contract-nature-main-proc` is works while `contract-nature` lists both services and works. TED's own services filter keeps it, and so must ours. |

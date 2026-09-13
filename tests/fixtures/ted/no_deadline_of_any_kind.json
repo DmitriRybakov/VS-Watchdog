@@ -25,7 +25,6 @@
   ],
   "notice-subtype": "7",
   "publication-date": "2026-09-07+02:00",
-  "contract-nature-main-proc": "works",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/612645-2026/xml"
@@ -112,6 +111,10 @@
       "SWE": "https://ted.europa.eu/sv/notice/612645-2026/html"
     }
   },
+  "contract-nature-main-proc": "works",
+  "identifier-lot": [
+    "LOT-0001"
+  ],
   "notice-identifier": "0c6c37d4-ab58-4da4-aa4e-c9fb00887e2f",
   "place-of-performance": [
     "BEZZZ",
@@ -122,7 +125,16 @@
   "title-proc": {
     "nld": "Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels"
   },
+  "dps-usage-lot": [
+    "none"
+  ],
   "main-classification-type-proc": "cpv",
+  "framework-agreement-lot": [
+    "fa-wo-rc"
+  ],
+  "main-activity": [
+    "gen-pub"
+  ],
   "buyer-country": [
     "BEL"
   ],
@@ -134,6 +146,7 @@
   "place-of-performance-country-lot": [
     "BEL"
   ],
+  "procedure-type": "open",
   "classification-cpv": [
     "45312000",
     "35125300",
@@ -163,6 +176,9 @@
       "Vlaamse Overheid"
     ]
   },
+  "submission-language": [
+    "NLD"
+  ],
   "notice-title": {
     "hun": "Belgium – Riasztórendszer és antennák szerelése – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",
     "lav": "Beļģija – Signalizācijas sistēmu un antenu uzstādīšana – Branddetectie, Toegangscontrole, Videofooninstallatie, Inbraakbeveiliging, Camerabewaking (CCTV), Verledding en andere technische aanpassingen dienstgebouwen tunnels",

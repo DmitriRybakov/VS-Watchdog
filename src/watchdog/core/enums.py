@@ -112,6 +112,26 @@ class Band(StrEnum):
     ARCHIVE = "archive"
 
 
+class ScreeningState(StrEnum):
+    """What a register row can honestly claim about how the notice was screened.
+
+    Five, not three. A judged score and a rules grade are the two that carry a
+    number; the other three do not, and showing any of them as a grade puts a
+    figure on screen that nothing stands behind.
+    """
+
+    # Nothing has screened this notice at all.
+    UNSCREENED = "unscreened"
+    # A model judged it: the score is a judgement.
+    ASSESSED = "assessed"
+    # The keyword rules graded the evidence, 0-3. Not a judgement.
+    GRADED = "graded"
+    # A model was asked and did not answer. Neither a score nor a grade.
+    ASSESSMENT_FAILED = "assessment_failed"
+    # Screened, but with no number of either kind - an exclusion, for instance.
+    UNGRADED = "ungraded"
+
+
 class Verdict(StrEnum):
     """A colleague's judgement. Never written by an automated process."""
 

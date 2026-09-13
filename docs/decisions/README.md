@@ -99,6 +99,23 @@ consequence - especially decisions that become expensive to reverse.
   configuration. The `config_version` table arrives with the settings page, and ingestion must be
   switched to read the active version at that point, or a colleague's edit in the browser will have
   no effect on what gets fetched.
+- **`page_size` and `REQUESTED_FIELDS` are two halves of one setting, and only one of them is
+  configuration.** TED prices a request as fields per page, so widening the field list lowers the
+  largest page size that works. The offline guard is deliberately pessimistic and the live check in
+  `watchdog config validate` confirms the real request, but when the settings page lets a colleague
+  edit the source configuration, `page_size` must not be editable without that check running - a page
+  size raised in the browser fails every subsequent run on its first request. See 0008 and the cap
+  section of docs/TED_API_CONTRACT.md.
+- **The exact per-field cost at TED is not known.** Our own 55-name list is charged 55.0 per notice;
+  a 40-name list built from `organisation-*-lot` names is charged 41.0, so at least one field name
+  costs more than one and we could not identify which. Nothing depends on knowing, because the
+  offline guard errs pessimistic and the live check is authoritative, but a future field that costs
+  two would shrink the page size without the arithmetic predicting it.
+- **Lot-level attribution, if it is ever wanted, comes from the notice XML.** The search response
+  cannot supply it at all (0008). `links.xml.MUL` is already stored on every notice and the summary
+  step already fetches documents, so the fetching exists; parsing eForms lot structure is what would
+  be new. Anything that starts attaching a search-response value to a lot is wrong regardless of how
+  well the lengths line up.
 - **Migration 0008 must be followed by a re-screen in the same deployment step.** Run
   `alembic upgrade head` and then `watchdog screen --rescreen` as one step, not two. The migration
   adds `domain_strength_rank` and `domain_rules_matched` with a zero default, and until a screening

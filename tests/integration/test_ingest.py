@@ -31,7 +31,7 @@ from watchdog.services.ingest import (
     retry_quarantined,
 )
 from watchdog.sources.base import RawNotice
-from watchdog.sources.errors import MappingError, TransportError
+from watchdog.sources.errors import MappingError, QueryError, TransportError
 from watchdog.sources.ted.mapper import map_notice
 from watchdog.storage.db import create_db_engine, create_session_factory
 from watchdog.storage.repository import Repository
@@ -729,6 +729,69 @@ def test_a_database_error_never_carries_its_statement_or_the_notice_into_a_messa
     assert "no column named first_seen_run_id" in reported
     assert "INSERT INTO" not in reported
     assert "parameters" not in reported
+
+
+# --------------------------------------------------- a projection TED refuses
+
+
+@freeze_time(NOW)
+def test_an_oversized_projection_fails_the_run_and_holds_the_watermark(
+    repository: Repository,
+) -> None:
+    """TED prices a request as fields per page and refuses one over 10,000.
+
+    The dangerous version of this is a run that reports success having stored
+    nothing, so the watermark moves past a window nobody read. It has to be the
+    loud kind of failure instead.
+    """
+
+    class RefusedSource(FakeSource):
+        def discover(self, window_from: date, window_to: date) -> Iterator[RawNotice]:
+            self.windows.append((window_from, window_to))
+            raise QueryError(
+                "TED rejected the request: Value (14250) of parameter 'Fields per page' "
+                "exceeds maximum allowed value (10000)",
+                field=None,
+                query="(publication-date>=20260601)",
+            )
+            yield  # pragma: no cover - never reached, keeps this a generator
+
+    outcome = run_ingest(repository, RefusedSource([[notice("900090-2026")]]))
+
+    assert outcome.status is RunStatus.FAILED
+    assert outcome.counts.fetched == 0
+    assert outcome.watermark_advanced is False
+    assert repository.get_watermark(SourcePlatform.TED) is None
+    assert any("Fields per page" in message for message in outcome.errors)
+
+    assert outcome.run_id is not None
+    run = repository.get_run(outcome.run_id)
+    assert run is not None
+    assert run.status is RunStatus.FAILED
+    assert run.watermark_advanced is False
+
+
+@freeze_time(NOW)
+def test_a_refused_projection_leaves_the_next_run_the_whole_window(
+    repository: Repository,
+) -> None:
+    # The point of holding the watermark: once the page size is fixed, the run
+    # that follows still covers the days the refused one never read.
+    class RefusedSource(FakeSource):
+        def discover(self, window_from: date, window_to: date) -> Iterator[RawNotice]:
+            self.windows.append((window_from, window_to))
+            raise QueryError("fields per page exceeded", field=None, query="q")
+            yield  # pragma: no cover
+
+    refused = RefusedSource([[]])
+    run_ingest(repository, refused)
+
+    recovered_source = FakeSource([[notice("900091-2026")]])
+    recovered = run_ingest(repository, recovered_source)
+
+    assert recovered.status is RunStatus.SUCCESS
+    assert recovered.counts.new == 1
+    assert recovered_source.windows == refused.windows, "the same days are asked for again"
 
 
 @freeze_time(NOW)

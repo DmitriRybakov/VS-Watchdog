@@ -150,5 +150,12 @@ overlap_days: 2
 # one-off with: watchdog ingest --full-backfill 2026-01-01
 backfill_days: 30
 
-# Notices per request. 250 is TED's maximum; anything higher is rejected outright.
-page_size: 250
+# Notices per request. 250 is TED's maximum, but the real ceiling is the fields
+# cap: TED prices a request as fields per page and refuses one over 10,000, so a
+# wider projection costs page size. The 55 names in REQUESTED_FIELDS are measured
+# to fit at 181; 175 is what the offline guard in `watchdog config validate`
+# allows, and the margin covers a TED field name that costs more than one.
+#
+# Raising this without shrinking the field list fails the whole run on its first
+# request. Run `watchdog config validate` after changing either.
+page_size: 175

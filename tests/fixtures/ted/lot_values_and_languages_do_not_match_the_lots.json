@@ -1,0 +1,313 @@
+{
+  "deadline-receipt-tender-date-lot": [
+    "2026-09-21+02:00",
+    "2026-09-21+02:00",
+    "2026-09-21+02:00",
+    "2026-09-21+02:00",
+    "2026-09-21+02:00"
+  ],
+  "notice-type": "cn-standard",
+  "publication-number": "532622-2026",
+  "main-classification-proc": [
+    "71356200"
+  ],
+  "submission-url-lot": [
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/"
+  ],
+  "place-of-performance-country-proc": [
+    "ESP"
+  ],
+  "contract-duration-period-lot": [
+    {
+      "unit": "YEAR",
+      "value": "3"
+    },
+    {
+      "unit": "YEAR",
+      "value": "3"
+    },
+    {
+      "unit": "YEAR",
+      "value": "3"
+    },
+    {
+      "unit": "YEAR",
+      "value": "3"
+    },
+    {
+      "unit": "YEAR",
+      "value": "3"
+    }
+  ],
+  "document-url-lot": [
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/",
+    "https://licitacions.bcn.cat/"
+  ],
+  "official-language": [
+    "SPA"
+  ],
+  "notice-subtype": "16",
+  "publication-date": "2026-07-31+02:00",
+  "estimated-value-proc": "12614228.74",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/532622-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/532622-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/532622-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/532622-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/532622-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/532622-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/532622-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/532622-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/532622-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/532622-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/532622-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/532622-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/532622-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/532622-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/532622-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/532622-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/532622-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/532622-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/532622-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/532622-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/532622-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/532622-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/532622-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/532622-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/532622-2026/pdf"
+    },
+    "pdfs": {
+      "SPA": "https://ted.europa.eu/es/notice/532622-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/532622-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/532622-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/532622-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/532622-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/532622-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/532622-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/532622-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/532622-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/532622-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/532622-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/532622-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/532622-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/532622-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/532622-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/532622-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/532622-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/532622-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/532622-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/532622-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/532622-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/532622-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/532622-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/532622-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/532622-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/532622-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/532622-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/532622-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/532622-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/532622-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/532622-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/532622-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/532622-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/532622-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/532622-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/532622-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/532622-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/532622-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/532622-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/532622-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/532622-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/532622-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/532622-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/532622-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/532622-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/532622-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/532622-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/532622-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/532622-2026/html"
+    }
+  },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001",
+    "LOT-0002",
+    "LOT-0003",
+    "LOT-0004",
+    "LOT-0005"
+  ],
+  "notice-identifier": "144a5c0f-e318-4f5e-9569-8ecbd91d0610",
+  "place-of-performance": [
+    "ES511",
+    "ESP",
+    "ES511",
+    "ES511",
+    "ES511",
+    "ES511",
+    "ES511",
+    "ESP",
+    "ESP",
+    "ESP",
+    "ESP",
+    "ESP"
+  ],
+  "deadline-receipt-request": [
+    "2026-09-21T23:59:59+02:00",
+    "2026-09-21T23:59:59+02:00",
+    "2026-09-21T23:59:59+02:00",
+    "2026-09-21T23:59:59+02:00",
+    "2026-09-21T23:59:59+02:00"
+  ],
+  "title-proc": {
+    "spa": "DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)"
+  },
+  "dps-usage-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
+  "estimated-value-lot": [
+    "2339128.06",
+    "3057191.59",
+    "2611622.27",
+    "2267158.76"
+  ],
+  "main-classification-type-proc": "cpv",
+  "renewal-maximum-lot": [
+    "2",
+    "2",
+    "2",
+    "2",
+    "2"
+  ],
+  "estimated-value-cur-lot": [
+    "EUR"
+  ],
+  "framework-agreement-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
+  "place-of-performance-city-proc": [
+    "Barcelona"
+  ],
+  "estimated-value-cur-proc": "EUR",
+  "main-activity": [
+    "gen-pub"
+  ],
+  "buyer-country": [
+    "ESP"
+  ],
+  "description-lot": {
+    "spa": [
+      "Servicio Distritos 1- 3 (Supervisión Lotes 1-3 COMIEP): Supervisión y gestión del mantenimiento de las aceras y el mobiliario de los Distritos de \"Ciutat Vella, Eixample y Sants – Montjuïc\", y dando soporte como Asistencia Técnica en los citados Distritos",
+      "Servicio Distritos 4-7 (Supervisión Lotes 4-7 COMIEP): Supervisión y gestión del mantenimiento de las aceras y el mobiliario de los Distritos de \"Les Corts, Sarrià – Sant Gervasi, Gràcia y Horta - Guinardó\", y dando soporte como Asistencia Técnica en los citados Distritos",
+      "Servicio Distritos 8-7 (Supervisión Lotes 8-10 COMIEP): Supervisión y gestión del mantenimiento de las aceras y el mobiliario de los Distritos de \"Nou Barris, Sant Andreu i Sant Martí\", y dando soporte como Asistencia Técnica en los citados Distritos",
+      "Pavimentos acera (Supervisión Lotes 11 y 12 COMIEP): Supervisión y gestión del mantenimiento de las aceras de toda la ciudad, así como del mantenimiento “fachada a fachada” del pavimento de la Rambla y del pavimento del Forum. TTambién se hará cargo de la gestión del mantenimiento de las juntas de calzada. Dará soporte como Asistencia Técnica al Departamento de Espacio Urbano",
+      "Señalización (Supervisión Lotes 13 y 14 COMIEP): Supervisión y gestión del mantenimiento de la señalización horizontal y vertical de toda la ciudad, y dará soporte como Assistència Técnica al Departamento de Espacio Urbano"
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "ESP",
+    "ESP",
+    "ESP",
+    "ESP",
+    "ESP"
+  ],
+  "deadline-receipt-tender-time-lot": [
+    "23:59:59+02:00",
+    "23:59:59+02:00",
+    "23:59:59+02:00",
+    "23:59:59+02:00",
+    "23:59:59+02:00"
+  ],
+  "procedure-type": "open",
+  "classification-cpv": [
+    "71356200",
+    "71356200",
+    "71356200",
+    "71356200",
+    "71356200",
+    "71356200"
+  ],
+  "contract-nature": [
+    "services",
+    "services",
+    "services",
+    "services",
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "spa": [
+      "AYUNTAMIENTO DE BARCELONA"
+    ]
+  },
+  "submission-language": [
+    "CAT",
+    "SPA",
+    "CAT",
+    "CAT",
+    "SPA",
+    "CAT",
+    "SPA",
+    "CAT"
+  ],
+  "notice-title": {
+    "hun": "Spanyolország – Műszaki segítségnyújtási szolgáltatások – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "lav": "Spānija – Tehniskās palīdzības pakalpojumi – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "swe": "Spanien – Tekniskt bistånd – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "gle": "An Spáinn – Technical assistance services – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "ell": "Ισπανία – Υπηρεσίες τεχνικής βοήθειας – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "spa": "España – Servicios de asistencia técnica – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "est": "Hispaania – Tehnilised abiteenused – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "nld": "Spanje – Technische bijstandsdiensten – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "fin": "Espanja – Tekninen apu – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "pol": "Hiszpania – Usługi pomocy technicznej – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "hrv": "Španjolska – Usluge tehničke pomoći – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "ces": "Španělsko – Technická asistence – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "dan": "Spanien – Tjenesteydelser i forbindelse med teknisk støtte – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "ron": "Spania – Servicii de asistenţă tehnică – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "por": "Espanha – Serviços de assistência técnica – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "slk": "Španielsko – Technická pomoc – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "fra": "Espagne – Services d'assistance technique – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "mlt": "Spanja – Servizzi ta' l-għajnuna teknika – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "deu": "Spanien – Technische Hilfe – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "lit": "Ispanija – Techninės pagalbos paslaugos – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "ita": "Spagna – Servizi di assistenza tecnica – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "bul": "Иcпaния – Услуги по оказване на техническа помощ – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "slv": "Španija – Storitve tehnične pomoči – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)",
+    "eng": "Spain – Technical assistance services – DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)"
+  },
+  "title-lot": {
+    "spa": [
+      "Servicio Distritos 1- 3 (Supervisión Lotes 1-3 COMIEP): Supervisión y gestión del mantenimiento de las aceras y el mobiliario de los Distritos de \"Ciutat Vella, Eixample y Sants – Montjuïc\", y dando soporte como Asistencia Técnica en los citados Distritos",
+      "Servicio Distritos 4-7 (Supervisión Lotes 4-7 COMIEP): Supervisión y gestión del mantenimiento de las aceras y el mobiliario de los Distritos de \"Les Corts, Sarrià – Sant Gervasi, Gràcia y Horta - Guinardó\", y dando soporte como Asistencia Técnica en los citados Distritos",
+      "Servicio Distritos 8-7 (Supervisión Lotes 8-10 COMIEP): Supervisión y gestión del mantenimiento de las aceras y el mobiliario de los Distritos de \"Nou Barris, Sant Andreu i Sant Martí\", y dando soporte como Asistencia Técnica en los citados Distritos",
+      "Pavimentos acera (Supervisión Lotes 11 y 12 COMIEP): Supervisión y gestión del mantenimiento de las aceras de toda la ciudad, así como del mantenimiento “fachada a fachada” del pavimento de la Rambla y del pavimento del Forum. También se hará cargo de la gestión del mantenimiento de las juntas de calzada. Dará soporte como Asistencia Técnica al Departamento de Espacio Urbano",
+      "Señalización (Supervisión Lotes 13 y 14 COMIEP): Supervisión y gestión del mantenimiento de la señalización horizontal y vertical de toda la ciudad, y dará soporte como Assistència Técnica al Departamento de Espacio Urbano"
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "spa": "DF, AT y Coordinación de Seguridad y Salud de COMIEP (2027-2030)"
+  }
+}

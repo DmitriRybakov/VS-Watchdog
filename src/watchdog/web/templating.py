@@ -16,11 +16,25 @@ default. The filters here exist for the two things escaping does not cover:
 
 from __future__ import annotations
 
-from datetime import date, datetime
+import re
+from datetime import UTC, date, datetime
 from pathlib import Path
 from urllib.parse import urlsplit
 
 from fastapi.templating import Jinja2Templates
+
+from watchdog.core.codelists import (
+    award_criterion_type_label,
+    criterion_number,
+    dps_usage_label,
+    framework_agreement_label,
+    language_name,
+    language_names,
+    main_activity_label,
+    number_kind_label,
+    procedure_type_label,
+)
+from watchdog.core.countries import country_name, country_names
 
 WEB_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = WEB_DIR / "templates"
@@ -58,6 +72,35 @@ EVIDENCE_LABELS = {
     3: "Strong evidence",
 }
 
+# The same grade as one word, for a sentence that already says "evidence".
+EVIDENCE_WORDS = {0: "none", 1: "weak", 2: "partial", 3: "strong"}
+
+# Three different absences, and a colleague has to be able to tell them apart:
+# the platform sent no value, we have not fetched or extracted it yet, and no
+# judgement has been made. One phrase for all three hides which it is, and the
+# thing to do about each of them is different.
+#
+# The first says "the retrieved data", not "the notice". TED returned no value in
+# that field; the fact may still be written in the notice text or in a tender
+# document nobody has read yet. "Not in the notice" claims we looked and it was
+# not there, which is more than we know and stops somebody going to look.
+NOT_IN_NOTICE = "Not provided in the retrieved data"
+NOT_RETRIEVED = "Not retrieved yet"
+NOT_ASSESSED = "AI assessment has not run"
+
+ABSENT = {"source": NOT_IN_NOTICE, "retrieval": NOT_RETRIEVED, "assessment": NOT_ASSESSED}
+
+# The fourth thing a screening chip can say: a model was asked and did not
+# answer. It is neither a score nor a grade, and it must not read as either.
+ASSESSMENT_FAILED_LABEL = "Assessment failed"
+ASSESSMENT_FAILED_HINT = (
+    "The AI assessment ran and did not come back, so nothing judged this notice."
+)
+
+# How much description shows before the expander takes over. Nothing is cut: the
+# remainder goes behind the expander whole.
+DESCRIPTION_LEAD_CHARS = 1200
+
 STRENGTH_LABELS = {"high": "high", "medium": "medium", "supporting": "supporting only"}
 
 
@@ -84,10 +127,18 @@ def day(value: date | datetime | None) -> str:
 
 
 def moment(value: datetime | None) -> str:
-    """A UTC timestamp to the minute, labelled, so nobody reads it as local time."""
+    """A UTC timestamp to the minute, labelled, so nobody reads it as local time.
+
+    Converted here, not assumed. Everything stored is already UTC, but appending
+    the word "UTC" to a value that is not one would be a wrong time that looks
+    checked - and a deadline of 00:30 in Warsaw is 22:30 the *previous day* in
+    UTC, so the date moves too, not only the clock.
+    """
     if value is None:
         return "\u2013"
-    return f"{value.strftime('%Y-%m-%d %H:%M')} UTC"
+    if value.tzinfo is None:
+        raise ValueError("a naive timestamp cannot be labelled UTC; attach its offset first")
+    return f"{value.astimezone(UTC).strftime('%Y-%m-%d %H:%M')} UTC"
 
 
 def days_badge(days: int | None) -> dict[str, str]:
@@ -113,6 +164,56 @@ def evidence_label(grade: int | None) -> str:
     return EVIDENCE_LABELS.get(grade, f"Grade {grade}")
 
 
+def evidence_word(grade: int | None) -> str:
+    return EVIDENCE_WORDS.get(grade if grade is not None else -1, "not graded")
+
+
+def given(value: object, kind: str = "source") -> str:
+    """A value, or the kind of nothing it is. Never one word for three absences."""
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return ABSENT.get(kind, NOT_IN_NOTICE)
+    return str(value)
+
+
+def country(code: str | None) -> str:
+    """A country by name, falling back to a code we cannot name, never to a guess."""
+    return country_name(code) or (code or "")
+
+
+def countries(codes: list[str] | None) -> str:
+    """Several countries by name, in the order the source gave them."""
+    return ", ".join(country_names(codes or []))
+
+
+def paragraphs(value: str | None) -> list[str]:
+    """Source text as paragraphs. Split on blank lines only; nothing is reflowed."""
+    if not value:
+        return []
+    return [
+        block.strip()
+        for block in re.split(r"\n\s*\n", value.replace("\r\n", "\n"))
+        if block.strip()
+    ]
+
+
+def clamped(value: str | None) -> dict[str, list[str]]:
+    """Paragraphs split into what shows and what the expander holds.
+
+    A description is never shortened, only folded: everything past the lead goes
+    behind the expander in full, so nothing on this page is text a person cannot
+    get back to.
+    """
+    blocks = paragraphs(value)
+    lead: list[str] = []
+    used = 0
+    for index, block in enumerate(blocks):
+        if lead and used + len(block) > DESCRIPTION_LEAD_CHARS:
+            return {"lead": lead, "rest": blocks[index:]}
+        lead.append(block)
+        used += len(block)
+    return {"lead": lead, "rest": []}
+
+
 def band_label(value: str | None) -> str:
     return BAND_LABELS.get(value or "", "Not screened")
 
@@ -134,6 +235,47 @@ def words(value: str | None) -> str:
     return (value or "").replace("_", " ").strip().capitalize()
 
 
+def language(code: str | None) -> str:
+    """A language by name, falling back to a code we cannot name, never to a guess."""
+    return language_name(code) or (code or "")
+
+
+def languages(codes: list[str] | None) -> str:
+    """Several languages by name, in the order the source gave them."""
+    return ", ".join(language_names(codes or []))
+
+
+def duration(value: object) -> str:
+    """A contract length with the unit the source gave. Never a bare number."""
+    if value is None:
+        return "\u2013"
+    amount = getattr(value, "value", None)
+    unit = getattr(value, "unit", None)
+    if amount is None:
+        return "\u2013"
+    if not unit:
+        return f"{amount} (unit not stated)"
+    word = unit.strip().lower()
+    return f"{amount} {word if amount in {'1', '1.0'} else word + 's'}"
+
+
+def criterion_weight(criterion: object) -> str:
+    """A criterion's number written with its verified meaning, or bare.
+
+    A rank of 1 and a weight of 1% are different claims and TED writes both as
+    "1". Where the meaning is not stated the number is shown exactly as it
+    arrived; see core.codelists.
+    """
+    number = getattr(criterion, "number", None)
+    kind = getattr(criterion, "number_kind", None)
+    written = criterion_number(number, kind)
+    if written is None:
+        return ""
+    if number_kind_label(kind) is None:
+        return f"{written} (TED did not say what this number means)"
+    return written
+
+
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.filters["safe_url"] = safe_url
 templates.env.filters["day"] = day
@@ -141,8 +283,27 @@ templates.env.filters["moment"] = moment
 templates.env.filters["days_badge"] = days_badge
 templates.env.filters["deadline_type"] = deadline_type
 templates.env.filters["evidence_label"] = evidence_label
+templates.env.filters["evidence_word"] = evidence_word
 templates.env.filters["band_label"] = band_label
 templates.env.filters["verdict_label"] = verdict_label
 templates.env.filters["strength_label"] = strength_label
 templates.env.filters["percent"] = percent
 templates.env.filters["words"] = words
+templates.env.filters["given"] = given
+templates.env.filters["country"] = country
+templates.env.filters["countries"] = countries
+templates.env.filters["language"] = language
+templates.env.filters["languages"] = languages
+templates.env.filters["duration"] = duration
+templates.env.filters["criterion_weight"] = criterion_weight
+templates.env.filters["procedure_type"] = procedure_type_label
+templates.env.filters["main_activity"] = main_activity_label
+templates.env.filters["framework_agreement"] = framework_agreement_label
+templates.env.filters["dps_usage"] = dps_usage_label
+templates.env.filters["criterion_type"] = award_criterion_type_label
+templates.env.filters["clamped"] = clamped
+templates.env.globals["NOT_IN_NOTICE"] = NOT_IN_NOTICE
+templates.env.globals["NOT_RETRIEVED"] = NOT_RETRIEVED
+templates.env.globals["NOT_ASSESSED"] = NOT_ASSESSED
+templates.env.globals["ASSESSMENT_FAILED_LABEL"] = ASSESSMENT_FAILED_LABEL
+templates.env.globals["ASSESSMENT_FAILED_HINT"] = ASSESSMENT_FAILED_HINT

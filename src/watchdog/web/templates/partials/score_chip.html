@@ -1,0 +1,52 @@
+{#
+  The one place a screening becomes a chip, so the card, the table and the queue
+  cannot drift apart.
+
+  Five states, not three. A score and a rules grade are the two that carry a
+  number. A failed assessment carries neither - a model was asked and did not
+  answer - and neither does a notice excluded by a rule. Rendering either of
+  those through the grade branch prints the word "None" where a grade belongs,
+  which reads as a very low mark rather than as an absent one.
+
+  Expects `row`. Set `caption` to also render the line of words underneath.
+#}
+{% set state = row.screening_state.value %}
+
+{% if state == 'assessed' %}
+  <span class="chip chip-score chip-{{ row.screening.score }}"
+        title="Assessed score, 1 to 5">{{ row.screening.score }}</span>
+  {% if caption %}
+    <span class="chip-caption">Score {{ row.screening.score }} of 5
+      &middot; {{ row.screening.axes_established }} of 3 axes established</span>
+  {% endif %}
+
+{% elif state == 'graded' %}
+  <span class="chip chip-evidence chip-e{{ row.evidence_grade }}"
+        title="Rules evidence grade, not a judged score">E{{ row.evidence_grade }}</span>
+  {% if caption %}
+    <span class="chip-caption">{{ row.evidence_grade | evidence_label }}
+      &middot; keyword and CPV match, not a judged score</span>
+  {% endif %}
+
+{% elif state == 'assessment_failed' %}
+  <span class="chip chip-failed"
+        title="{{ ASSESSMENT_FAILED_HINT }}">&#9888;</span>
+  {% if caption %}
+    <span class="chip-caption">{{ ASSESSMENT_FAILED_LABEL }}
+      &middot; {{ ASSESSMENT_FAILED_HINT }}</span>
+  {% endif %}
+
+{% elif state == 'ungraded' %}
+  <span class="chip chip-failed"
+        title="Screened, but neither judged nor graded">&ndash;</span>
+  {% if caption %}
+    <span class="chip-caption">Not graded
+      &middot; {{ row.screening.reason_codes | join(', ') | lower or 'no number was produced' }}</span>
+  {% endif %}
+
+{% else %}
+  <span class="chip chip-none" title="Never screened">&ndash;</span>
+  {% if caption %}
+    <span class="chip-caption">Never screened</span>
+  {% endif %}
+{% endif %}

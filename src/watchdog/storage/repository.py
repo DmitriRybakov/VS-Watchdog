@@ -15,7 +15,8 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Callable, Iterable, Sequence
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
+from decimal import Decimal
 from enum import Enum
 from typing import Any, cast
 
@@ -96,9 +97,26 @@ SOURCE_FIELDS: tuple[str, ...] = (
     "cpv_all",
     "estimated_value",
     "currency",
-    "documents_url",
+    "estimated_value_source",
+    "lot_values",
+    "lot_value_currency",
+    "document_urls",
     "languages",
+    "lot_ids",
     "multi_lot",
+    "procedure_type",
+    "main_activity",
+    "performance_cities",
+    "submission_languages",
+    "submission_urls",
+    "framework_agreements",
+    "dps_usages",
+    "contract_durations",
+    "contract_start_dates",
+    "renewal_maximums",
+    "award_criteria",
+    "selection_criteria",
+    "criteria_unpaired",
     "screening_blocks",
     "raw",
 )
@@ -1371,8 +1389,24 @@ def _column_value(value: Any) -> Any:
     if isinstance(value, BaseModel):
         return value.model_dump(mode="json")
     if isinstance(value, list):
-        return [_column_value(item) for item in value]
+        return [_json_item(item) for item in value]
     return value
+
+
+def _json_item(value: Any) -> Any:
+    """One member of a list column, in a form JSON can hold.
+
+    Only lists reach a JSON column; the scalar columns are typed, so a Decimal
+    kept for ``estimated_value`` stays a Decimal and only a lot value on its way
+    into JSON becomes a string.
+    """
+    if isinstance(value, Decimal):
+        return str(value)
+    if isinstance(value, datetime):
+        return value.isoformat()
+    if isinstance(value, date):
+        return value.isoformat()
+    return _column_value(value)
 
 
 def _as_text(value: Any) -> str | None:

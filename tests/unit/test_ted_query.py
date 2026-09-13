@@ -169,7 +169,7 @@ def test_the_shipped_configuration_loads_and_builds_a_query() -> None:
     assert NoticeStage.MARKET_CONSULTATION in shipped.notice_stages
     assert NoticeStage.PRIOR_INFORMATION in shipped.notice_stages
     assert shipped.overlap_days == 2
-    assert shipped.page_size == 250
+    assert shipped.page_size == 175
     assert "NOR" in shipped.buyer_countries
     assert shipped.place_of_performance == []
 

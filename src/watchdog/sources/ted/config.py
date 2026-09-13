@@ -26,6 +26,36 @@ DEFAULT_CONFIG_PATH = Path("config/sources/ted.yaml")
 # TED rejects a limit above this outright, with SEARCH_EXCEEDS_MAX_LIMIT.
 MAX_PAGE_SIZE = 250
 
+# TED also prices a request as "fields per page" and refuses one over this,
+# with SEARCH_FIELDS_PER_PAGE_EXCEEDS_MAX_LIMIT. Measured on the live endpoint.
+MAX_FIELDS_PER_PAGE = 10_000
+
+# What one requested field name costs per notice, for the offline guard.
+#
+# This is a PRECAUTION, not a proven formula. Measured 13 September 2026, TED
+# charged our own 55-name list exactly 55 per notice and accepted page size 181 -
+# but a 40-name list built from `organisation-*-lot` names was charged 41, so at
+# least one field name costs more than one and no arithmetic here can be trusted
+# on its own. The extra unit buys a margin for that, and `watchdog config
+# validate` confirms the real request against the live endpoint.
+FIELD_COST = 2
+
+# The largest page size the shipped field list fits in. config/sources/ted.yaml
+# is the real setting; this is only what a config built without one gets, and it
+# has to be a value that works rather than TED's bare maximum, which 55 fields
+# have not fitted in since the projection was widened.
+DEFAULT_PAGE_SIZE = 175
+
+
+def fields_per_page(field_count: int, page_size: int) -> int:
+    """What a request of this shape is assumed to cost TED, for the offline guard."""
+    return (field_count + FIELD_COST) * page_size
+
+
+def max_page_size(field_count: int) -> int:
+    """The largest page size this many fields is allowed offline. May be 0."""
+    return min(MAX_PAGE_SIZE, MAX_FIELDS_PER_PAGE // (field_count + FIELD_COST))
+
 
 class ProvisionalCode(BaseModel):
     """A CPV code that is in the list on a stated bet rather than a measured gain.
@@ -71,7 +101,7 @@ class TedSourceConfig(BaseModel):
     overlap_days: int = Field(default=2, ge=0, le=30)
     # How far back the very first run reaches, when there is no watermark yet.
     backfill_days: int = Field(default=30, ge=1, le=365)
-    page_size: int = Field(default=MAX_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE)
+    page_size: int = Field(default=DEFAULT_PAGE_SIZE, ge=1, le=MAX_PAGE_SIZE)
 
     @model_validator(mode="before")
     @classmethod

@@ -1,4 +1,11 @@
 {
+  "contract-duration-start-date-lot": [
+    "2027-01-01+01:00",
+    "2027-01-01+01:00",
+    "2027-01-01+01:00",
+    "2027-01-01+01:00",
+    "2027-01-01+01:00"
+  ],
   "deadline-receipt-tender-date-lot": [
     "2026-10-02+02:00",
     "2026-10-02+02:00",
@@ -7,9 +14,25 @@
     "2026-10-02+02:00"
   ],
   "notice-type": "cn-standard",
+  "award-criterion-description-lot": {
+    "pol": [
+      "Kryterium – Cena brutto oferty - waga 100%",
+      "Kryterium – Cena brutto oferty - waga 100%",
+      "Kryterium – Cena brutto oferty - waga 100%",
+      "Kryterium – Cena brutto oferty - waga 100%",
+      "Kryterium – Cena brutto oferty - waga 100%"
+    ]
+  },
   "publication-number": "596416-2026",
   "main-classification-proc": [
     "90910000"
+  ],
+  "submission-url-lot": [
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
+    "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details"
   ],
   "additional-classification-proc": [
     "90911200",
@@ -30,12 +53,18 @@
     "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details",
     "https://kis.ezamawiajacy.pl/pn/kis/demand/314788/notice/public/details"
   ],
+  "award-criterion-number-lot": [
+    "100",
+    "100",
+    "100",
+    "100",
+    "100"
+  ],
   "official-language": [
     "POL"
   ],
   "notice-subtype": "16",
   "publication-date": "2026-08-31+02:00",
-  "contract-nature-main-proc": "services",
   "links": {
     "xml": {
       "MUL": "https://ted.europa.eu/en/notice/596416-2026/xml"
@@ -122,6 +151,14 @@
       "SWE": "https://ted.europa.eu/sv/notice/596416-2026/html"
     }
   },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001",
+    "LOT-0002",
+    "LOT-0003",
+    "LOT-0004",
+    "LOT-0005"
+  ],
   "notice-identifier": "9a3fe699-66d9-4d68-b046-43759f02da64",
   "place-of-performance": [
     "POL",
@@ -146,9 +183,40 @@
   "title-proc": {
     "pol": "Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku."
   },
+  "dps-usage-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
   "main-classification-type-proc": "cpv",
+  "award-criterion-type-lot": [
+    "price",
+    "price",
+    "price",
+    "price",
+    "price"
+  ],
+  "framework-agreement-lot": [
+    "none",
+    "none",
+    "none",
+    "none",
+    "none"
+  ],
+  "main-activity": [
+    "gen-pub"
+  ],
   "buyer-country": [
     "POL"
+  ],
+  "award-criterion-number-weight-lot": [
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa"
   ],
   "description-lot": {
     "pol": [
@@ -173,6 +241,7 @@
     "10:00:00+02:00",
     "10:00:00+02:00"
   ],
+  "procedure-type": "open",
   "classification-cpv": [
     "90910000",
     "90911200",
@@ -201,6 +270,13 @@
       "Krajowa Informacja Skarbowa"
     ]
   },
+  "submission-language": [
+    "POL",
+    "POL",
+    "POL",
+    "POL",
+    "POL"
+  ],
   "notice-title": {
     "hun": "Lengyelország – Takarítási szolgáltatások – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",
     "lav": "Polija – Uzkopšanas pakalpojumi – Świadczenie usługi kompleksowego sprzątania i bieżącego utrzymywania czystości w budynkach i na posesjach Krajowej Informacji Skarbowej w 2027 roku.",

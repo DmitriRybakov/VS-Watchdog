@@ -1,0 +1,282 @@
+{
+  "notice-type": "cn-standard",
+  "award-criterion-description-lot": {
+    "deu": [
+      "Für die Bewertung des Honorars wird das vom Bieter eingetragene Endhonorar (netto) in seinem Angebot bewertet. Das danach günstigste Angebot erhält 100 Punkte. Ein Angebot, welches nach dieser Berechnung doppelt so teuer wäre wie das günstigste Angebot, erhält 0 Punkte. Dazwischen werden die Punkte nach der nachfolgenden Formel interpoliert: P = 100 – ((Honorar des jeweiligen Angebotes – niedrigstes Honorar) x 100 / niedrigstes Honorar). Dabei ist „P“ die Punktzahl für das zu bewertende Angebot. Sämtliche Zuschläge und ggf. optionalen Leistungen sind im Angebot auszuweisen und gehen in die Wertung ein.",
+      "Im Rahmen dieses Kriteriums (max. 100 Punkte) wird bewertet, welche konkreten Erfahrungen die Mitglieder des Projektteams (nicht jedoch die allgemeinen Referenzen des Bewerbers, da diese schon im Rahmen des Teilnahmewettbewerbs geprüft wurden) mit (mit dem vorliegenden Leistungsge-genstand vergleichbaren) Projekten haben. Mindestens ist ein Projektteam von drei Personen mit einer verbindlichen Projektleitung anzubieten. Hierfür ist das mit der Aufforderung zur Angebotsabgabe versendetes Formblatt „Qualifikation_Projektteam“ zu verwenden. Es wird unter Verweis auf Ziff. 1.4 der Bewerbungs- und Vergabebedingungen darum gebeten, von der unaufgeforderten Einreichung weiterer Unterlagen und Nachweise abzusehen. Sind sämtliche der in Ziff. 2.3.2 der Bewerbungs- und Vergabebedingungen aufgeführten Erfahrungen/Kompetenz bei mindestens einem Mitglied des Projektteams vorhanden, erhält das Angebot des Bieters in diesem Kriterium 100 Punkte. Ansonsten werden die Punkte anhand der in Ziff. 2.3.2 der Bewerbungs- und Vergabebedingungen aufgeführten Tabelle verteilt, wobei es stets erforderlich ist, dass das jeweilige Unterkriterium erfüllt ist, um die diesem Unterkriterium zugewiesenen Punkte zu erhalten. Werden Mitglieder des Projektteams während der Angebotsphase oder nach Zuschlagserteilung ausgetauscht, so ist dies nur nach vorheriger schriftlicher Zustimmung des Auftraggebers und nur dann zulässig, wenn sich durch diesen Personalwechsel die Punktzahl des Projektteams erhöht oder diese gleich bleibt.",
+      "Im Rahmen dieses Kriteriums (max. 100 Punkte) werden die Aspekte des Konzeptes von einer Jury der Auftraggeberin bewertet. Das Konzept darf max. 1.500 Wörter umfassen. Zusätzlich können max. 5 grafische/zeichnerische Darstellungen beigefügt werden, die jeweils nicht umfangreicher als 1 DIN A4-Seite sein dürfen. Textliche Bestandteile dieser Darstellungen werden nicht hinsichtlich der Anzahl der Wörter berücksichtigt, sofern sie als untergeordneter Teil lediglich der Erläuterung bzw. Beschreibung der grafischen/zeichnersichen Elemente dienen. Deckblatt und Inhaltsverzeichnis, sofern vorhanden, gehen nicht in die Wertung ein. Ausführungen, welche die vorstehenden Vorgaben überschreiten, werden nicht gewertet. Die Bieter haben eigenständig dafür Sorge zu tragen, dass eine Überschreitung nicht erfolgt. Für den Fall, dass die vorgenannten formalen Anforderungen an das Konzept nicht eingehalten werden, wird dies bei der Bewertung des jeweiligen Konzepts derart berücksichtigt, dass das Konzept lediglich bis zu dem Punkt gelesen und bewertet wird, bis zu welchem es sich innerhalb der formalen Anforderungen bewegt. Alle zur Einreichung eines schriftlichen Konzepts aufgeforderten Bieter werden auf die Möglichkeit hingewiesen, sämtliche zur Verfügung gestellten Unterlagen in die Erstellung des schriftlichen Konzepts einfließen zu lassen. Details zu Zielstellung, Erwartungshorizont und Bewertung des Konzepts sind Ziff. 2.3.3 der Bewerbungs- und Vergabebedingungen zu entnehmen.",
+      "Im Rahmen dieses Kriteriums (max. 100 Punkte) werden die Aspekte der Präsentation von einer Jury der Auftraggeberin bewertet. An der Präsentation müssen mindestens der Projektleiter und der stellvertretende Projektleiter teilnehmen. Sofern nicht anders mitgeteilt, findet der Termin in Präsenz an einem von der Auftraggeberin zu bestimmenden Ort statt. Die Auftraggeberin behält sich vor, den Präsentationstermin nur durchzuführen, sofern sich nach Auswertung aller anderen Kriterien hierdurch die Wertungsreihenfolge noch verändern kann. Für den Fall, dass die Präsentation aufgrund obenstehenden Sachverhalts entfällt, werden die 20 % des Kriteriums Präsentation insofern berücksichtigt, dass alle Bieter die volle Punktzahl erhalten. Details zu Inhalt, Form und Bewertung der Präsentation sind Ziff. 2.3.4 der Bewerbungs- und Vergabebedingungen zu entnehmen.",
+      "Für die Bewertung des Honorars wird das vom Bieter eingetragene Endhonorar (netto) in seinem Angebot bewertet. Das danach günstigste Angebot erhält 100 Punkte. Ein Angebot, welches nach dieser Berechnung doppelt so teuer wäre wie das günstigste Angebot, erhält 0 Punkte. Dazwischen werden die Punkte nach der nachfolgenden Formel interpoliert: P = 100 – ((Honorar des jeweiligen Angebotes – niedrigstes Honorar) x 100 / niedrigstes Honorar). Dabei ist „P“ die Punktzahl für das zu bewertende Angebot. Sämtliche Zuschläge und ggf. optionalen Leistungen sind im Angebot auszuweisen und gehen in die Wertung ein.",
+      "Im Rahmen dieses Kriteriums (max. 100 Punkte) wird bewertet, welche konkreten Erfahrungen die Mitglieder des Projektteams (nicht jedoch die allgemeinen Referenzen des Bewerbers, da diese schon im Rahmen des Teilnahmewettbewerbs geprüft wurden) mit (mit dem vorliegenden Leistungsge-genstand vergleichbaren) Projekten haben. Mindestens ist ein Projektteam von zwei Personen mit einer verbindlichen Projektleitung anzubieten. Hierfür ist das mit der Aufforderung zur Angebotsabgabe versendetes Formblatt „Qualifikation_Projektteam“ zu verwenden. Es wird unter Verweis auf Ziff. 1.4 der Bewerbungs- und Vergabebedingungen darum gebeten, von der unaufgeforderten Einreichung weiterer Unterlagen und Nachweise abzusehen. Sind sämtliche der in Ziff. 2.3.2 der Bewerbungs- und Vergabebedingungen aufgeführten Erfahrungen/Kompetenz bei mindestens einem Mitglied des Projektteams vorhanden, erhält das Angebot des Bieters in diesem Kriterium 100 Punkte. Ansonsten werden die Punkte anhand der in Ziff. 2.3.2 der Bewerbungs- und Vergabebedingungen aufgeführten Tabelle verteilt, wobei es stets erforderlich ist, dass das jeweilige Unterkriterium erfüllt ist, um die diesem Unterkriterium zugewiesenen Punkte zu erhalten. Werden Mitglieder des Projektteams während der Angebotsphase oder nach Zuschlagserteilung ausgetauscht, so ist dies nur nach vorheriger schriftlicher Zustimmung des Auftraggebers und nur dann zulässig, wenn sich durch diesen Personalwechsel die Punktzahl des Projektteams erhöht oder diese gleich bleibt.",
+      "Im Rahmen dieses Kriteriums (max. 100 Punkte) werden die Aspekte der Präsentation von einer Jury der Auftraggeberin bewertet. An der Präsentation müssen mindestens der Projektleiter und der stellvertretende Projektleiter teilnehmen. Sofern nicht anders mitgeteilt, findet der Termin in Präsenz an einem von der Auftraggeberin zu bestimmenden Ort statt. Die Auftraggeberin behält sich vor, den Präsentationstermin nur durchzuführen, sofern sich nach Auswertung aller anderen Kriterien hierdurch die Wertungsreihenfolge noch verändern kann. Für den Fall, dass die Präsentation aufgrund obenstehenden Sachverhalts entfällt, werden die 25 % des Kriteriums Präsentation insofern berücksichtigt, dass alle Bieter die volle Punktzahl erhalten. Details zu Inhalt, Form und Bewertung der Präsentation sind Ziff. 2.3.3 der Bewerbungs- und Vergabebedingungen zu entnehmen."
+    ]
+  },
+  "publication-number": "458521-2026",
+  "main-classification-proc": [
+    "71000000"
+  ],
+  "submission-url-lot": [
+    "https://www.subreport.de/E59134612",
+    "https://www.subreport.de/E59134612"
+  ],
+  "additional-classification-proc": [
+    "71240000",
+    "71300000",
+    "71313000"
+  ],
+  "place-of-performance-country-proc": [
+    "DEU"
+  ],
+  "document-url-lot": [
+    "https://www.subreport.de/E59134612",
+    "https://www.subreport.de/E59134612"
+  ],
+  "award-criterion-number-lot": [
+    "40",
+    "20",
+    "20",
+    "20",
+    "50",
+    "25",
+    "25"
+  ],
+  "official-language": [
+    "DEU"
+  ],
+  "notice-subtype": "16",
+  "publication-date": "2026-07-03+02:00",
+  "links": {
+    "xml": {
+      "MUL": "https://ted.europa.eu/en/notice/458521-2026/xml"
+    },
+    "pdf": {
+      "BUL": "https://ted.europa.eu/bg/notice/458521-2026/pdf",
+      "SPA": "https://ted.europa.eu/es/notice/458521-2026/pdf",
+      "CES": "https://ted.europa.eu/cs/notice/458521-2026/pdf",
+      "DAN": "https://ted.europa.eu/da/notice/458521-2026/pdf",
+      "DEU": "https://ted.europa.eu/de/notice/458521-2026/pdf",
+      "EST": "https://ted.europa.eu/et/notice/458521-2026/pdf",
+      "ELL": "https://ted.europa.eu/el/notice/458521-2026/pdf",
+      "ENG": "https://ted.europa.eu/en/notice/458521-2026/pdf",
+      "FRA": "https://ted.europa.eu/fr/notice/458521-2026/pdf",
+      "GLE": "https://ted.europa.eu/ga/notice/458521-2026/pdf",
+      "HRV": "https://ted.europa.eu/hr/notice/458521-2026/pdf",
+      "ITA": "https://ted.europa.eu/it/notice/458521-2026/pdf",
+      "LAV": "https://ted.europa.eu/lv/notice/458521-2026/pdf",
+      "LIT": "https://ted.europa.eu/lt/notice/458521-2026/pdf",
+      "HUN": "https://ted.europa.eu/hu/notice/458521-2026/pdf",
+      "MLT": "https://ted.europa.eu/mt/notice/458521-2026/pdf",
+      "NLD": "https://ted.europa.eu/nl/notice/458521-2026/pdf",
+      "POL": "https://ted.europa.eu/pl/notice/458521-2026/pdf",
+      "POR": "https://ted.europa.eu/pt/notice/458521-2026/pdf",
+      "RON": "https://ted.europa.eu/ro/notice/458521-2026/pdf",
+      "SLK": "https://ted.europa.eu/sk/notice/458521-2026/pdf",
+      "SLV": "https://ted.europa.eu/sl/notice/458521-2026/pdf",
+      "FIN": "https://ted.europa.eu/fi/notice/458521-2026/pdf",
+      "SWE": "https://ted.europa.eu/sv/notice/458521-2026/pdf"
+    },
+    "pdfs": {
+      "DEU": "https://ted.europa.eu/de/notice/458521-2026/pdfs"
+    },
+    "html": {
+      "BUL": "https://ted.europa.eu/bg/notice/-/detail/458521-2026",
+      "SPA": "https://ted.europa.eu/es/notice/-/detail/458521-2026",
+      "CES": "https://ted.europa.eu/cs/notice/-/detail/458521-2026",
+      "DAN": "https://ted.europa.eu/da/notice/-/detail/458521-2026",
+      "DEU": "https://ted.europa.eu/de/notice/-/detail/458521-2026",
+      "EST": "https://ted.europa.eu/et/notice/-/detail/458521-2026",
+      "ELL": "https://ted.europa.eu/el/notice/-/detail/458521-2026",
+      "ENG": "https://ted.europa.eu/en/notice/-/detail/458521-2026",
+      "FRA": "https://ted.europa.eu/fr/notice/-/detail/458521-2026",
+      "GLE": "https://ted.europa.eu/ga/notice/-/detail/458521-2026",
+      "HRV": "https://ted.europa.eu/hr/notice/-/detail/458521-2026",
+      "ITA": "https://ted.europa.eu/it/notice/-/detail/458521-2026",
+      "LAV": "https://ted.europa.eu/lv/notice/-/detail/458521-2026",
+      "LIT": "https://ted.europa.eu/lt/notice/-/detail/458521-2026",
+      "HUN": "https://ted.europa.eu/hu/notice/-/detail/458521-2026",
+      "MLT": "https://ted.europa.eu/mt/notice/-/detail/458521-2026",
+      "NLD": "https://ted.europa.eu/nl/notice/-/detail/458521-2026",
+      "POL": "https://ted.europa.eu/pl/notice/-/detail/458521-2026",
+      "POR": "https://ted.europa.eu/pt/notice/-/detail/458521-2026",
+      "RON": "https://ted.europa.eu/ro/notice/-/detail/458521-2026",
+      "SLK": "https://ted.europa.eu/sk/notice/-/detail/458521-2026",
+      "SLV": "https://ted.europa.eu/sl/notice/-/detail/458521-2026",
+      "FIN": "https://ted.europa.eu/fi/notice/-/detail/458521-2026",
+      "SWE": "https://ted.europa.eu/sv/notice/-/detail/458521-2026"
+    },
+    "htmlDirect": {
+      "BUL": "https://ted.europa.eu/bg/notice/458521-2026/html",
+      "SPA": "https://ted.europa.eu/es/notice/458521-2026/html",
+      "CES": "https://ted.europa.eu/cs/notice/458521-2026/html",
+      "DAN": "https://ted.europa.eu/da/notice/458521-2026/html",
+      "DEU": "https://ted.europa.eu/de/notice/458521-2026/html",
+      "EST": "https://ted.europa.eu/et/notice/458521-2026/html",
+      "ELL": "https://ted.europa.eu/el/notice/458521-2026/html",
+      "ENG": "https://ted.europa.eu/en/notice/458521-2026/html",
+      "FRA": "https://ted.europa.eu/fr/notice/458521-2026/html",
+      "GLE": "https://ted.europa.eu/ga/notice/458521-2026/html",
+      "HRV": "https://ted.europa.eu/hr/notice/458521-2026/html",
+      "ITA": "https://ted.europa.eu/it/notice/458521-2026/html",
+      "LAV": "https://ted.europa.eu/lv/notice/458521-2026/html",
+      "LIT": "https://ted.europa.eu/lt/notice/458521-2026/html",
+      "HUN": "https://ted.europa.eu/hu/notice/458521-2026/html",
+      "MLT": "https://ted.europa.eu/mt/notice/458521-2026/html",
+      "NLD": "https://ted.europa.eu/nl/notice/458521-2026/html",
+      "POL": "https://ted.europa.eu/pl/notice/458521-2026/html",
+      "POR": "https://ted.europa.eu/pt/notice/458521-2026/html",
+      "RON": "https://ted.europa.eu/ro/notice/458521-2026/html",
+      "SLK": "https://ted.europa.eu/sk/notice/458521-2026/html",
+      "SLV": "https://ted.europa.eu/sl/notice/458521-2026/html",
+      "FIN": "https://ted.europa.eu/fi/notice/458521-2026/html",
+      "SWE": "https://ted.europa.eu/sv/notice/458521-2026/html"
+    }
+  },
+  "contract-nature-main-proc": "services",
+  "identifier-lot": [
+    "LOT-0001",
+    "LOT-0003"
+  ],
+  "deadline-receipt-request-date-lot": [
+    "2026-08-05+02:00",
+    "2026-08-05+02:00"
+  ],
+  "notice-identifier": "f2f5a3b0-e904-4403-8abb-2c9987db46c2",
+  "place-of-performance": [
+    "DEA28",
+    "DEU",
+    "DEA28",
+    "DEA28",
+    "DEU",
+    "DEU"
+  ],
+  "deadline-receipt-request": [
+    "2026-08-05T11:00:00+02:00",
+    "2026-08-05T11:00:00+02:00"
+  ],
+  "title-proc": {
+    "deu": "Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens"
+  },
+  "dps-usage-lot": [
+    "none",
+    "none"
+  ],
+  "main-classification-type-proc": "cpv",
+  "award-criterion-type-lot": [
+    "cost",
+    "quality",
+    "quality",
+    "quality",
+    "cost",
+    "quality",
+    "quality"
+  ],
+  "framework-agreement-lot": [
+    "none",
+    "none"
+  ],
+  "award-criterion-name-lot": {
+    "deu": [
+      "Honorar",
+      "Qualifikation des Projektteams",
+      "Schriftliches Konzept",
+      "Präsentation",
+      "Honorar",
+      "Qualifikation des Projektteams",
+      "Präsentation"
+    ]
+  },
+  "place-of-performance-city-proc": [
+    "Nettersheim"
+  ],
+  "main-activity": [
+    "gen-pub"
+  ],
+  "buyer-country": [
+    "DEU"
+  ],
+  "deadline-receipt-request-time-lot": [
+    "11:00:00+02:00",
+    "11:00:00+02:00"
+  ],
+  "award-criterion-number-weight-lot": [
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa",
+    "per-exa"
+  ],
+  "description-lot": {
+    "deu": [
+      "Planungs-/Ingenieurleistungen für die Errichtung eines Hochwasserrückhaltebeckens am Genfbach Nähe Nettersheim, Leistungsumfang vgl. Leistungsbeschreibung zu Los 1",
+      "Beratungs-/Prüfungsleistungen (Umweltprüfungen) im Zuge der Errichtung eines Hochwasserrückhaltebeckens am Genfbach Nähe Nettersheim, Leistungsumfang vgl. Leistungsbeschreibung zu Los 2"
+    ]
+  },
+  "place-of-performance-country-lot": [
+    "DEU",
+    "DEU"
+  ],
+  "procedure-type": "neg-w-call",
+  "classification-cpv": [
+    "71000000",
+    "71240000",
+    "71300000",
+    "71313000",
+    "71000000",
+    "71000000",
+    "71240000",
+    "71300000",
+    "71313000"
+  ],
+  "contract-nature": [
+    "services",
+    "services",
+    "services"
+  ],
+  "buyer-name": {
+    "deu": [
+      "Eifelgemeinde Nettersheim"
+    ]
+  },
+  "submission-language": [
+    "DEU",
+    "DEU"
+  ],
+  "notice-title": {
+    "hun": "Németország – Építészeti, építési, mérnöki és vizsgálati szolgáltatások – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "lav": "Vācija – Arhitektūras, būvniecības, inženiertehniskie un pārbaudes pakalpojumi – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "swe": "Tyskland – Arkitekt-, bygg-, ingenjörs- och besiktningstjänster – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "gle": "An Ghearmáin – Architectural, construction, engineering and inspection services – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "ell": "Γερμανία – Υπηρεσίες αρχιτεκτονικής, κατασκευαστικών έργων, έργων πολιτικού μηχανικού και επίβλεψης – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "spa": "Alemania – Servicios de arquitectura, construcción, ingeniería e inspección – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "est": "Saksamaa – Arhitektuuri-, ehitus-, inseneri- ja ehitusjärelevalveteenused – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "nld": "Duitsland – Dienstverlening op het gebied van architectuur, bouwkunde, civiele techniek en inspectie – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "fin": "Saksa – Arkkitehti-, rakennus-, insinööri- ja tarkastuspalvelut – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "pol": "Niemcy – Usługi architektoniczne, budowlane, inżynieryjne i kontrolne – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "hrv": "Njemačka – Arhitektonske, građevne, tehničke i inspekcije usluge – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "ces": "Německo – Architektonické, stavební, technické a inspekční služby – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "dan": "Tyskland – Arkitekt-, konstruktions-, ingeniør- og inspektionsvirksomhed – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "ron": "Germania – Servicii de arhitectură, de construcţii, de inginerie şi de inspecţie – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "por": "Alemanha – Serviços de arquitectura, construção, engenharia e inspecção – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "slk": "Nemecko – Architektonické, stavebné, inžinierske a inšpekčné služby – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "fra": "Allemagne – Services d'architecture, services de construction, services d'ingénierie et services d'inspection – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "mlt": "Il-Ġermanja – Servizzi ta' perizja, kostruzzjoni, inġinerija u spezzjoni – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "deu": "Deutschland – Dienstleistungen von Architektur-, Konstruktions- und Ingenieurbüros und Prüfstellen – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "lit": "Vokietija – Architektūros, statybų, inžinerijos ir inspektavimo paslaugos – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "ita": "Germania – Servizi architettonici, di costruzione, ingegneria e ispezione – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "bul": "Гepмaния – Архитектурни, строителни, инженерни и инспекционни услуги – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "slv": "Nemčija – Arhitekturne, gradbeniške, inženirske in inšpekcijske storitve – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens",
+    "eng": "Germany – Architectural, construction, engineering and inspection services – Nettersheim - Planungsleistungen für die Errichtung eines Hochwasserrückhaltebeckens"
+  },
+  "title-lot": {
+    "deu": [
+      "Errichtung eines Hochwasserrückhaltebeckens am Genfbach Nähe Nettersheim (Los 1: Hochwasserrückhaltebecken)",
+      "Errichtung eines Hochwasserrückhaltebeckens am Genfbach Nähe Nettersheim (Los 2: Umweltprüfungen)"
+    ]
+  },
+  "form-type": "competition",
+  "description-proc": {
+    "deu": "Zur Verbesserung der Hochwassersituation am Genfbach (Gewässerkennzahl: 28222) soll ein Hochwasserrückhaltebecken (HRB) im Hauptschluss errichtet werden. Darüber hinaus soll ggf. eine Drosselung des Borbachs, der unterhalb des geplanten HRB einmündet, realisiert werden. Die Ortslage Nettersheim war im Juli 2021 erheblich von der Flutkatastrophe betroffen. Besonders stark traf es zahlreiche Gebäude sowie die öffentliche Infrastruktur, die teils schwer beschädigt wurden. Um die Bevölkerung entlang des Genfbachs künftig besser vor Hochwas-serereignissen zu schützen, plant die Gemeinde den Bau eines Hochwasserrückhaltebeckens vor der Ortslage, zwischen Nettersheim und Engelgau. Ziel ist es die Wasserabflüsse bei Extremwetterereignissen zu drosseln und einen Bordvollen Abfluss des Gewässers Genfbach bei Extremwetterereignissen. Folgendes Natura-2000-Gebiet (FFHGebiet) liegt innerhalb des Gebietes: DE-5505-305 Unteres Genfbachtal. Zur Übernahme der erforderlichen Leistungen sucht die Gemeinde Nettersheim einen geeigneten Generalplaner."
+  }
+}

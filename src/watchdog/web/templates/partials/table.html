@@ -33,17 +33,7 @@
             data-index="{{ loop.index0 }}"
             data-detail="/register/notice/{{ row.tender.id }}?{{ query.query_string(cursor=loop.index0) }}">
           <td>
-            {% if row.screening %}
-              {% if row.is_assessed %}
-                <span class="chip chip-score chip-{{ row.screening.score }}"
-                      title="Assessed score">{{ row.screening.score }}</span>
-              {% else %}
-                <span class="chip chip-evidence chip-e{{ row.evidence_grade }}"
-                      title="Rules evidence grade, not a judged score">E{{ row.evidence_grade }}</span>
-              {% endif %}
-            {% else %}
-              <span class="chip chip-none" title="Never screened">&ndash;</span>
-            {% endif %}
+            {% include "partials/score_chip.html" %}
           </td>
           <td>{{ row.screening.band.value | band_label if row.screening else 'Not screened' }}</td>
           <td class="cell-title">
@@ -72,7 +62,12 @@
               <span class="muted">&ndash;</span>
             {% endfor %}
           </td>
-          <td>{{ row.screening.confidence | percent if row.screening else '\u2013' }}</td>
+          <td>
+            {% if row.is_assessed %}{{ row.screening.confidence | percent }}
+            {% else %}<span class="muted"
+                  title="Confidence describes an AI judgement, and none has been made">&ndash;</span>
+            {% endif %}
+          </td>
           <td>
             <span class="verdict verdict-{{ row.review.verdict.value if row.review else 'none' }}">
               {{ (row.review.verdict.value if row.review else None) | verdict_label }}

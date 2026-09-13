@@ -45,6 +45,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from watchdog.core.enums import Band, RuleSignal, RulesRoute, RuleStrength
 from watchdog.core.models import (
+    ASSESSMENT_FAILED,
     RANKING_FIELDS,
     Assessment,
     RulesResult,
@@ -65,8 +66,10 @@ _AXIS_LABELS = {"domain_fit": "Domain", "service_fit": "Service", "stage_fit": "
 # Reason codes with a fixed meaning. The rest are the keys of the `caps:` and
 # `reason_codes:` blocks of config/policy.yaml, upper-cased - those are data, so
 # adding one is a configuration change and not a release.
+#
+# ASSESSMENT_FAILED is defined in core.models: the register reads it to tell a
+# failed assessment apart from a rules grade, and core cannot import this package.
 EXCLUDED_BY_RULE = "EXCLUDED_BY_RULE"
-ASSESSMENT_FAILED = "ASSESSMENT_FAILED"
 RULES_ONLY = "RULES_ONLY"
 RULES_ONLY_NO_EVIDENCE = "RULES_ONLY_NO_EVIDENCE"
 INSUFFICIENT_INFORMATION = "INSUFFICIENT_INFORMATION"

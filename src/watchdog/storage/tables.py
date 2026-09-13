@@ -163,10 +163,43 @@ class TenderRow(Base):
 
     estimated_value: Mapped[Decimal | None] = mapped_column(Numeric(20, 2))
     currency: Mapped[str | None] = mapped_column(String(8))
+    # Which source field the value came from. A procedure estimate and a single
+    # lot's estimate are different facts and must not read as the same one.
+    estimated_value_source: Mapped[str | None] = mapped_column(String(64))
+    lot_values: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    lot_value_currency: Mapped[str | None] = mapped_column(String(8))
 
-    documents_url: Mapped[str | None] = mapped_column(Text)
+    document_urls: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     languages: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+
+    # Lot identifiers as TED gave them. The only authoritative lot count, and not
+    # necessarily contiguous. Nothing below is attributed to an individual lot;
+    # see docs/decisions/0008.
+    lot_ids: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
     multi_lot: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+
+    procedure_type: Mapped[str | None] = mapped_column(String(32))
+    main_activity: Mapped[str | None] = mapped_column(String(32))
+    performance_cities: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+
+    # Stated per lot, held as the distinct set across lots.
+    submission_languages: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    submission_urls: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    framework_agreements: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    dps_usages: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    contract_durations: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
+    contract_start_dates: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+    renewal_maximums: Mapped[list[str]] = mapped_column(JSON, nullable=False, default=list)
+
+    award_criteria: Mapped[list[dict[str, Any]]] = mapped_column(JSON, nullable=False, default=list)
+    selection_criteria: Mapped[list[dict[str, Any]]] = mapped_column(
+        JSON, nullable=False, default=list
+    )
+    # True when TED's parallel criterion arrays disagreed in length, so none were
+    # paired. The parts are still in ``raw``.
+    criteria_unpaired: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # The original text the screening reads: [{field, language, text}, ...].
     screening_blocks: Mapped[list[dict[str, Any]]] = mapped_column(
