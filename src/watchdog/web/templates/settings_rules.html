@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} &middot; Settings &middot; Watchdog{% endblock %}
+
+{#
+  The vocabulary the deterministic stage matches on. One rule is one canonical
+  concept with its aliases; keywords are evidence and never a verdict.
+
+  Every save from this page is refused while the freeze holds, unless the override
+  is ticked and the note says why. See docs/decisions/README.md.
+#}
+{% block content %}
+<div id="run-status">{% include "partials/status.html" %}</div>
+
+<p class="breadcrumb"><a href="/settings">&larr; Back to settings</a></p>
+<h1>{{ label }}</h1>
+<p class="muted">{{ note }}</p>
+<p class="muted">Active version {{ active.version }}, saved by {{ active.saved_by }}
+  on {{ active.saved_at | moment }}.</p>
+
+<div class="notice notice-warn" role="status">
+  <p><strong>Frozen at version {{ frozen_at }}.</strong> {{ freeze_reason }}</p>
+</div>
+
+<form id="rules-form" class="config-form"
+      hx-post="/settings/rules" hx-target="#save-result" hx-swap="innerHTML">
+
+  <fieldset>
+    <legend>Existing rules ({{ rules | length }})</legend>
+    {% for rule in rules %}
+      {% set identifier = rule.id %}
+      <details class="rule-editor" id="rule-{{ identifier }}">
+        <summary>
+          {{ identifier }}
+          <span class="pill">{{ rule.signal }}</span>
+          {% if rule.label %}<span class="pill">{{ rule.label }}</span>{% endif %}
+          <span class="pill">{{ rule.strength | default('medium') }}</span>
+          {% if not rule.get('active', True) %}<span class="pill">inactive</span>{% endif %}
+        </summary>
+
+        {#
+          A browser leaves an unchecked box out of the submission entirely, so this
+          marker is what tells the save path "this rule was on the form". Without
+          it a partial post would read as every rule having no aliases.
+        #}
+        <input type="hidden" name="rule.{{ identifier }}.present" value="1" />
+
+        <label for="aliases-{{ identifier }}">Aliases, one per line
+          <textarea id="aliases-{{ identifier }}" name="rule.{{ identifier }}.aliases"
+                    rows="4">{{ rule.aliases | join('\n') }}</textarea>
+          <small class="muted">Matched on the buyer's own words, on token boundaries. A
+            trailing <code>*</code> makes a prefix, and is allowed on subject-matter aliases
+            only.</small>
+        </label>
+
+        <label for="context-{{ identifier }}">Required context words, one per line
+          <textarea id="context-{{ identifier }}" name="rule.{{ identifier }}.context"
+                    rows="3">{{ rule.get('requires_context', []) | join('\n') }}</textarea>
+          <small class="muted">Must appear near an alias, in the same block. This is what
+            keeps an ambiguous acronym from counting: HVAC usually means heating and
+            ventilation, not high-voltage AC.</small>
+        </label>
+
+        <label for="companion-{{ identifier }}">Required subject words, one per line
+          <textarea id="companion-{{ identifier }}" name="rule.{{ identifier }}.companion"
+                    rows="3">{{ rule.get('requires_companion', []) | join('\n') }}</textarea>
+          <small class="muted">Must appear somewhere in the notice, with no proximity. Asks
+            what the notice is about, not what one word means.</small>
+        </label>
+
+        <label for="blocked-{{ identifier }}">Blocking words, one per line
+          <textarea id="blocked-{{ identifier }}" name="rule.{{ identifier }}.blocked"
+                    rows="3">{{ rule.get('blocked_by', []) | join('\n') }}</textarea>
+          <small class="muted">Stop this rule counting at all when they appear anywhere in
+            the notice.</small>
+        </label>
+
+        <label for="strength-{{ identifier }}">Strength
+          <select id="strength-{{ identifier }}" name="rule.{{ identifier }}.strength">
+            {% for choice in ['high', 'medium', 'supporting'] %}
+              <option value="{{ choice }}"
+                {{ 'selected' if rule.get('strength', 'medium') == choice else '' }}>
+                {{ choice }}
+              </option>
+            {% endfor %}
+          </select>
+        </label>
+
+        <label for="note-{{ identifier }}">Why this rule exists
+          <textarea id="note-{{ identifier }}" name="rule.{{ identifier }}.note"
+                    rows="2">{{ rule.get('note') or '' }}</textarea>
+          <small class="muted">Data, not a comment: a justification here survives a save.</small>
+        </label>
+
+        <label class="check">
+          <input type="checkbox" name="rule.{{ identifier }}.active" value="1"
+                 {{ 'checked' if rule.get('active', True) else '' }} />
+          Active
+        </label>
+        <label class="check">
+          <input type="checkbox" name="rule.{{ identifier }}.remove" value="1" />
+          Remove this rule entirely
+        </label>
+      </details>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend>Add a rule</legend>
+    <label for="new-id">Id
+      <input id="new-id" name="new.id" type="text" placeholder="leave empty to add nothing" />
+      <small class="muted">An id identifies a rule in every stored screening result, so it
+        never changes once results exist. A duplicate is refused.</small>
+    </label>
+    <label for="new-signal">Signal
+      <select id="new-signal" name="new.signal">
+        {% for choice in ['domain', 'activity', 'stage', 'exclusion'] %}
+          <option value="{{ choice }}">{{ choice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label for="new-label">Vocabulary member
+      <input id="new-label" name="new.label" type="text" />
+      <small class="muted">A domain, service type or decision stage, matching the signal.
+        An exclusion carries none: "not our work" is not a subject matter.</small>
+    </label>
+    <label for="new-strength">Strength
+      <select id="new-strength" name="new.strength">
+        {% for choice in ['high', 'medium', 'supporting'] %}
+          <option value="{{ choice }}" {{ 'selected' if choice == 'medium' else '' }}>{{ choice }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label for="new-aliases">Aliases, one per line
+      <textarea id="new-aliases" name="new.aliases" rows="3"></textarea>
+    </label>
+    <label for="new-context">Required context words, one per line
+      <textarea id="new-context" name="new.context" rows="2"></textarea>
+    </label>
+    <label for="new-note">Why this rule exists
+      <textarea id="new-note" name="new.note" rows="2"></textarea>
+    </label>
+  </fieldset>
+
+  {% include "partials/config_controls.html" %}
+</form>
+
+<div id="preview"></div>
+<div id="save-result"></div>
+{% endblock %}

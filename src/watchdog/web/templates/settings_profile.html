@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} &middot; Settings &middot; Watchdog{% endblock %}
+
+{#
+  What Entr is for, in the words a model is given verbatim. Part 2 of the profile
+  file - geography, contract value, language, bid route - is never sent to a model
+  and is deliberately not editable here: it changes the bid route, never the
+  relevance score.
+#}
+{% block content %}
+<div id="run-status">{% include "partials/status.html" %}</div>
+
+<p class="breadcrumb"><a href="/settings">&larr; Back to settings</a></p>
+<h1>{{ label }}</h1>
+<p class="muted">{{ note }}</p>
+<p class="muted">Active version {{ active.version }}, saved by {{ active.saved_by }}
+  on {{ active.saved_at | moment }}.</p>
+
+<div class="notice notice-info" role="status">
+  <p>A change here makes every assessment stale, because every assessment was made
+    against the mandate as it read at the time. The cached model answers are keyed on the
+    exact text that was sent, so nothing stale can be served back after a change.</p>
+</div>
+
+<form id="profile-form" class="config-form"
+      hx-post="/settings/profile" hx-target="#save-result" hx-swap="innerHTML">
+
+  <fieldset>
+    <legend>The governing principle</legend>
+    <label for="principle">Sent at the top of every assessment
+      <textarea id="principle" name="principle" rows="4">{{ principle }}</textarea>
+      <small class="muted">This is what stops geography and contract value reaching the
+        relevance score. It cannot be empty.</small>
+    </label>
+  </fieldset>
+
+  <fieldset>
+    <legend>The screening mandate</legend>
+    <label for="mandate">Sections, as YAML
+      <textarea id="mandate" name="mandate" rows="24" spellcheck="false">{{ mandate }}</textarea>
+      <small class="muted">Edited as YAML because the mandate is a nested document whose
+        shape belongs to Entr, not to this tool. It is parsed before it is stored, so an
+        unreadable one is refused here rather than at the next screening run.</small>
+    </label>
+  </fieldset>
+
+  {% include "partials/config_controls.html" %}
+</form>
+
+<div id="preview"></div>
+<div id="save-result"></div>
+{% endblock %}

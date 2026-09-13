@@ -1,0 +1,23 @@
+{#
+  The outcome of a save: a new version, a refusal by the freeze, or the reasons it
+  would not validate. Never a stack trace.
+#}
+{% if saved_version %}
+  <div class="notice notice-info" role="status">
+    <p><strong>Saved as {{ label | lower }} version {{ saved_version }}.</strong>
+      The previous version is kept, and every screening result stamped with it stays
+      readable.</p>
+    <p><a href="/settings">Back to settings</a> &middot;
+      <a href="/settings#staleness">See what needs screening again</a></p>
+  </div>
+{% elif frozen %}
+  <div class="notice notice-warn" role="alert">
+    <p><strong>Not saved: the keyword vocabulary is frozen.</strong></p>
+    <p>{{ frozen }}</p>
+  </div>
+{% else %}
+  <div class="notice notice-error" role="alert">
+    <p><strong>Not saved.</strong></p>
+    <ul>{% for problem in problems %}<li>{{ problem }}</li>{% endfor %}</ul>
+  </div>
+{% endif %}

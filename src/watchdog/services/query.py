@@ -447,6 +447,76 @@ def notice(
     return None if row is None else prepare(row, as_of=as_of or utc_now().date())
 
 
+@dataclass(frozen=True)
+class Neighbours:
+    """The notice before and after this one, inside the filter it was reached from.
+
+    Review is a flow: a colleague works down a filtered list and should not have to
+    go back to it between every notice. The links carry the same filter, the same
+    sort and the same page, so "next" means the next one in the list they are
+    actually looking at rather than the next one in the register.
+    """
+
+    previous: str | None = None
+    next: str | None = None
+    previous_query: str | None = None
+    next_query: str | None = None
+    # Where this notice sits in the filtered list, counting from 1. None when the
+    # position could not be confirmed - see :func:`neighbours`.
+    position: int | None = None
+    total: int = 0
+
+
+def neighbours(
+    tender_id: str,
+    query: RegisterQuery,
+    *,
+    repository: Repository,
+) -> Neighbours:
+    """The previous and next notice in this filtered, sorted list.
+
+    Reads three rows, not the list: the detail link a colleague followed carries
+    the row's index, so the window around it can be asked for directly. If the
+    notice is not where the index says it is - somebody re-screened, or the filter
+    is "undecided only" and a verdict has been recorded since - no neighbours are
+    offered rather than the wrong ones.
+    """
+    position = max(0, query.offset + query.cursor)
+    start = max(0, position - 1)
+
+    window = repository.list_register(
+        query.filters,
+        sort_by=query.sort,
+        descending=query.descending,
+        limit=3,
+        offset=start,
+    )
+    ids = [row.tender.id for row in window.items]
+    if tender_id not in ids:
+        return Neighbours(total=window.total)
+
+    index = ids.index(tender_id)
+    absolute = start + index
+
+    previous_id = ids[index - 1] if index > 0 else None
+    next_id = ids[index + 1] if index + 1 < len(ids) else None
+
+    return Neighbours(
+        previous=previous_id,
+        next=next_id,
+        previous_query=_at_position(query, absolute - 1) if previous_id else None,
+        next_query=_at_position(query, absolute + 1) if next_id else None,
+        position=absolute + 1,
+        total=window.total,
+    )
+
+
+def _at_position(query: RegisterQuery, absolute: int) -> str:
+    """The same view, with the cursor on one particular row of the whole list."""
+    offset = (absolute // query.limit) * query.limit
+    return query.query_string(offset=offset or None, cursor=absolute - offset)
+
+
 def header_counts(
     repository: Repository,
     *,

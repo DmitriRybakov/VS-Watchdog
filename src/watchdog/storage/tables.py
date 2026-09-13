@@ -444,3 +444,65 @@ class WatermarkRow(Base):
     source: Mapped[str] = mapped_column(String(32), primary_key=True)
     last_successful_at: Mapped[datetime | None] = mapped_column(UtcDateTime)
     updated_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
+
+
+class ConfigVersionRow(Base):
+    """One saved version of one configuration. Append-only, like a screening result.
+
+    The active configuration lives here, not in the YAML file. On a host, a file
+    written by the settings page is erased by the next deploy and is invisible to
+    a scheduled job running in a different container; the database is the only
+    store both of them can see.
+
+    ``version`` is the number a screening result is stamped with, so it is
+    **imported from the file, never reset**. The rules are at version 3 with ten
+    thousand results stamped ``3``; seeding them as version 1 would make every one
+    of those results claim to have been screened under a rule set that never
+    existed.
+    """
+
+    __tablename__ = "config_version"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # rules | policy | profile.
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False, default=dict)
+    # Who saved it. A colleague's name, or the word for the process that seeded it.
+    saved_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    saved_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
+    note: Mapped[str | None] = mapped_column(Text)
+    # Exactly one row per kind is active. Superseding is an update of this flag;
+    # no row is ever edited or removed, so an old result stays explainable.
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+
+    __table_args__ = (
+        UniqueConstraint("kind", "version", name="uq_config_version_kind_version"),
+        Index("ix_config_version_kind_active", "kind", "active"),
+    )
+
+
+class FeedbackCommentRow(Base):
+    """A colleague's comment about the interface. Kept well away from tender data.
+
+    Its own table on purpose: these are notes about Watchdog, not facts about a
+    procurement, and nothing here may ever be mistaken for either. ``tender_id``
+    is a plain string rather than a foreign key, so a comment left on a page that
+    is not about one notice still records where it was made.
+    """
+
+    __tablename__ = "feedback_comment"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    # The path the comment was made on, without its query string.
+    page: Mapped[str] = mapped_column(Text, nullable=False)
+    # What was clicked: an element id, or a short CSS-ish path when it had none.
+    element: Mapped[str] = mapped_column(Text, nullable=False)
+    # The visible label of what was clicked. Never the contents of an input.
+    element_label: Mapped[str | None] = mapped_column(Text)
+    tender_id: Mapped[str | None] = mapped_column(String(255))
+    comment: Mapped[str] = mapped_column(Text, nullable=False)
+    reported_by: Mapped[str | None] = mapped_column(String(128))
+    created_at: Mapped[datetime] = mapped_column(UtcDateTime, nullable=False)
+
+    __table_args__ = (Index("ix_feedback_comment_page_element", "page", "element"),)

@@ -2,23 +2,80 @@
 {% block title %}{{ row.tender.title }} &middot; Watchdog{% endblock %}
 
 {#
-  Everything the card leaves out. The rule is that the card carries what a
-  decision needs; when it is not clear whether something belongs there, it comes
-  here instead. Nothing here is a summary - every value says where it came from.
+  One notice, laid out as our own register is: what the documents say, then what
+  Entr's analysis concluded. Every field carries where its value came from, and a
+  field nothing fills is still shown - its emptiness is information, and hiding it
+  would make the page look complete while a fact was silently missing.
+
+  Everything less-used is behind one expander rather than a switch per field. A
+  checkbox per field is a configuration surface nobody maintains, whose failure
+  mode is a colleague hiding something and forgetting.
 #}
+
+{% macro field(item) %}
+  <div class="field" data-field="{{ item.key }}">
+    <dt>
+      {{ item.label }}
+      <span class="pill pill-origin">{{ item.origin }}</span>
+    </dt>
+    <dd>
+      {% if item.filled %}
+        {% for value in item.values %}
+          <p class="field-value">
+            {% set href = value.href | safe_url %}
+            {% if href %}
+              <a href="{{ href }}" rel="noopener noreferrer" target="_blank"
+                 lang="{{ value.language or '' }}">{{ value.text }}</a>
+            {% else %}
+              <span lang="{{ value.language or '' }}">{{ value.text }}</span>
+            {% endif %}
+            {% if value.note %}<span class="muted">{{ value.note }}</span>{% endif %}
+          </p>
+        {% endfor %}
+      {% else %}
+        <p class="field-value muted">{{ ABSENT[item.absent] }}</p>
+      {% endif %}
+      {% if item.caution %}<p class="muted field-caution">{{ item.caution }}</p>{% endif %}
+      {% if item.note %}<p class="muted field-note">{{ item.note }}</p>{% endif %}
+    </dd>
+  </div>
+{% endmacro %}
+
 {% block content %}
-{% set link = row.tender.source_url | safe_url %}
-{% set badge = row.days_left | days_badge %}
+{% set documents = summary.groups[0] %}
+{% set analysis = summary.groups[1] %}
 
-<p class="breadcrumb"><a href="/register?{{ back }}">&larr; Back to the register</a></p>
+<nav class="detail-nav" aria-label="Within this filtered list">
+  <a href="/register?{{ back }}">&larr; Back to the register</a>
+  {% if around.position %}
+    <span class="muted">{{ around.position }} of {{ around.total }} in this view</span>
+  {% endif %}
+  <span class="detail-steps">
+    {% if around.previous_query %}
+      <a id="previous-notice"
+         href="/register/notice/{{ around.previous }}?{{ around.previous_query }}">&larr; Previous</a>
+    {% else %}
+      <span class="muted">&larr; Previous</span>
+    {% endif %}
+    {% if around.next_query %}
+      <a id="next-notice"
+         href="/register/notice/{{ around.next }}?{{ around.next_query }}">Next &rarr;</a>
+    {% else %}
+      <span class="muted">Next &rarr;</span>
+    {% endif %}
+  </span>
+</nav>
 
-<article class="detail">
+<article class="detail" data-tender-id="{{ row.tender.id }}">
   <header>
     <h1>{{ row.tender.title }}</h1>
-    <p class="muted">
-      TED composes this line as country, CPV category and then the buyer's own title.
-      The English is TED's; the buyer's words inside it are not translated.
-    </p>
+    {#
+      The same badge, from the same filter, as the register row this page was
+      opened from. It used to be absent here, so a stated deadline read as
+      "No deadline given" on the detail page and as "12d left" on the list.
+    #}
+    {% set badge = row.days_left | days_badge %}
+    <p><span class="badge badge-{{ badge.state }}">{{ badge.text }}</span></p>
     {% if row.tender.title_native %}
       <h2 class="native" lang="{{ row.tender.title_native_language or '' }}">{{ row.tender.title_native }}</h2>
       <p class="muted">The buyer's own title, in
@@ -27,13 +84,21 @@
     {% endif %}
   </header>
 
+  <section id="documents-summary">
+    <h3>{{ documents.label }}</h3>
+    <p class="muted">{{ documents.note }}</p>
+    <dl class="facts">
+      {% for item in documents.prominent %}{{ field(item) }}{% endfor %}
+    </dl>
+  </section>
+
   {#
     The description is the text a bid or no-bid decision is actually made on, so
     it comes before anything Watchdog has to say about the notice. Shown whole:
     a long one folds behind an expander and is never cut short.
   #}
   {% set body = row.tender.description | clamped %}
-  <section class="description">
+  <section id="description" class="description">
     <h3>What the buyer is asking for</h3>
     <p class="muted">The buyer's own description, exactly as the source sent it and in its
       original language. Not a summary and not a translation.</p>
@@ -52,147 +117,129 @@
     {% endif %}
   </section>
 
-  <section>
-    <h3>Source facts</h3>
-    <p class="muted">Everything here came from the source as it stands.
-      &ldquo;{{ NOT_IN_NOTICE }}&rdquo; means the platform sent no value for that field.</p>
+  <section id="analysis">
+    <h3>{{ analysis.label }}</h3>
+    <p class="muted">{{ analysis.note }}</p>
+
+    {% if row.screening %}
+      {% set state = row.screening_state.value %}
+      <p class="explanation">{{ row.screening.explanation }}</p>
+      <dl class="facts">
+        <div>
+          <dt>
+            {% if state == 'assessed' %}Score
+            {% elif state == 'graded' %}Rules evidence grade
+            {% elif state == 'assessment_failed' %}{{ ASSESSMENT_FAILED_LABEL }}
+            {% else %}No score or grade{% endif %}
+          </dt>
+          <dd>
+            {% if state == 'assessed' %}
+              {{ row.screening.score }} of 5
+              &middot; {{ row.screening.axes_established }} of 3 axes established
+            {% elif state == 'graded' %}
+              {{ row.evidence_grade }} &ndash; {{ row.evidence_grade | evidence_label }}
+              <span class="muted">Keyword and CPV evidence. No model judged this notice.</span>
+            {% elif state == 'assessment_failed' %}
+              <span class="muted">{{ ASSESSMENT_FAILED_HINT }}
+                The notice is in the register at the fallback band so it is not lost, and it
+                is retried on the next screening run.</span>
+            {% else %}
+              <span class="muted">This notice was screened but neither judged nor graded
+                &mdash; {{ row.screening.reason_codes | join(', ') | given('assessment') }}.</span>
+            {% endif %}
+          </dd>
+        </div>
+        <div><dt>Band</dt><dd>{{ row.screening.band.value | band_label }}</dd></div>
+        {% if row.is_assessed %}
+          <div><dt>Confidence</dt><dd>{{ row.screening.confidence | percent }}
+            <span class="muted">How well evidenced the judgement is, not a chance that the
+              tender is relevant. {{ row.screening.confidence_reasons | join('; ') }}</span></dd></div>
+        {% elif row.evidence_grade is not none %}
+          <div><dt>How well evidenced</dt>
+            <dd>Keyword evidence: {{ row.evidence_grade | evidence_word }}, {{ row.evidence_grade }} of 3. {{ NOT_ASSESSED }}.
+              <span class="muted">Confidence describes a judgement, and none has been made,
+                so no percentage is shown.</span></dd></div>
+        {% else %}
+          <div><dt>How well evidenced</dt>
+            <dd>No judgement was made
+              &mdash; {{ row.screening.reason_codes | join(', ') | given('assessment') }}.
+              <span class="muted">Confidence describes a judgement; there is none here to
+                describe, so no percentage is shown.</span></dd></div>
+        {% endif %}
+      </dl>
+    {% else %}
+      <p class="muted">This notice has never been screened.</p>
+    {% endif %}
+
     <dl class="facts">
-      <div><dt>Identity</dt><dd>{{ row.tender.source.value | upper }} {{ row.tender.source_id }}</dd></div>
-      <div><dt>Notice version</dt><dd>{{ row.tender.source_version | given }}</dd></div>
-      <div><dt>Buyer</dt><dd>{{ row.tender.buyer_name | given }}</dd></div>
-      <div><dt>Buyer country</dt><dd>{{ row.tender.buyer_country | country | given }}</dd></div>
-      <div>
-        <dt>Country of performance</dt>
-        <dd>{{ row.tender.place_of_performance_country | countries | given }}</dd>
-      </div>
-      <div>
-        <dt>Work outside the buyer's country</dt>
-        <dd>
-          {% if row.tender.crosses_border_from_buyer %}
-            <span class="badge badge-urgent">Yes</span>
-            The buyer sits in {{ row.tender.buyer_country | country }} and the work is in
-            {{ row.tender.place_of_performance_country | countries }}.
-          {% elif row.tender.buyer_country and row.tender.place_of_performance_country %}
-            No &mdash; the work is in the buyer's own country.
-          {% else %}
-            {{ NOT_IN_NOTICE }} &mdash; one of the two countries is missing, so this
-            cannot be answered either way.
-          {% endif %}
-        </dd>
-      </div>
-      <div>
-        <dt>Place of performance, as given</dt>
-        <dd>{{ row.tender.place_of_performance | given }}
-          <span class="muted">Codes kept unresolved; regions are not looked up.</span></dd>
-      </div>
-      <div><dt>Published</dt><dd>{{ row.tender.published_date | day }}</dd></div>
-      <div>
-        <dt>{{ row.tender.deadline_type.value | deadline_type }}</dt>
-        <dd>
-          {% if row.tender.deadline %}
-            {{ row.tender.deadline | moment }}
-            <span class="badge badge-{{ badge.state }}">{{ badge.text }}</span>
-          {% elif row.tender.deadline_date %}
-            {{ row.tender.deadline_date | day }}
-            <span class="badge badge-{{ badge.state }}">{{ badge.text }}</span>
-            <span class="muted">A date with no time of day; none has been invented.</span>
-          {% else %}
-            {{ NOT_IN_NOTICE }}
-            <span class="muted">No deadline of any kind. That is not a passed deadline.</span>
-          {% endif %}
-          {% if row.tender.deadline_source %}
-            <span class="muted">Read from {{ row.tender.deadline_source }}.</span>
-          {% endif %}
-        </dd>
-      </div>
-      <div><dt>Notice stage</dt><dd>{{ row.tender.notice_stage.value | words }}</dd></div>
-      <div>
-        <dt>Contract nature</dt>
-        <dd>{{ row.tender.contract_natures | map(attribute='value') | join(', ') | given }}</dd>
-      </div>
-      <div>
-        <dt>Estimated value</dt>
-        <dd>
-          {% if row.tender.estimated_value is not none %}
-            {{ row.tender.estimated_value }} {{ row.tender.currency or '(currency not stated)' }}
-            {% if row.tender.estimated_value_source == 'estimated-value-lot' %}
-              <span class="muted">The notice states no value for the procedure as a whole;
-                this is its single lot's value.</span>
-            {% endif %}
-          {% elif not row.tender.lot_values %}
-            {{ NOT_IN_NOTICE }}
-          {% endif %}
-          {% if row.tender.lot_values and row.tender.estimated_value_source != 'estimated-value-lot' %}
-            <span class="muted">Also stated per lot:</span>
-            {{ row.tender.lot_values | join(', ') }}
-            {{ row.tender.lot_value_currency or '(currency not stated)' }}
-            <span class="muted">{{ row.tender.lot_values | length }} value(s) across
-              {{ row.tender.lot_count or 'an unstated number of' }} lot(s), listed as given.
-              Not added up, and not matched to particular lots &mdash; see Lots below.</span>
-          {% endif %}
-        </dd>
-      </div>
-      <div><dt>CPV, main</dt><dd>{{ row.tender.cpv_main | given }}</dd></div>
-      <div><dt>CPV, all</dt><dd>{{ row.tender.cpv_all | join(', ') | given }}</dd></div>
-      <div>
-        <dt>Procedure</dt>
-        <dd>{{ row.tender.procedure_type | procedure_type | given }}
-          {% if row.tender.has_qualification_stage is not none %}
-            <span class="muted">
-              {{ 'Bidders must get through a qualification or negotiation stage first.'
-                 if row.tender.has_qualification_stage
-                 else 'Anyone may tender; there is no separate qualification stage.' }}</span>
-          {% endif %}
-        </dd>
-      </div>
-      <div>
-        <dt>Buyer's sector</dt>
-        <dd>{{ row.tender.main_activity | main_activity | given }}
-          {% if row.tender.buyer_is_utility is not none %}
-            <span class="muted">{{ 'A utility.' if row.tender.buyer_is_utility
-              else 'A general authority, not a utility.' }}</span>
-          {% endif %}
-        </dd>
-      </div>
-      <div>
-        <dt>Town or city of performance</dt>
-        <dd>{{ row.tender.performance_cities | join(', ') | given }}</dd>
-      </div>
-      <div><dt>First seen</dt><dd>{{ row.tender.first_seen_at | moment }}
-        <span class="muted">run {{ row.tender.first_seen_run_id or 'not recorded' }}</span></dd></div>
-      <div><dt>Last seen</dt><dd>{{ row.tender.last_seen_at | moment }}
-        <span class="muted">run {{ row.tender.last_seen_run_id or 'not recorded' }}</span></dd></div>
-      <div>
-        <dt>Links</dt>
-        <dd>
-          {% if link %}<a href="{{ link }}" rel="noopener noreferrer" target="_blank">Notice on {{ row.tender.source.value | upper }}</a>{% endif %}
-          {% for url in row.tender.document_urls %}
-            {% set document = url | safe_url %}
-            {% if document %}
-              &middot; <a href="{{ document }}" rel="noopener noreferrer" target="_blank">Documents{{ ' ' ~ loop.index if row.tender.document_urls | length > 1 }}</a>
-            {% endif %}
-          {% endfor %}
-          {% for url in row.tender.submission_urls %}
-            {% set portal = url | safe_url %}
-            {% if portal %}
-              &middot; <a href="{{ portal }}" rel="noopener noreferrer" target="_blank">Bidding portal{{ ' ' ~ loop.index if row.tender.submission_urls | length > 1 }}</a>
-            {% endif %}
-          {% endfor %}
-          {% if not link and not row.tender.document_urls and not row.tender.submission_urls %}<span class="muted">None the source gave that we will render.</span>{% endif %}
-        </dd>
-      </div>
+      {% for item in analysis.fields %}{{ field(item) }}{% endfor %}
     </dl>
+
+    {% if row.is_assessed %}
+      <h4>The assessment, axis by axis</h4>
+      <p>{{ row.screening.assessment.short_reason }}</p>
+      {% for name, axis in row.screening.assessment.axes %}
+        <h5>{{ name | words }}:
+          {{ axis.score if axis.score is not none else 'not established' }}
+          &mdash; {{ axis.label.value | words }}</h5>
+        <ul>
+          {% for quote in axis.quotes %}<li><q>{{ quote }}</q></li>{% endfor %}
+        </ul>
+      {% endfor %}
+      {% if row.screening.assessment.missing_information %}
+        <h5>What the notice did not say</h5>
+        <ul>{% for item in row.screening.assessment.missing_information %}<li>{{ item }}</li>{% endfor %}</ul>
+      {% endif %}
+    {% endif %}
   </section>
 
   {#
-    Everything TED states per lot, held as the set across lots and labelled that
-    way. The search API flattens lot-scoped fields into one array and states no
-    ordering, so which lot a value belongs to cannot be established from it at
-    all. Nothing on this page attributes a value to a lot unless there is only
-    one lot to attribute it to. See docs/decisions/0008.
+    Every matched rule, split by what the match actually did. An exclusion listed
+    beside a domain rule in the same style reads as evidence for the score, and an
+    exclusion that changed nothing looks exactly like one that archived a notice.
   #}
-  <section>
-    <h3>Lots, and what is stated across them</h3>
+  <section id="matched-rules">
+    <h3>What the keyword rules found</h3>
+    {% if summary.rule_groups %}
+      {% for group in summary.rule_groups %}
+        <div class="rule-group rule-group-{{ group.key }}">
+          <h4>{{ group.heading }}</h4>
+          <p class="muted">{{ group.outcome }}</p>
+          <ul class="evidence-list">
+            {% for match in group.matches %}
+              <li class="evidence evidence-{{ match.signal.value }}">
+                <span class="evidence-rule">{{ match.rule_id }}
+                  <span class="muted">({{ match.strength.value | strength_label }}, matched
+                    &ldquo;{{ match.alias_matched }}&rdquo; in {{ match.field }})</span></span>
+                <q class="evidence-quote">{{ match.evidence }}</q>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    {% elif row.screening %}
+      <p class="muted">Nothing matched. Our vocabulary is English; this notice may not be.
+        A notice with no keyword match is not a notice we judged irrelevant.</p>
+    {% else %}
+      <p class="muted">This notice has never been screened.</p>
+    {% endif %}
+  </section>
+
+  <section id="review">{% include "partials/review.html" %}</section>
+
+  {#
+    One expander for everything less-used, remembered per browser the same way the
+    reviewer's name is. Not a checkbox per field.
+  #}
+  <details class="more-details" id="more-details" data-remember="more-details">
+    <summary>More details</summary>
+
+    <h4>{{ documents.label }}</h4>
+    <dl class="facts">
+      {% for item in documents.more %}{{ field(item) }}{% endfor %}
+    </dl>
+
+    <h4>Lots</h4>
     <dl class="facts">
       <div>
         <dt>Lots</dt>
@@ -205,268 +252,132 @@
             <span class="muted">TED sent no lot identifiers for this notice.</span>
           {% endif %}
           {% if row.tender.multi_lot %}
-            <span class="muted">Values below are stated somewhere in the notice. With more than
+            <span class="muted">Values above are stated somewhere in the notice. With more than
               one lot, TED does not say which lot each belongs to, so none is attached to one.</span>
           {% endif %}
         </dd>
       </div>
       <div>
-        <dt>{{ 'Submission languages' if row.tender.multi_lot else 'Submission language' }}</dt>
+        <dt>Bidding portal</dt>
         <dd>
-          {% if row.tender.submission_languages %}
-            {% if row.tender.multi_lot %}
-              Mentioned across lots: {{ row.tender.submission_languages | languages }}
-              <span class="muted">Not necessarily every one for every lot.</span>
-            {% else %}
-              {{ row.tender.submission_languages | languages }}
+          {% for url in row.tender.submission_urls %}
+            {% set portal = url | safe_url %}
+            {% if portal %}
+              <a href="{{ portal }}" rel="noopener noreferrer" target="_blank">Bidding portal{{ ' ' ~ loop.index if row.tender.submission_urls | length > 1 }}</a>
             {% endif %}
-          {% else %}{{ NOT_IN_NOTICE }}{% endif %}
-          <span class="muted">The language a bid may be written in. Different from the
-            language the notice was published in
-            ({{ row.tender.languages | languages | given }}).</span>
-        </dd>
-      </div>
-      <div>
-        <dt>Contract length</dt>
-        <dd>
-          {% for item in row.tender.contract_durations %}
-            {{ item | duration }}{{ ', ' if not loop.last }}
           {% else %}{{ NOT_IN_NOTICE }}{% endfor %}
+          <span class="muted">Where a bid is submitted. Not the platform the notice was
+            published on, and not the procurement documents.</span>
         </dd>
       </div>
       <div>
-        <dt>Contract start</dt>
-        <dd>
-          {% for start in row.tender.contract_start_dates %}
-            {{ start | day }}{{ ', ' if not loop.last }}
-          {% else %}{{ NOT_IN_NOTICE }}{% endfor %}
-        </dd>
+        <dt>CPV codes</dt>
+        <dd>{{ row.tender.cpv_all | join(', ') | given }}
+          <span class="muted">Main: {{ row.tender.cpv_main | given }}. A recall filter, never
+            evidence of relevance &mdash; see docs/decisions/0004.</span></dd>
       </div>
       <div>
-        <dt>Renewals</dt>
-        <dd>
-          {% if row.tender.renewal_maximums %}
-            {{ row.tender.renewal_maximums | join(', ') }} at most
-          {% else %}{{ NOT_IN_NOTICE }}{% endif %}
-        </dd>
+        <dt>Contract nature</dt>
+        <dd>{{ row.tender.contract_natures | map(attribute='value') | join(', ') | given }}</dd>
       </div>
       <div>
-        <dt>Commercial model</dt>
-        <dd>
-          {% for code in row.tender.framework_agreements %}
-            {{ code | framework_agreement | given }}{{ ' &middot; ' | safe if not loop.last }}
-          {% else %}{{ NOT_IN_NOTICE }}{% endfor %}
-          {% for code in row.tender.dps_usages %}
-            &middot; {{ code | dps_usage | given }}
-          {% endfor %}
-        </dd>
-      </div>
-    </dl>
-
-    <h4>How a bid would be judged</h4>
-    {% if row.tender.criteria_unpaired %}
-      <p class="muted">TED's arrays for the criteria on this notice disagree in length, so
-        their parts could not be read as one list. Nothing has been paired up, because a
-        criterion carrying another criterion's weight would look entirely plausible. The
-        criteria are on the notice itself.</p>
-    {% elif row.tender.award_criteria %}
-      <ul class="criteria">
-        {% for criterion in row.tender.award_criteria %}
-          <li>
-            <span class="criterion-type">{{ criterion.type | criterion_type | given }}</span>
-            {% if criterion.name %}<span class="criterion-name">{{ criterion.name }}</span>{% endif %}
-            {% set weight = criterion | criterion_weight %}
-            {% if weight %}<span class="criterion-weight">{{ weight }}</span>{% endif %}
-            {% if criterion.description %}<q class="criterion-text">{{ criterion.description }}</q>{% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-      {% if row.tender.multi_lot %}
-        <p class="muted">{{ row.tender.award_criteria | length }} criteria stated on a notice with
-          {{ row.tender.lot_count or 'several' }} lots. Which lot each belongs to is not in the
-          data, so none is shown against one.</p>
-      {% endif %}
-    {% else %}
-      <p class="muted">{{ NOT_IN_NOTICE }}</p>
-    {% endif %}
-
-    <h4>Who may bid</h4>
-    {% if row.tender.selection_criteria and not row.tender.criteria_unpaired %}
-      <ul class="criteria">
-        {% for criterion in row.tender.selection_criteria %}
-          <li>
-            <span class="criterion-type">{{ criterion.type | words | given }}</span>
-            {% if criterion.description %}<q class="criterion-text">{{ criterion.description }}</q>{% endif %}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="muted">{{ NOT_IN_NOTICE }}</p>
-    {% endif %}
-  </section>
-
-  {% if row.screening %}
-  {% set state = row.screening_state.value %}
-  <section>
-    <h3>Watchdog's own screening</h3>
-    <p class="explanation">{{ row.screening.explanation }}</p>
-    <dl class="facts">
-      <div>
-        <dt>
-          {% if state == 'assessed' %}Score
-          {% elif state == 'graded' %}Rules evidence grade
-          {% elif state == 'assessment_failed' %}{{ ASSESSMENT_FAILED_LABEL }}
-          {% else %}No score or grade{% endif %}
-        </dt>
-        <dd>
-          {% if state == 'assessed' %}
-            {{ row.screening.score }} of 5
-            &middot; {{ row.screening.axes_established }} of 3 axes established
-          {% elif state == 'graded' %}
-            {{ row.evidence_grade }} &ndash; {{ row.evidence_grade | evidence_label }}
-            <span class="muted">Keyword and CPV evidence. No model judged this notice.</span>
-          {% elif state == 'assessment_failed' %}
-            <span class="muted">{{ ASSESSMENT_FAILED_HINT }}
-              The notice is in the register at the fallback band so it is not lost, and it
-              is retried on the next screening run.</span>
-          {% else %}
-            <span class="muted">This notice was screened but neither judged nor graded
-              &mdash; {{ row.screening.reason_codes | join(', ') | given('assessment') }}.</span>
+        <dt>Procedure</dt>
+        <dd>{{ row.tender.procedure_type | procedure_type | given }}
+          {% if row.tender.has_qualification_stage is not none %}
+            <span class="muted">
+              {{ 'Bidders must get through a qualification or negotiation stage first.'
+                 if row.tender.has_qualification_stage
+                 else 'Anyone may tender; there is no separate qualification stage.' }}</span>
           {% endif %}
         </dd>
       </div>
-      <div><dt>Band</dt><dd>{{ row.screening.band.value | band_label }}</dd></div>
-      {% if row.is_assessed %}
-        <div><dt>Confidence</dt><dd>{{ row.screening.confidence | percent }}
-          <span class="muted">How well evidenced the judgement is, not a chance that the
-            tender is relevant. {{ row.screening.confidence_reasons | join('; ') }}</span></dd></div>
-      {% elif row.evidence_grade is not none %}
-        <div><dt>How well evidenced</dt>
-          <dd>Keyword evidence: {{ row.evidence_grade | evidence_word }}, {{ row.evidence_grade }} of 3. {{ NOT_ASSESSED }}.
-            <span class="muted">Confidence describes a judgement, and none has been made,
-              so no percentage is shown.</span></dd></div>
-      {% else %}
-        <div><dt>How well evidenced</dt>
-          <dd>No judgement was made
-            &mdash; {{ row.screening.reason_codes | join(', ') | given('assessment') }}.
-            <span class="muted">Confidence describes a judgement; there is none here to
-              describe, so no percentage is shown.</span></dd></div>
-      {% endif %}
-      <div><dt>Reason codes</dt><dd>{{ row.screening.reason_codes | join(', ') or 'None' }}</dd></div>
-      <div><dt>Rules route</dt><dd>{{ row.screening.rules.route.value | words }}</dd></div>
-      <div><dt>CPV archive guard</dt><dd>{{ 'Matched' if row.screening.rules.cpv_match else 'No match' }}</dd></div>
       <div>
-        <dt>Judged by</dt>
-        <dd>{{ row.screening.provider }}{% if row.screening.model %} / {{ row.screening.model }}{% endif %}
-          at {{ row.screening.created_at | moment }}</dd>
-      </div>
-      <div>
-        <dt>Versions</dt>
-        <dd>rules {{ row.screening.rules_version }} &middot;
-            policy {{ row.screening.policy_version }} &middot;
-            profile {{ row.screening.profile_version }}
-            {% if row.screening.prompt_version %}&middot; prompt {{ row.screening.prompt_version }}{% endif %}</dd>
+        <dt>Client's sector</dt>
+        <dd>{{ row.tender.main_activity | main_activity | given }}
+          {% if row.tender.buyer_is_utility is not none %}
+            <span class="muted">{{ 'A utility.' if row.tender.buyer_is_utility
+              else 'A general authority, not a utility.' }}</span>
+          {% endif %}
+        </dd>
       </div>
     </dl>
-  </section>
 
-  <section>
-    <h3>Every rule that matched</h3>
-    {% if row.signals %}
-      <ul class="evidence-list">
-        {% for match in row.signals %}
-          <li class="evidence evidence-{{ match.signal.value }}">
-            <span class="evidence-rule">{{ match.rule_id }}
-              <span class="muted">({{ match.signal.value }}, {{ match.strength.value | strength_label }},
-                matched &ldquo;{{ match.alias_matched }}&rdquo; in {{ match.field }})</span></span>
-            <q class="evidence-quote">{{ match.evidence }}</q>
-          </li>
+    {% if changes %}
+      <h4>What changed at the source</h4>
+      <ol class="history">
+        {% for change in changes %}
+          <li>{{ change.detected_at | moment }} &mdash; <strong>{{ change.field }}</strong>:
+            {{ change.old_value or 'not set' }} &rarr; {{ change.new_value or 'not set' }}</li>
         {% endfor %}
-      </ul>
-    {% else %}
-      <p class="muted">Nothing matched. Our vocabulary is English; this notice may not be.</p>
+      </ol>
     {% endif %}
-  </section>
+  </details>
 
-  {% if row.is_assessed %}
-    <section>
-      <h3>The assessment, axis by axis</h3>
-      <p>{{ row.screening.assessment.short_reason }}</p>
-      {% for name, axis in row.screening.assessment.axes %}
-        <h4>{{ name | words }}:
-          {{ axis.score if axis.score is not none else 'not established' }}
-          &mdash; {{ axis.label.value | words }}</h4>
-        <ul>
-          {% for quote in axis.quotes %}<li><q>{{ quote }}</q></li>{% endfor %}
-        </ul>
-      {% endfor %}
-      {% if row.screening.assessment.missing_information %}
-        <h4>What the notice did not say</h4>
-        <ul>{% for item in row.screening.assessment.missing_information %}<li>{{ item }}</li>{% endfor %}</ul>
+  {#
+    Run ids, rule codes and version numbers. A colleague does not need them;
+    whoever has to defend or debug a score does.
+  #}
+  <details class="technical" id="technical-details" data-remember="technical-details">
+    <summary>Technical details</summary>
+
+    <dl class="facts">
+      <div><dt>Identity</dt><dd>{{ row.tender.source.value | upper }} {{ row.tender.source_id }}
+        <span class="muted">{{ row.tender.id }}</span></dd></div>
+      <div><dt>Notice version</dt><dd>{{ row.tender.source_version | given }}</dd></div>
+      <div><dt>First seen</dt><dd>{{ row.tender.first_seen_at | moment }}
+        <span class="muted">run {{ row.tender.first_seen_run_id or 'not recorded' }}</span></dd></div>
+      <div><dt>Last seen</dt><dd>{{ row.tender.last_seen_at | moment }}
+        <span class="muted">run {{ row.tender.last_seen_run_id or 'not recorded' }}</span></dd></div>
+      <div>
+        <dt>Selection criterion codes</dt>
+        <dd>{{ row.tender.selection_criteria | map(attribute='type') | select | join(', ') | given }}
+          <span class="muted">TED's own codes, translated on the page above.</span></dd>
+      </div>
+      {% if row.screening %}
+        <div><dt>Reason codes</dt><dd>{{ row.screening.reason_codes | join(', ') or 'None' }}</dd></div>
+        <div><dt>Rules route</dt><dd>{{ row.screening.rules.route.value | words }}</dd></div>
+        <div><dt>CPV archive guard</dt><dd>{{ 'Matched' if row.screening.rules.cpv_match else 'No match' }}</dd></div>
+        <div>
+          <dt>Judged by</dt>
+          <dd>{{ row.screening.provider }}{% if row.screening.model %} / {{ row.screening.model }}{% endif %}
+            at {{ row.screening.created_at | moment }}</dd>
+        </div>
+        <div>
+          <dt>Versions</dt>
+          <dd>rules {{ row.screening.rules_version }} &middot;
+              policy {{ row.screening.policy_version }} &middot;
+              profile {{ row.screening.profile_version }}
+              {% if row.screening.prompt_version %}&middot; prompt {{ row.screening.prompt_version }}{% endif %}</dd>
+        </div>
       {% endif %}
-    </section>
-  {% endif %}
-  {% else %}
-    <section><h3>Screening</h3><p>This notice has never been screened.</p></section>
-  {% endif %}
+    </dl>
 
-  <section>
-    <h3>The text the screening read</h3>
+    <h4>The text the screening read</h4>
     <p class="muted">Stored exactly as received, in the original language.</p>
     {% for block in row.tender.screening_blocks %}
       <details>
         <summary>{{ block.field }} ({{ block.language or 'language not stated' }})</summary>
         <p lang="{{ block.language or '' }}" class="block-text">{{ block.text }}</p>
       </details>
+    {% else %}
+      <p class="muted">{{ NOT_IN_NOTICE }}</p>
     {% endfor %}
-  </section>
 
-  <section>
-    <h3>Decisions</h3>
-    {% if reviews %}
+    {% if history | length > 1 %}
+      <h4>Earlier screenings</h4>
+      <p class="muted">Nothing is overwritten; a new result supersedes the one before it.</p>
       <ol class="history">
-        {% for review in reviews %}
+        {% for past in history %}
           <li>
-            <strong>{{ review.verdict.value | verdict_label }}</strong>
-            by {{ review.reviewed_by }} on {{ review.reviewed_at | moment }}
-            {% if review.superseded %}<span class="muted">(superseded)</span>{% endif %}
-            {% if review.note %}<p>{{ review.note }}</p>{% endif %}
+            {{ past.created_at | moment }} &mdash;
+            {{ 'score ' ~ past.score if past.assessment else 'evidence grade ' ~ past.rules_only_score }},
+            {{ past.band.value | band_label }},
+            {{ past.provider }}, rules {{ past.rules_version }}
+            {% if past.superseded %}<span class="muted">(superseded)</span>{% endif %}
           </li>
         {% endfor %}
       </ol>
-    {% else %}
-      <p class="muted">Nobody has recorded a verdict yet.</p>
     {% endif %}
-  </section>
-
-  {% if changes %}
-  <section>
-    <h3>What changed at the source</h3>
-    <ol class="history">
-      {% for change in changes %}
-        <li>{{ change.detected_at | moment }} &mdash; <strong>{{ change.field }}</strong>:
-          {{ change.old_value or 'not set' }} &rarr; {{ change.new_value or 'not set' }}</li>
-      {% endfor %}
-    </ol>
-  </section>
-  {% endif %}
-
-  {% if history | length > 1 %}
-  <section>
-    <h3>Earlier screenings</h3>
-    <p class="muted">Nothing is overwritten; a new result supersedes the one before it.</p>
-    <ol class="history">
-      {% for past in history %}
-        <li>
-          {{ past.created_at | moment }} &mdash;
-          {{ 'score ' ~ past.score if past.assessment else 'evidence grade ' ~ past.rules_only_score }},
-          {{ past.band.value | band_label }},
-          {{ past.provider }}, rules {{ past.rules_version }}
-          {% if past.superseded %}<span class="muted">(superseded)</span>{% endif %}
-        </li>
-      {% endfor %}
-    </ol>
-  </section>
-  {% endif %}
+  </details>
 </article>
 {% endblock %}

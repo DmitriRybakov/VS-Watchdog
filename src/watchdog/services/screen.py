@@ -12,9 +12,12 @@ Three stages run here, in order, and each one is a different kind of claim:
 person can read twenty assessments before anything is banded on them.
 ``screen_register`` runs all three and persists.
 
-The configuration seeds are read here, in the service layer, because business
-logic must not read a config file directly. When the config_version table becomes
-the active source, only this module changes.
+The configuration comes from the active version in the database, taken as one
+:class:`~watchdog.services.configuration.ConfigSnapshot` at the start of a run and
+held to the end. That is deliberate: a run screens thousands of notices over many
+minutes, and if somebody saved a rules change halfway through, half the results
+would be stamped with one version and half with another, with nothing on screen
+to say where the line fell.
 """
 
 from __future__ import annotations
@@ -22,7 +25,6 @@ from __future__ import annotations
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date
-from pathlib import Path
 
 from watchdog.core.enums import Band, RunKind, RunStatus
 from watchdog.core.logging import get_logger
@@ -36,19 +38,16 @@ from watchdog.core.settings import Settings, get_settings
 from watchdog.llm.cache import ResponseCache
 from watchdog.llm.provider import LLMError, LLMProvider, get_provider
 from watchdog.screening.assess import AssessmentOutcome, AssessRun, Candidate, assess
-from watchdog.screening.config import DEFAULT_CONFIG_PATH as RULES_CONFIG_PATH
-from watchdog.screening.config import load_rules_config
 from watchdog.screening.policy import (
-    DEFAULT_POLICY_PATH,
     Decision,
     RulesEvidence,
     decide,
-    load_policy,
     ranking_key,
 )
-from watchdog.screening.profile import DEFAULT_PROFILE_PATH, load_profile
 from watchdog.screening.prompts import DEFAULT_PROMPT_VERSION
 from watchdog.screening.rules import RuleEngine
+from watchdog.services import configuration as configuration_service
+from watchdog.services.configuration import ConfigSnapshot
 from watchdog.services.ingest import DatabaseNotReady
 from watchdog.storage.db import get_session_factory
 from watchdog.storage.repository import MAX_PAGE_SIZE, Repository
@@ -107,8 +106,7 @@ def assess_sample(
     settings: Settings | None = None,
     provider: LLMProvider | None = None,
     repository: Repository | None = None,
-    rules_path: Path | str = RULES_CONFIG_PATH,
-    profile_path: Path | str = DEFAULT_PROFILE_PATH,
+    config: ConfigSnapshot | None = None,
     prompt_version: str = DEFAULT_PROMPT_VERSION,
 ) -> SampleOutcome:
     """Assess a small sample of the register and report what the model said.
@@ -123,8 +121,9 @@ def assess_sample(
     if not check.ok:
         raise DatabaseNotReady(check)
 
-    rules_config = load_rules_config(rules_path)
-    profile = load_profile(profile_path)
+    active = config or configuration_service.snapshot(repository=store)
+    rules_config = active.rules
+    profile = active.profile
     engine = RuleEngine(rules_config)
 
     page = store.list_tenders(limit=limit * _CANDIDATE_OVERSAMPLE)
@@ -286,9 +285,7 @@ def screen_register(
     settings: Settings | None = None,
     provider: LLMProvider | None = None,
     repository: Repository | None = None,
-    rules_path: Path | str = RULES_CONFIG_PATH,
-    profile_path: Path | str = DEFAULT_PROFILE_PATH,
-    policy_path: Path | str = DEFAULT_POLICY_PATH,
+    config: ConfigSnapshot | None = None,
     prompt_version: str = DEFAULT_PROMPT_VERSION,
     on_progress: ProgressCallback | None = None,
 ) -> ScreenOutcome:
@@ -310,19 +307,17 @@ def screen_register(
     if not check.ok:
         raise DatabaseNotReady(check)
 
-    rules_config = load_rules_config(rules_path)
-    profile = load_profile(profile_path)
-    policy = load_policy(policy_path)
+    # Taken once. Every notice in this run answers to this snapshot, whatever is
+    # saved from the settings page while it is going.
+    active = config or configuration_service.snapshot(repository=store)
+    rules_config = active.rules
+    profile = active.profile
+    policy = active.policy
     engine = RuleEngine(rules_config)
     model = provider or get_provider(resolved)
     cache = ResponseCache.under(resolved.data_dir, enabled=use_cache)
 
-    versions = ScreeningVersions(
-        rules_version=rules_config.rules_version,
-        policy_version=policy.policy_version,
-        profile_version=profile.profile_version,
-        prompt_version=prompt_version if model.enabled else None,
-    )
+    versions = active.versions(prompt_version=prompt_version if model.enabled else None)
 
     total_in_register, stale = _work_to_do(store, versions, model, rescreen=rescreen)
     if limit is not None:

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Feedback &middot; Watchdog{% endblock %}
+
+{#
+  Every comment, grouped by page and by what was clicked. Comments are colleagues'
+  own words and are escaped exactly as source and model text are.
+#}
+{% block content %}
+<h1>Interface feedback</h1>
+<p class="muted">Notes about Watchdog itself, kept in their own table well away from tender
+  data. Turning feedback mode off hides the controls and keeps everything here.</p>
+
+<p><a class="button" href="/feedback/export.md">Download as Markdown</a></p>
+
+{% if not pages %}
+  <p class="notice notice-info" role="status">No comments yet. Turn feedback mode on in the
+    header, then click anything you want to say something about.</p>
+{% endif %}
+
+{% for page in pages %}
+  <section class="card feedback-page">
+    <h2>{{ page.page }}</h2>
+    <p class="muted">{{ page.count }} comment{{ '' if page.count == 1 else 's' }}</p>
+
+    {% for element in page.elements %}
+      <h3>{{ element.label or element.element }}</h3>
+      <p class="muted"><code>{{ element.element }}</code></p>
+      <ol class="history">
+        {% for comment in element.comments %}
+          <li>
+            <strong>{{ comment.reported_by or 'Name not recorded' }}</strong>
+            &mdash; {{ comment.created_at | moment }}
+            {% if comment.tender_id %}<span class="muted">notice {{ comment.tender_id }}</span>{% endif %}
+            <p class="source-text">{{ comment.comment }}</p>
+          </li>
+        {% endfor %}
+      </ol>
+    {% endfor %}
+  </section>
+{% endfor %}
+{% endblock %}

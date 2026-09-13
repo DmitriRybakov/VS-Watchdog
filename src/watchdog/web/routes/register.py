@@ -22,13 +22,19 @@ from typing import Any
 from fastapi import APIRouter, Form, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 
-from watchdog.core.enums import Verdict
+from watchdog.core.enums import BidRoute, Verdict
 from watchdog.core.models import RegisterRow
 from watchdog.core.settings import Settings
 from watchdog.services import export as export_service
 from watchdog.services import query as query_service
+from watchdog.services import summary as summary_service
 from watchdog.services.query import FilterError, RegisterView
-from watchdog.services.review import UnattributedReview, UnknownTender, record_verdict
+from watchdog.services.review import (
+    InvalidReview,
+    UnattributedReview,
+    UnknownTender,
+    record_verdict,
+)
 from watchdog.storage.repository import Repository
 from watchdog.web import reviewer as reviewer_cookie
 from watchdog.web.deps import Config, Store
@@ -141,8 +147,14 @@ def record(
 
 
 @router.get("/register/notice/{tender_id:path}", response_class=HTMLResponse)
-def detail(request: Request, tender_id: str, store: Store, reviewer: Reviewer) -> HTMLResponse:
-    """Everything about one notice, including what the card deliberately leaves out."""
+def detail(
+    request: Request,
+    tender_id: str,
+    store: Store,
+    settings: Config,
+    reviewer: Reviewer,
+) -> HTMLResponse:
+    """Everything about one notice, in the order our own register has it."""
     row = query_service.notice(tender_id, repository=store)
     if row is None:
         return _problem(
@@ -151,19 +163,98 @@ def detail(request: Request, tender_id: str, store: Store, reviewer: Reviewer) -
             status_code=404,
         )
 
+    try:
+        parsed = query_service.parse(
+            _params(request), ai_enabled=query_service.ai_configured(settings)
+        )
+    except FilterError:
+        # A detail page reached from a bookmark with an unreadable filter still
+        # shows the notice. Only the previous and next links are lost.
+        parsed = None
+
+    around = (
+        query_service.neighbours(tender_id, parsed, repository=store)
+        if parsed is not None
+        else query_service.Neighbours()
+    )
+
     return templates.TemplateResponse(
         request,
         "detail.html",
-        {
-            "row": row,
-            "history": store.screening_history(tender_id),
-            "reviews": store.list_reviews(tender_id),
-            "changes": store.list_changes(tender_id),
-            "back": request.url.query,
-            "reviewer": reviewer,
-            "version": _version(),
-        },
+        _detail_context(request, row, store, reviewer, around=around),
     )
+
+
+@router.post("/register/{tender_id:path}/review", response_class=HTMLResponse)
+def record_review(
+    request: Request,
+    tender_id: str,
+    store: Store,
+    reviewer: Reviewer,
+    verdict: str = Form(...),
+    bid_route: str = Form(default=""),
+    owner: str = Form(default=""),
+    next_action: str = Form(default=""),
+    note: str = Form(default=""),
+) -> HTMLResponse:
+    """Record the whole review, and hand back the review panel with its history.
+
+    Nothing is overwritten: this writes a new review and supersedes the previous
+    one, which keeps every word it had, its author and its timestamp.
+    """
+    row = query_service.notice(tender_id, repository=store)
+    if row is None:
+        return _problem(
+            request,
+            f"The register holds no notice with the id {tender_id}.",
+            status_code=404,
+        )
+
+    try:
+        chosen = Verdict(verdict)
+    except ValueError:
+        return _problem(
+            request,
+            f"{verdict!r} is not a verdict. The choices are: "
+            f"{', '.join(member.value for member in Verdict)}.",
+            status_code=400,
+        )
+
+    route: BidRoute | None = None
+    if bid_route:
+        try:
+            route = BidRoute(bid_route)
+        except ValueError:
+            return _problem(
+                request,
+                f"{bid_route!r} is not a bid route. The choices are: "
+                f"{', '.join(member.value for member in BidRoute)}.",
+                status_code=400,
+            )
+
+    try:
+        record_verdict(
+            tender_id,
+            chosen,
+            reviewed_by=reviewer or "",
+            bid_route=route,
+            owner=owner,
+            next_action=next_action,
+            note=note,
+            repository=store,
+        )
+    except UnattributedReview as exc:
+        return _problem(request, str(exc), status_code=400)
+    except InvalidReview as exc:
+        return _problem(request, str(exc), status_code=400)
+    except UnknownTender as exc:
+        return _problem(request, str(exc), status_code=404)
+
+    fresh = query_service.notice(tender_id, repository=store)
+    assert fresh is not None  # it was there a moment ago and nothing is ever deleted
+    context = _detail_context(request, fresh, store, reviewer, around=query_service.Neighbours())
+    context["saved"] = True
+    return templates.TemplateResponse(request, "partials/review.html", context)
 
 
 @router.get("/register/export.csv")
@@ -246,6 +337,32 @@ def _reviewer_panel(
         {"reviewer": reviewer, "reviewer_error": message, "version": _version()},
         status_code=status_code,
     )
+
+
+def _detail_context(
+    request: Request,
+    row: RegisterRow,
+    store: Repository,
+    reviewer: str | None,
+    *,
+    around: query_service.Neighbours,
+) -> dict[str, Any]:
+    """Everything the detail page and its review panel render."""
+    tender_id = row.tender.id
+    return {
+        "row": row,
+        "summary": summary_service.summarise(row, detail=store.get_detail(tender_id)),
+        "history": store.screening_history(tender_id),
+        "reviews": store.list_reviews(tender_id),
+        "changes": store.list_changes(tender_id),
+        "around": around,
+        "back": request.url.query,
+        "reviewer": reviewer,
+        "verdicts": list(Verdict),
+        "bid_routes": list(BidRoute),
+        "version": _version(),
+        "saved": False,
+    }
 
 
 def _version() -> str:

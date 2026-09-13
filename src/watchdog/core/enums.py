@@ -159,6 +159,19 @@ class RuleSignal(StrEnum):
     EXCLUSION = "exclusion"
 
 
+class ConfigKind(StrEnum):
+    """Which configuration a saved version is a version of.
+
+    Each one is stamped on every screening result, so the three are versioned
+    independently: changing the arithmetic must not make a judgement look as
+    though it was made against a different mandate.
+    """
+
+    RULES = "rules"
+    POLICY = "policy"
+    PROFILE = "profile"
+
+
 class RuleStrength(StrEnum):
     """How much weight one rule's evidence can carry.
 

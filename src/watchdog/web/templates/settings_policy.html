@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ label }} &middot; Settings &middot; Watchdog{% endblock %}
+
+{#
+  The arithmetic, not the judgement. These numbers decide what a set of axis
+  scores becomes; they do not decide what the axes say.
+#}
+{% block content %}
+<div id="run-status">{% include "partials/status.html" %}</div>
+
+<p class="breadcrumb"><a href="/settings">&larr; Back to settings</a></p>
+<h1>{{ label }}</h1>
+<p class="muted">{{ note }}</p>
+<p class="muted">Active version {{ active.version }}, saved by {{ active.saved_by }}
+  on {{ active.saved_at | moment }}.</p>
+
+<form id="policy-form" class="config-form"
+      hx-post="/settings/policy" hx-target="#save-result" hx-swap="innerHTML">
+
+  <fieldset>
+    <legend>Weights, bands and thresholds</legend>
+    {% for number in numbers %}
+      <label for="number-{{ loop.index }}">{{ number.label }}
+        <input id="number-{{ loop.index }}"
+               name="number.{{ number.path }}"
+               type="number"
+               step="{{ number.step }}"
+               min="{{ number.minimum }}"
+               max="{{ number.maximum }}"
+               value="{{ number.value(payload) if number.value(payload) is not none else '' }}" />
+        <small class="muted">{{ number.note }}</small>
+      </label>
+    {% endfor %}
+  </fieldset>
+
+  <fieldset>
+    <legend>Caps</legend>
+    <p class="muted">A cap can only ever lower a score. Its condition is shown as it is
+      written in the policy and is not editable here: a condition is a small expression, and
+      one typed wrongly into a box would change how every notice is scored.</p>
+    {% for cap in caps %}
+      <label for="cap-{{ cap.name }}">{{ cap.name }} &mdash; highest score when
+        <code>{{ cap.when }}</code>
+        <input id="cap-{{ cap.name }}" name="cap.{{ cap.name }}" type="number"
+               min="1" max="5" step="1" value="{{ cap.max_score }}" />
+        {% if cap.note %}<small class="muted">{{ cap.note }}</small>{% endif %}
+      </label>
+    {% else %}
+      <p class="muted">This policy defines no caps.</p>
+    {% endfor %}
+  </fieldset>
+
+  {% include "partials/config_controls.html" %}
+</form>
+
+<div id="preview"></div>
+<div id="save-result"></div>
+{% endblock %}

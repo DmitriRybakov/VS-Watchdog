@@ -229,7 +229,28 @@ def test_the_workbook_is_a_readable_zip_openpyxl_can_reopen() -> None:
 
     reopened = load_workbook(io.BytesIO(workbook))
     assert reopened.sheetnames == ["Register"]
-    assert [cell.value for cell in reopened["Register"][1]] == list(export.COLUMNS)
+    # The heading row is the team's word for each column, not the internal key.
+    assert [cell.value for cell in reopened["Register"][1]] == export.headings()
+
+
+def test_the_heading_row_uses_the_teams_word_and_the_column_keys_stay_stable() -> None:
+    """One display vocabulary, and a label change is never a data change.
+
+    The key is what a stored extraction, a test and any downstream script address;
+    the heading is what a colleague reads. Renaming a label must not move a column
+    or rename a key.
+    """
+    headings = export.headings()
+
+    assert len(headings) == len(export.COLUMNS)
+    assert headings[export.COLUMNS.index("buyer_name")] == "Client"
+    assert headings[export.COLUMNS.index("buyer_country")] == "Client Country"
+    assert headings[export.COLUMNS.index("country_of_performance")] == "Project Location"
+    assert headings[export.COLUMNS.index("source")] == "Public Platform"
+    assert headings[export.COLUMNS.index("notice_stage")] == "Phase of Tender"
+    # A column the vocabulary does not name keeps its key rather than gaining an
+    # invented label.
+    assert headings[export.COLUMNS.index("confidence")] == "confidence"
 
 
 def test_the_csv_carries_a_bom_so_excel_reads_accents() -> None:

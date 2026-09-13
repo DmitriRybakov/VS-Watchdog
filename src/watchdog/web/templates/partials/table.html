@@ -14,12 +14,12 @@
       <tr>
         <th scope="col">{{ 'Score' if view.ai_enabled else 'Evidence' }}</th>
         <th scope="col">Band</th>
-        <th scope="col">Title</th>
-        <th scope="col">Buyer</th>
-        <th scope="col">Country</th>
+        <th scope="col">{{ LABEL('tender_name') }}</th>
+        <th scope="col">{{ LABEL('client') }}</th>
+        <th scope="col">{{ LABEL('client_country') }}</th>
         <th scope="col">Domain</th>
-        <th scope="col">Published</th>
-        <th scope="col">Deadline</th>
+        <th scope="col">{{ LABEL('published_date') }}</th>
+        <th scope="col">{{ LABEL('deadline_date') }}</th>
         <th scope="col">Signals</th>
         <th scope="col">Conf.</th>
         <th scope="col">Verdict</th>

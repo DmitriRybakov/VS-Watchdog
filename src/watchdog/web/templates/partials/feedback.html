@@ -1,0 +1,37 @@
+{#
+  Feedback mode's comment box. One include in the base template is all that any
+  other page needs to know about it: while the mode is on, the script intercepts
+  a click anywhere, reads what was clicked, and fills this form in.
+
+  The intercepted click never runs. Pressing "Update from TED" in feedback mode
+  opens this box and starts nothing.
+#}
+<dialog id="feedback-dialog" class="feedback-dialog" aria-labelledby="feedback-heading">
+  <form id="feedback-form" method="dialog"
+        hx-post="/feedback" hx-target="#feedback-result" hx-swap="innerHTML">
+    <h2 id="feedback-heading">Comment on what you just clicked</h2>
+
+    <p class="muted" id="feedback-what">
+      <span id="feedback-what-label"></span>
+    </p>
+
+    <input type="hidden" name="page" id="feedback-page" />
+    <input type="hidden" name="element" id="feedback-element" />
+    <input type="hidden" name="element_label" id="feedback-element-label" />
+    <input type="hidden" name="tender_id" id="feedback-tender" />
+    <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}" />
+
+    <label for="feedback-comment">What is wrong, missing or confusing
+      <textarea id="feedback-comment" name="comment" rows="5" maxlength="2000" required></textarea>
+    </label>
+
+    <p class="muted">Only the element and its visible label are recorded. Nothing you have
+      typed into a field on the page is sent.</p>
+
+    <div class="feedback-buttons">
+      <button type="submit" class="button" id="feedback-save">Save comment</button>
+      <button type="button" class="button" id="feedback-close">Close without saving</button>
+    </div>
+  </form>
+  <div id="feedback-result" aria-live="polite"></div>
+</dialog>

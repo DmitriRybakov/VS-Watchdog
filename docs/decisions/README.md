@@ -39,6 +39,12 @@ consequence - especially decisions that become expensive to reverse.
   explicit flag is set, so a settings-page edit cannot quietly produce version 4 while step 7 is
   being tuned.
 
+  **Enforced in step 9.** `services/configuration.py` refuses any rules save that would produce a
+  version above `FROZEN_RULES_VERSION` unless the override is set explicitly, and the refusal says
+  why and which two cases qualify. It covers the import path as well as the settings page: an import
+  is a save whose payload came from a file, and a route that skipped the check would be a way round
+  it.
+
 - **Step 7 owes three answers about the rules-only grade.** All three come out of the version 3
   baseline, `docs/eval/2026-09-12-rules-baseline-v3.md`, which is the reference point to tune
   against - no screening result has ever been stored, so that file is the only starting distribution

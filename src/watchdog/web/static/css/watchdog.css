@@ -794,6 +794,138 @@ kbd {
   font-size: 0.9rem;
 }
 
+/* One field on the detail page: the team's label, where the value came from, and
+   the value. The origin pill is text, never a colour, so it survives a print. */
+.field dt {
+  display: flex;
+  gap: var(--wd-tight);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.pill-origin {
+  font-size: 0.7rem;
+  color: var(--pico-muted-color);
+  text-transform: none;
+}
+
+.field-value {
+  margin: 0 0 0.2rem 0;
+}
+
+.field-value .muted {
+  display: block;
+}
+
+.field-caution {
+  border-left: 3px solid var(--wd-urgent-fg);
+  padding-left: var(--wd-tight);
+}
+
+.detail-nav {
+  display: flex;
+  gap: var(--wd-gap);
+  align-items: baseline;
+  flex-wrap: wrap;
+  padding-block: var(--wd-tight);
+}
+
+.detail-steps {
+  margin-left: auto;
+  display: flex;
+  gap: var(--wd-gap);
+}
+
+.more-details > summary,
+.technical > summary {
+  cursor: pointer;
+  font-weight: 600;
+  padding-block: var(--wd-tight);
+}
+
+.rule-group {
+  margin-block: var(--wd-gap);
+}
+
+.rule-group-exclusion {
+  border-left: 3px dashed var(--pico-muted-border-color);
+  padding-left: var(--wd-gap);
+}
+
+.review-form fieldset {
+  display: grid;
+  gap: var(--wd-tight);
+  max-width: 44rem;
+}
+
+.review-note {
+  white-space: pre-line;
+}
+
+/* ---------------------------------------------------------------- settings */
+
+.config-card {
+  max-width: 52rem;
+}
+
+.config-form fieldset {
+  display: grid;
+  gap: var(--wd-tight);
+  max-width: 52rem;
+}
+
+.config-buttons {
+  display: flex;
+  gap: var(--wd-tight);
+  flex-wrap: wrap;
+}
+
+.rule-editor {
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  padding: var(--wd-tight);
+  margin-block: var(--wd-tight);
+}
+
+.rule-editor > summary {
+  cursor: pointer;
+}
+
+.config-diff {
+  overflow-x: auto;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  padding: var(--wd-tight);
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+}
+
+/* ---------------------------------------------------------------- feedback */
+
+.feedback-mode {
+  margin: 0;
+  display: flex;
+  gap: var(--wd-tight);
+  align-items: baseline;
+}
+
+.feedback-dialog {
+  max-width: 40rem;
+  width: 90vw;
+}
+
+.feedback-buttons {
+  display: flex;
+  gap: var(--wd-tight);
+  flex-wrap: wrap;
+}
+
+/* While feedback mode is on, the pointer says so on everything, because nothing
+   a colleague clicks will do what it normally does. */
+body[data-feedback="on"] main {
+  cursor: help;
+}
+
 /* ------------------------------------------------- tablet and narrow screens */
 
 @media (max-width: 1100px) {

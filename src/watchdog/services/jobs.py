@@ -38,6 +38,11 @@ log = get_logger(__name__)
 
 UPDATE = "update"
 RESCREEN = "rescreen"
+# Screen only the notices whose stored result no longer reflects how we screen -
+# what the settings page offers after a configuration change. Distinct from
+# RESCREEN, which redoes every notice in the register whatever its versions say:
+# one is a few hundred model calls and the other is ten thousand.
+RESCREEN_STALE = "rescreen-stale"
 # The same two jobs, started from a terminal instead of a button. They take the
 # same lock: during a deployment one of these runs for an hour against the hosted
 # database while the site is live, and that is exactly when somebody presses
@@ -50,6 +55,7 @@ CLI_SCREEN = "cli-screen"
 JOB_LABELS = {
     UPDATE: "Update from TED",
     RESCREEN: "Re-screen",
+    RESCREEN_STALE: "Re-screen what changed",
     CLI_INGEST: "Ingest (command line)",
     CLI_SCREEN: "Re-screen (command line)",
 }
@@ -57,6 +63,7 @@ JOB_LABELS = {
 JOB_KINDS = {
     UPDATE: RunKind.INGEST,
     RESCREEN: RunKind.SCREEN,
+    RESCREEN_STALE: RunKind.SCREEN,
     CLI_INGEST: RunKind.INGEST,
     CLI_SCREEN: RunKind.SCREEN,
 }
@@ -243,7 +250,7 @@ def run(
         if job == UPDATE:
             counts = _update(store, resolved)
         else:
-            counts = _rescreen(store, resolved, job=job, rescreen=True)
+            counts = _rescreen(store, resolved, job=job, rescreen=job == RESCREEN)
     except DatabaseNotReady as exc:
         _fail(store, job, message=str(exc))
         return

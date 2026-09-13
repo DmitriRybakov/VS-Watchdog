@@ -1,0 +1,30 @@
+{#
+  The controls every configuration form ends with: say why, preview the change,
+  then save. Shared so the three editors cannot come to offer different guarantees.
+#}
+<fieldset class="config-controls">
+  <legend>Save this change</legend>
+
+  <label for="config-note">Why this change
+    <textarea id="config-note" name="note" rows="2"
+              placeholder="One sentence. This is stored with the version and is what the next person reads."></textarea>
+  </label>
+
+  {% if is_frozen %}
+    <label class="check">
+      <input id="override-freeze" type="checkbox" name="override_freeze" value="1" />
+      Override the version {{ frozen_at }} freeze
+    </label>
+    <p class="muted">Two cases qualify: a rule that crashes or corrupts, and a false positive
+      at high strength. Anything else waits for the audit. Say which it is in the note.</p>
+  {% endif %}
+
+  <div class="config-buttons">
+    <button id="preview-change" type="button" class="button"
+            hx-post="/settings/{{ kind.value }}/preview"
+            hx-include="closest form"
+            hx-target="#preview"
+            hx-swap="innerHTML">Show me what would change</button>
+    <button id="save-config" type="submit" class="button">Save as a new version</button>
+  </div>
+</fieldset>

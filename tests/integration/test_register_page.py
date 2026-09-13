@@ -410,7 +410,11 @@ def test_the_description_is_shown_whole_with_an_expander_for_the_rest(
 def test_work_outside_the_buyers_country_is_stated_and_countries_are_named(
     client: TestClient, repository: Repository
 ) -> None:
-    """619675-2026: a French buyer procuring a waste roadmap for Angola."""
+    """619675-2026: a French buyer procuring a waste roadmap for Angola.
+
+    The page says "client", not "buyer": one display vocabulary, the team's own,
+    and it is the register's word for whoever is doing the procuring.
+    """
     tender = _tender(source_id="619675-2026").model_copy(
         update={"buyer_country": "FRA", "place_of_performance_country": ["AGO"]}
     )
@@ -419,7 +423,10 @@ def test_work_outside_the_buyers_country_is_stated_and_countries_are_named(
 
     html = client.get(f"/register/notice/{tender.id}").text
 
-    assert "Work outside the buyer's country" in html
+    assert (
+        "Work outside the client&#39;s country" in html
+        or "Work outside the client's country" in html
+    )
     assert "France" in html
     assert "Angola" in html
     assert ">FRA<" not in html
@@ -576,8 +583,11 @@ def test_the_register_export_labels_an_across_lots_column_as_one(
     header, values = rows[0], rows[1]
     cells = dict(zip(header, values, strict=True))
 
-    assert "submission_languages_across_lots" in header
-    assert cells["submission_languages_across_lots"] == "CAT SPA"
+    # The heading is the team's word for the column, from core.vocabulary, and it
+    # still carries the across-lots qualifier: the column name alone would read as
+    # "both languages are accepted for every lot", which is not what TED said.
+    assert "Submission language (across lots)" in header
+    assert cells["Submission language (across lots)"] == "CAT SPA"
     assert cells["lot_count"] == "5"
 
 
@@ -627,9 +637,12 @@ def test_a_machine_result_and_a_human_review_are_labelled_apart(
 
     html = client.get("/register/notice/ted:1-2026").text
 
-    assert "Watchdog&#39;s own screening" in html or "Watchdog's own screening" in html
-    assert "Source facts" in html
-    assert "Decisions" in html
+    # Three sections, three kinds of claim, each named for what it is: what the
+    # documents say, what Entr's analysis concluded, and what a colleague decided.
+    assert "From the documents" in html
+    assert "Entr AI analysis" in html
+    assert "Our decision" in html
+    assert "Every decision recorded on this notice" in html
 
 
 def test_every_time_on_screen_says_it_is_utc(client: TestClient, loaded: Repository) -> None:

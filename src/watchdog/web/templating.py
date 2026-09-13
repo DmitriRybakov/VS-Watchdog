@@ -23,6 +23,7 @@ from urllib.parse import urlsplit
 
 from fastapi.templating import Jinja2Templates
 
+from watchdog.core import vocabulary
 from watchdog.core.codelists import (
     award_criterion_type_label,
     criterion_number,
@@ -61,6 +62,16 @@ VERDICT_LABELS = {
     "relevant": "Relevant",
     "not_relevant": "Not relevant",
     "unsure": "Unsure",
+}
+
+# How we would go after it, if at all. A separate question from whether it is
+# relevant, and the words are the ones the team uses when it discusses one.
+BID_ROUTE_LABELS = {
+    "not_assessed": "Not assessed",
+    "direct_bid": "Direct bid",
+    "partner_route": "Partner route",
+    "watch": "Watch",
+    "no_bid": "No bid",
 }
 
 # The rules-only grade in words. The number on its own invites being read as a
@@ -222,6 +233,10 @@ def verdict_label(value: str | None) -> str:
     return VERDICT_LABELS.get(value or "", "Undecided")
 
 
+def bid_route_label(value: str | None) -> str:
+    return BID_ROUTE_LABELS.get(value or "", "Not assessed")
+
+
 def strength_label(value: str | None) -> str:
     return STRENGTH_LABELS.get(value or "", value or "")
 
@@ -286,6 +301,7 @@ templates.env.filters["evidence_label"] = evidence_label
 templates.env.filters["evidence_word"] = evidence_word
 templates.env.filters["band_label"] = band_label
 templates.env.filters["verdict_label"] = verdict_label
+templates.env.filters["bid_route_label"] = bid_route_label
 templates.env.filters["strength_label"] = strength_label
 templates.env.filters["percent"] = percent
 templates.env.filters["words"] = words
@@ -305,5 +321,11 @@ templates.env.filters["clamped"] = clamped
 templates.env.globals["NOT_IN_NOTICE"] = NOT_IN_NOTICE
 templates.env.globals["NOT_RETRIEVED"] = NOT_RETRIEVED
 templates.env.globals["NOT_ASSESSED"] = NOT_ASSESSED
+# The three absences by name, so a field can say which kind of nothing it is
+# without a template deciding on the wording.
+templates.env.globals["ABSENT"] = ABSENT
 templates.env.globals["ASSESSMENT_FAILED_LABEL"] = ASSESSMENT_FAILED_LABEL
 templates.env.globals["ASSESSMENT_FAILED_HINT"] = ASSESSMENT_FAILED_HINT
+# The team's word for every register field. Read by the table headers and the
+# detail page, so TED's vocabulary never reaches a colleague.
+templates.env.globals["LABEL"] = vocabulary.label

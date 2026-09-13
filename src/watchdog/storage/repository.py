@@ -26,10 +26,12 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.orm import InstrumentedAttribute, Session
 
 from watchdog.core.clock import utc_now
-from watchdog.core.enums import RunKind, RunStatus, SourcePlatform
+from watchdog.core.enums import ConfigKind, RunKind, RunStatus, SourcePlatform
 from watchdog.core.models import (
     RANKING_FIELDS,
     STALE_JOB_AFTER,
+    ConfigVersion,
+    FeedbackComment,
     JobState,
     QuarantinedNotice,
     RegisterFacets,
@@ -40,6 +42,7 @@ from watchdog.core.models import (
     SchemaCheck,
     ScreeningResult,
     ScreeningVersions,
+    Staleness,
     Tender,
     TenderChange,
     TenderDetail,
@@ -54,7 +57,9 @@ from watchdog.core.models import (
 from watchdog.storage.db import SessionFactory
 from watchdog.storage.tables import (
     Base,
+    ConfigVersionRow,
     DelimitedList,
+    FeedbackCommentRow,
     JobLockRow,
     QuarantineRow,
     ReviewRow,
@@ -163,6 +168,19 @@ REGISTER_SORT = "register"
 # A result carrying this code judged nothing: the assessment failed. It is stored so
 # the notice is visible, and it never counts as screened.
 RETRY_REASON_CODE = "ASSESSMENT_FAILED"
+
+# Why a notice would be screened again, in the order the check asks. One name per
+# field on ``Staleness``; a notice is counted once, under the first reason that
+# applies, so the parts always add up to the total.
+STALE_REASONS: tuple[str, ...] = (
+    "never_screened",
+    "changed_content",
+    "older_rules",
+    "older_policy",
+    "older_profile",
+    "different_model",
+    "assessment_failed",
+)
 
 # How many ids to put in one IN clause. SQLite refuses a very long parameter list.
 _ID_CHUNK = 400
@@ -705,6 +723,41 @@ class Repository:
         the notice is visible and filterable rather than silently absent, but nothing
         was judged, so the next run has to try again.
         """
+        return [
+            tender_id
+            for tender_id, _ in self._stale_with_reasons(
+                current_versions, current_provider, current_model
+            )
+        ]
+
+    def screening_staleness(
+        self,
+        current_versions: ScreeningVersions,
+        current_provider: str,
+        current_model: str | None,
+    ) -> Staleness:
+        """How many notices would be re-screened now, and why, split by reason.
+
+        Counts the **latest** result for each notice and nothing else. Results are
+        append-only, so counting every historical row would leave "needs
+        re-screening" permanently above zero: the first save of any configuration
+        would strand thousands of superseded rows on an older version for good, and
+        a number that can never reach zero is one nobody reads after the first week.
+        """
+        counted: dict[str, int] = {reason: 0 for reason in STALE_REASONS}
+        for _, reason in self._stale_with_reasons(
+            current_versions, current_provider, current_model
+        ):
+            counted[reason] += 1
+        return Staleness(**counted)
+
+    def _stale_with_reasons(
+        self,
+        current_versions: ScreeningVersions,
+        current_provider: str,
+        current_model: str | None,
+    ) -> list[tuple[str, str]]:
+        """Every stale tender id with the first reason that made it stale."""
         with self._session_factory() as session:
             latest = {
                 row.tender_id: row
@@ -723,7 +776,7 @@ class Repository:
                 )
             }
 
-            stale: list[str] = []
+            stale: list[tuple[str, str]] = []
             for tender in session.execute(
                 select(
                     TenderRow.id,
@@ -733,7 +786,7 @@ class Repository:
             ):
                 result = latest.get(tender.id)
                 if result is None:
-                    stale.append(tender.id)
+                    stale.append((tender.id, "never_screened"))
                     continue
 
                 blocks = [
@@ -743,19 +796,154 @@ class Repository:
                     screening_text_from_blocks(blocks),
                     tender.cpv_all or [],
                 )
-                if (
-                    RETRY_REASON_CODE in (result.reason_codes or [])
-                    or result.screened_content_hash != current_hash
-                    or result.rules_version != current_versions.rules_version
-                    or result.policy_version != current_versions.policy_version
-                    or result.profile_version != current_versions.profile_version
-                    or result.prompt_version != current_versions.prompt_version
+
+                if RETRY_REASON_CODE in (result.reason_codes or []):
+                    stale.append((tender.id, "assessment_failed"))
+                elif result.screened_content_hash != current_hash:
+                    stale.append((tender.id, "changed_content"))
+                elif result.rules_version != current_versions.rules_version:
+                    stale.append((tender.id, "older_rules"))
+                elif result.policy_version != current_versions.policy_version:
+                    stale.append((tender.id, "older_policy"))
+                elif result.profile_version != current_versions.profile_version:
+                    stale.append((tender.id, "older_profile"))
+                elif (
+                    result.prompt_version != current_versions.prompt_version
                     or result.provider != current_provider
                     or result.model != current_model
                 ):
-                    stale.append(tender.id)
+                    stale.append((tender.id, "different_model"))
 
             return stale
+
+    # ---------------------------------------------------------- configuration
+
+    def active_config(self, kind: ConfigKind) -> ConfigVersion | None:
+        """The configuration in force, or None when nothing has been seeded yet."""
+        with self._session_factory() as session:
+            row = (
+                session.execute(
+                    select(ConfigVersionRow)
+                    .where(ConfigVersionRow.kind == kind.value, ConfigVersionRow.active.is_(True))
+                    .order_by(ConfigVersionRow.version.desc())
+                )
+                .scalars()
+                .first()
+            )
+            return ConfigVersion.model_validate(row) if row is not None else None
+
+    def config_history(self, kind: ConfigKind, *, limit: int = 50) -> list[ConfigVersion]:
+        """Every saved version of one configuration, newest first."""
+        with self._session_factory() as session:
+            rows = (
+                session.execute(
+                    select(ConfigVersionRow)
+                    .where(ConfigVersionRow.kind == kind.value)
+                    .order_by(ConfigVersionRow.version.desc())
+                    .limit(limit)
+                )
+                .scalars()
+                .all()
+            )
+            return [ConfigVersion.model_validate(row) for row in rows]
+
+    def highest_config_version(self, kind: ConfigKind) -> int:
+        """The largest version number ever saved for one kind. 0 when there is none."""
+        with self._session_factory() as session:
+            found = session.execute(
+                select(func.max(ConfigVersionRow.version)).where(
+                    ConfigVersionRow.kind == kind.value
+                )
+            ).scalar_one_or_none()
+            return int(found or 0)
+
+    def save_config(self, version: ConfigVersion) -> ConfigVersion:
+        """Store a new configuration version and make it the active one.
+
+        Append-only: the previous active row keeps every byte of its payload and is
+        only marked inactive, so a screening result stamped with it stays readable.
+        """
+        with self._session_factory() as session:
+            session.execute(
+                update(ConfigVersionRow)
+                .where(
+                    ConfigVersionRow.kind == version.kind.value,
+                    ConfigVersionRow.active.is_(True),
+                )
+                .values(active=False)
+            )
+            row = ConfigVersionRow(
+                kind=version.kind.value,
+                version=version.version,
+                payload=version.payload,
+                saved_by=version.saved_by,
+                saved_at=version.saved_at,
+                note=version.note,
+                active=True,
+            )
+            session.add(row)
+            session.commit()
+            return ConfigVersion.model_validate(row)
+
+    def seed_config(self, version: ConfigVersion) -> ConfigVersion | None:
+        """Store a first version for a kind, and do nothing at all if one exists.
+
+        This is what runs at startup and after a deploy. It must never overwrite an
+        active configuration: a colleague's saved rule set would otherwise be
+        replaced by whatever the YAML file in the image happened to say, silently,
+        on every deploy.
+        """
+        with self._session_factory() as session:
+            existing = session.execute(
+                select(ConfigVersionRow.id).where(ConfigVersionRow.kind == version.kind.value)
+            ).first()
+            if existing is not None:
+                return None
+
+            row = ConfigVersionRow(
+                kind=version.kind.value,
+                version=version.version,
+                payload=version.payload,
+                saved_by=version.saved_by,
+                saved_at=version.saved_at,
+                note=version.note,
+                active=True,
+            )
+            session.add(row)
+            session.commit()
+            return ConfigVersion.model_validate(row)
+
+    # -------------------------------------------------------------- feedback
+
+    def save_feedback(self, comment: FeedbackComment) -> FeedbackComment:
+        """Store one comment about the interface. Never touches tender data."""
+        with self._session_factory() as session:
+            row = FeedbackCommentRow(
+                page=comment.page,
+                element=comment.element,
+                element_label=comment.element_label,
+                tender_id=comment.tender_id,
+                comment=comment.comment,
+                reported_by=comment.reported_by,
+                created_at=comment.created_at,
+            )
+            session.add(row)
+            session.commit()
+            return FeedbackComment.model_validate(row)
+
+    def list_feedback(self, *, limit: int = 1000) -> list[FeedbackComment]:
+        """Every comment, newest first."""
+        with self._session_factory() as session:
+            rows = (
+                session.execute(
+                    select(FeedbackCommentRow)
+                    .order_by(FeedbackCommentRow.created_at.desc(), FeedbackCommentRow.id.desc())
+                    .limit(limit)
+                )
+                .scalars()
+                .all()
+            )
+            return [FeedbackComment.model_validate(row) for row in rows]
 
     # ------------------------------------------------------------------ reviews
 

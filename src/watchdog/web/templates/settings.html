@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Settings &middot; Watchdog{% endblock %}
+
+{#
+  What drives the register, and who changed it. The active configuration lives in
+  the database rather than in the files, because on a host a setting written to a
+  file is erased by the next deploy and is invisible to a scheduled job running in
+  a different container.
+#}
+{% block content %}
+<div id="run-status">{% include "partials/status.html" %}</div>
+
+<h1>Settings</h1>
+<p class="muted">Everything here is versioned. A save writes a new version and never edits
+  an old one, so a screening result recorded last week can still be read against the
+  configuration that produced it.</p>
+
+<section class="card" id="freeze-notice">
+  <h2>The keyword vocabulary is frozen at version {{ frozen_at }}</h2>
+  <p>{{ freeze_reason }}</p>
+</section>
+
+<section class="config-list">
+  {% for kind in kinds %}
+    {% set current = versions[kind] %}
+    <article class="card config-card" id="config-{{ kind.value }}">
+      <h2>{{ labels[kind] }}</h2>
+      <p class="muted">{{ notes[kind] }}</p>
+      <dl class="facts">
+        <div><dt>Active version</dt><dd>{{ current.version }}</dd></div>
+        <div><dt>Saved by</dt><dd>{{ current.saved_by }} on {{ current.saved_at | moment }}</dd></div>
+        <div><dt>Why</dt><dd>{{ current.note | given }}</dd></div>
+      </dl>
+      <p><a class="button" href="/settings/{{ kind.value }}">Edit {{ labels[kind] | lower }}</a></p>
+
+      {% if history[kind] | length > 1 %}
+        <details>
+          <summary>Earlier versions ({{ history[kind] | length - 1 }})</summary>
+          <ol class="history">
+            {% for past in history[kind] %}
+              <li>
+                Version {{ past.version }} &mdash; {{ past.saved_by }}
+                on {{ past.saved_at | moment }}
+                {% if not past.active %}<span class="muted">(superseded)</span>
+                {% else %}<span class="pill">current</span>{% endif %}
+                {% if past.note %}<p class="muted">{{ past.note }}</p>{% endif %}
+              </li>
+            {% endfor %}
+          </ol>
+        </details>
+      {% endif %}
+    </article>
+  {% endfor %}
+</section>
+
+{#
+  Loaded after the page, because counting staleness reads every notice in the
+  register and a page waiting on it would look like a page that had hung.
+#}
+<section class="card" id="staleness"
+         hx-get="/settings/staleness" hx-trigger="load" hx-swap="innerHTML">
+  <h2>What needs screening again</h2>
+  <p class="muted">Counting&hellip;</p>
+</section>
+
+<section class="card">
+  <h2>Keeping the files and the database in step</h2>
+  <p>The configuration files in <code>config/</code> are the seed and the export format.
+    From a terminal, <code>watchdog config export</code> writes the active versions back to
+    them so a change made here can be committed and reviewed in git, and
+    <code>watchdog config import</code> does the reverse.</p>
+</section>
+{% endblock %}

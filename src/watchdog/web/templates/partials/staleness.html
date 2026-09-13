@@ -1,0 +1,38 @@
+{#
+  How many stored results no longer reflect the active configuration, and why.
+
+  Every count is over the LATEST result for a notice. Results are append-only, so
+  counting the superseded ones as well would leave this permanently above zero and
+  nobody would trust it after the first week.
+#}
+<h2>What needs screening again</h2>
+
+{% if started %}
+  <p class="notice notice-info" role="status">Started. The progress belt at the top of the
+    page shows how far it has got; you can leave this page.</p>
+{% endif %}
+
+{% if busy_error %}
+  <p class="notice notice-warn" role="alert">{{ busy_error }}</p>
+{% endif %}
+
+{% if staleness.total %}
+  <p><strong>{{ staleness.total }}</strong> notice{{ '' if staleness.total == 1 else 's' }}
+    would be screened again now.</p>
+  <ul>
+    {% for label, count in staleness.lines() %}
+      <li>{{ count }} &mdash; {{ label }}</li>
+    {% endfor %}
+  </ul>
+  <form hx-post="/settings/rescreen" hx-target="#staleness" hx-swap="innerHTML">
+    <button id="rescreen-stale" type="submit" class="button">Re-screen those now</button>
+  </form>
+  <p class="muted">This screens the affected records only, not the whole register.</p>
+{% else %}
+  <p>Every notice in the register was screened under the configuration that is active now.</p>
+{% endif %}
+
+{% if not ai_enabled %}
+  <p class="muted">AI assessment is off, so these are keyword and CPV grades rather than
+    judgements. Turning a model on makes every rules-only result stale, which is intended.</p>
+{% endif %}

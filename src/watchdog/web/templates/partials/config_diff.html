@@ -1,0 +1,16 @@
+{#
+  What a save would change, shown before it is made. Diff lines are source text
+  and model text alike and are escaped like everything else on the page.
+#}
+{% if problems %}
+  <div class="notice notice-error" role="alert">
+    <p><strong>{{ label }}: this cannot be saved as it stands.</strong></p>
+    <ul>{% for problem in problems %}<li>{{ problem }}</li>{% endfor %}</ul>
+  </div>
+{% elif diff %}
+  <h3>What would change</h3>
+  <pre class="config-diff">{% for line in diff %}{{ line }}
+{% endfor %}</pre>
+{% else %}
+  <p class="notice notice-info" role="status">Nothing has changed, so there is nothing to save.</p>
+{% endif %}

@@ -11,14 +11,15 @@ import typer
 
 from watchdog import __version__
 from watchdog.core.countries import country_name, country_names
-from watchdog.core.enums import RunStatus, SourcePlatform
+from watchdog.core.enums import ConfigKind, RunStatus, SourcePlatform
 from watchdog.core.logging import configure_logging, get_logger
 from watchdog.core.models import AxisScore, Run, SchemaCheck
 from watchdog.core.settings import get_settings
+from watchdog.services import configuration, jobs
 from watchdog.services import ingest as ingest_service
-from watchdog.services import jobs
 from watchdog.services import screen as screen_service
 from watchdog.services import ted as ted_service
+from watchdog.services.configuration import ConfigFrozen, ConfigInvalid
 
 app = typer.Typer(help="Watchdog - tender screening for Entr Advisory & Decision Support.")
 config_app = typer.Typer(help="Inspect and check the configuration.")
@@ -148,6 +149,103 @@ def config_validate() -> None:
 
     typer.secho("TED accepted the query at the configured page size.", fg=typer.colors.GREEN)
     typer.echo(f"  {result.query}")
+
+
+@config_app.command("versions")
+def config_versions() -> None:
+    """Show which version of each configuration is active, and who saved it."""
+    settings = get_settings()
+    configure_logging(settings.log_level, json_output=not settings.is_dev)
+
+    for kind in ConfigKind:
+        active = configuration.active(kind)
+        typer.echo(
+            f"{kind.value:8} version {active.version}  "
+            f"saved by {active.saved_by} at {active.saved_at:%Y-%m-%d %H:%M} UTC"
+        )
+        if active.note:
+            typer.echo(
+                textwrap.fill(
+                    active.note, width=88, initial_indent="    ", subsequent_indent="    "
+                )
+            )
+
+    typer.echo("")
+    typer.secho(
+        f"The keyword vocabulary is frozen at version {configuration.FROZEN_RULES_VERSION}.",
+        fg=typer.colors.YELLOW,
+    )
+
+
+@config_app.command("export")
+def config_export() -> None:
+    """Write the active configuration back to config/*.yaml, so it can be committed.
+
+    The database holds the active configuration; the files are the seed and the
+    export format. This is how a change made in the browser gets reviewed in git
+    like any other change to how the register scores.
+    """
+    settings = get_settings()
+    configure_logging(settings.log_level, json_output=not settings.is_dev)
+
+    written = configuration.export_to_files()
+    if not written:
+        typer.echo("Nothing to export: no configuration has been stored yet.")
+        return
+
+    for kind, path, version in written:
+        typer.secho(f"{kind.value:8} version {version} -> {path.as_posix()}", fg=typer.colors.GREEN)
+    typer.echo("Comments in the files are not preserved. Review the diff before committing.")
+
+
+@config_app.command("import")
+def config_import(
+    saved_by: str = typer.Option(
+        ..., "--by", help="Whose change this is. Recorded on the version."
+    ),
+    note: str = typer.Option("", "--note", help="Why, in one sentence."),
+    override_freeze: bool = typer.Option(
+        False,
+        "--override-freeze",
+        help="Save a rules change despite the freeze. Say why in the note.",
+    ),
+) -> None:
+    """Load config/*.yaml into the database as new versions.
+
+    The freeze applies here exactly as it does to a save from the browser: an
+    import is a save whose payload came from a file, and a path that skipped the
+    check would be a way round it.
+    """
+    settings = get_settings()
+    configure_logging(settings.log_level, json_output=not settings.is_dev)
+
+    try:
+        saved = configuration.import_from_files(
+            saved_by=saved_by,
+            note=note or None,
+            override_freeze=override_freeze,
+        )
+    except ConfigFrozen as exc:
+        typer.secho("Refused: the keyword vocabulary is frozen.", fg=typer.colors.RED)
+        typer.echo(textwrap.fill(str(exc), width=88))
+        raise typer.Exit(code=1) from exc
+    except ConfigInvalid as exc:
+        typer.secho(f"Refused: {exc.kind.value} did not validate.", fg=typer.colors.RED)
+        for problem in exc.problems:
+            typer.echo(f"  - {problem}")
+        raise typer.Exit(code=1) from exc
+
+    if not saved:
+        typer.echo("Nothing to import: the files match the active configuration.")
+        return
+
+    for version in saved:
+        typer.secho(
+            f"{version.kind.value:8} saved as version {version.version}", fg=typer.colors.GREEN
+        )
+    typer.echo(
+        "Stored results screened under an earlier version are now stale. Re-screen when ready."
+    )
 
 
 @app.command("ted-probe")

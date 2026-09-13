@@ -1,0 +1,100 @@
+{#
+  The whole review, not just the three keys. Saved separately from anything a
+  machine produced, and append-only: this writes a new review and supersedes the
+  previous one, which keeps its verdict, its note, its author and its timestamp.
+
+  The history below is the point. A colleague who changed their mind should be
+  able to see what they thought last month and why, and so should everybody else.
+#}
+<h3>Our decision</h3>
+
+{% if saved %}
+  <p class="notice notice-info" role="status">Saved. The previous decision is kept below.</p>
+{% endif %}
+
+{% if row.review %}
+  <p class="current-review">
+    Currently <strong>{{ row.review.verdict.value | verdict_label }}</strong>,
+    bid route <strong>{{ row.review.bid_route.value | bid_route_label }}</strong>,
+    recorded by {{ row.review.reviewed_by }} on {{ row.review.reviewed_at | moment }}.
+  </p>
+{% else %}
+  <p class="muted">Nobody has recorded a decision on this notice yet.</p>
+{% endif %}
+
+<form id="review-form"
+      class="review-form"
+      hx-post="/register/{{ row.tender.id }}/review"
+      hx-target="#review"
+      hx-swap="innerHTML">
+  <fieldset {% if not reviewer %}disabled{% endif %}>
+    <label for="review-verdict">Verdict
+      <select id="review-verdict" name="verdict" required>
+        {% for choice in verdicts %}
+          <option value="{{ choice.value }}"
+            {{ 'selected' if row.review and row.review.verdict == choice else '' }}>
+            {{ choice.value | verdict_label }}
+          </option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label for="review-route">Bid route
+      <select id="review-route" name="bid_route">
+        {% for choice in bid_routes %}
+          <option value="{{ choice.value }}"
+            {{ 'selected' if row.review and row.review.bid_route == choice else '' }}>
+            {{ choice.value | bid_route_label }}
+          </option>
+        {% endfor %}
+      </select>
+      <small class="muted">How we would go after it, if at all. A different question from
+        whether it is relevant.</small>
+    </label>
+
+    <label for="review-owner">Owner
+      <input id="review-owner" name="owner" type="text" maxlength="128"
+             value="{{ row.review.owner if row.review and row.review.owner else '' }}"
+             placeholder="Who is carrying this" />
+    </label>
+
+    <label for="review-next">Next action
+      <input id="review-next" name="next_action" type="text" maxlength="500"
+             value="{{ row.review.next_action if row.review and row.review.next_action else '' }}"
+             placeholder="What happens next, and by when" />
+    </label>
+
+    <label for="review-note">Note
+      <textarea id="review-note" name="note" rows="4" maxlength="4000"
+                placeholder="Why this decision">{{ row.review.note if row.review and row.review.note else '' }}</textarea>
+    </label>
+
+    <button id="save-review" type="submit" class="button">Save decision</button>
+  </fieldset>
+
+  {% if not reviewer %}
+    <p class="muted">Put your name in the &ldquo;Recording as&rdquo; box at the top of the
+      register first. A decision with nobody's name on it is lost data, so it is refused
+      rather than given a placeholder.</p>
+  {% endif %}
+</form>
+
+<h4>Every decision recorded on this notice</h4>
+{% if reviews %}
+  <ol class="history review-history">
+    {% for past in reviews %}
+      <li>
+        <strong>{{ past.verdict.value | verdict_label }}</strong>
+        &middot; {{ past.bid_route.value | bid_route_label }}
+        &mdash; {{ past.reviewed_by }} on {{ past.reviewed_at | moment }}
+        {% if past.superseded %}<span class="muted">(superseded)</span>
+        {% else %}<span class="pill">current</span>{% endif %}
+        {% if past.owner %}<span class="muted">Owner: {{ past.owner }}</span>{% endif %}
+        {% if past.next_action %}<p class="muted">Next: {{ past.next_action }}</p>{% endif %}
+        {% if past.note %}<p class="review-note">{{ past.note }}</p>{% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+{% else %}
+  <p class="muted">Nothing yet. Nothing is ever deleted, so everything recorded here stays.</p>
+{% endif %}

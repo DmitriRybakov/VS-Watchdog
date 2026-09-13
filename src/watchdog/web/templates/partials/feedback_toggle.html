@@ -1,0 +1,25 @@
+{#
+  The toggle itself. Off by default; turning it off hides the controls and keeps
+  every comment that was made. It swaps itself, so the body's data attribute is
+  updated by the script rather than by a page reload.
+
+  The route passes the state it has just set, because the request that turned the
+  mode on still carries the old cookie. Everywhere else, the cookie is the answer.
+#}
+{% set is_on = feedback_on if feedback_on is defined
+               else request.cookies.get('watchdog_feedback') == 'on' %}
+<form class="feedback-mode"
+      hx-post="/feedback/mode"
+      hx-target="#feedback-toggle"
+      hx-swap="innerHTML"
+      data-feedback-state="{{ 'on' if is_on else 'off' }}">
+  <input type="hidden" name="on" value="{{ '0' if is_on else '1' }}" />
+  <button id="feedback-mode-button" type="submit" class="link-button"
+          aria-pressed="{{ 'true' if is_on else 'false' }}">
+    {{ 'Feedback mode: on' if is_on else 'Feedback mode: off' }}
+  </button>
+  {% if is_on %}
+    <span class="pill" role="status">Clicks open a comment box and do nothing else</span>
+    <a href="/feedback">See comments</a>
+  {% endif %}
+</form>

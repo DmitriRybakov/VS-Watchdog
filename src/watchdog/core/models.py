@@ -21,13 +21,14 @@ from decimal import Decimal
 from enum import StrEnum
 from typing import Annotated, Any, Protocol
 
-from pydantic import AfterValidator, BaseModel, ConfigDict, Field, model_validator
+from pydantic import AfterValidator, BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from watchdog.core.clock import ensure_utc, utc_now
 from watchdog.core.codelists import has_qualification_stage, is_utility_activity
 from watchdog.core.enums import (
     Band,
     BidRoute,
+    ConfigKind,
     ContractNature,
     DeadlineType,
     DecisionStage,
@@ -44,6 +45,7 @@ from watchdog.core.enums import (
     SourcePlatform,
     Verdict,
 )
+from watchdog.core.vocabulary import FIELDS_EXTRACTED
 
 # A timestamp that is always UTC-aware. Anything naive fails loudly here rather
 # than silently becoming "an hour off" in the register.
@@ -630,10 +632,17 @@ class DetailField(BaseModel):
 
 
 class TenderDetail(BaseModel):
-    """The summary-template fields for one tender, each with its own source reference.
+    """The extracted register fields for one tender, each with its source reference.
 
-    The field names are whatever the summary template asks for; they are data, not
-    code, so a new template field is a prompt change and not a migration.
+    The keys are an explicit, validated list - ``core.vocabulary.FIELDS_EXTRACTED``
+    - and closing that list is what closes docs/decisions/0001. A dictionary of
+    free-form names meant that a field renamed in a prompt showed up on the detail
+    page as a blank, in exactly the same words a notice that genuinely said nothing
+    uses. A page that looks complete while a fact is silently missing is the one
+    failure mode the register cannot carry, so an unknown key is refused here.
+
+    The keys are internal identifiers and stay stable however the team's display
+    labels change; the labels live in ``core.vocabulary`` and nowhere else.
     """
 
     model_config = ConfigDict(from_attributes=True)
@@ -643,6 +652,18 @@ class TenderDetail(BaseModel):
     extracted_at: UtcDatetime = Field(default_factory=utc_now)
     model: str | None = None
     prompt_version: str | None = None
+
+    @field_validator("fields")
+    @classmethod
+    def _check_keys(cls, value: dict[str, DetailField]) -> dict[str, DetailField]:
+        unknown = sorted(set(value) - set(FIELDS_EXTRACTED))
+        if unknown:
+            raise ValueError(
+                f"unknown extracted field(s) {', '.join(unknown)}; the register's extraction "
+                f"columns are: {', '.join(FIELDS_EXTRACTED)}. Add the field to "
+                "core.vocabulary rather than inventing a key here"
+            )
+        return value
 
 
 class Run(BaseModel):
@@ -682,6 +703,49 @@ class Watermark(BaseModel):
     source: SourcePlatform
     last_successful_at: UtcDatetime | None = None
     updated_at: UtcDatetime = Field(default_factory=utc_now)
+
+
+class ConfigVersion(BaseModel):
+    """One saved version of one configuration, with who saved it and why.
+
+    Append-only. A change writes a new row and marks the previous one inactive, so
+    every stored screening result can still be read against the configuration it
+    was actually produced under.
+
+    ``payload`` is the whole configuration as a mapping, validated by the screening
+    package on the way in and on the way out. It is held untyped here because
+    ``core`` may not import ``screening``.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    kind: ConfigKind
+    version: int = Field(ge=1)
+    payload: dict[str, Any] = Field(default_factory=dict)
+    saved_by: str
+    saved_at: UtcDatetime = Field(default_factory=utc_now)
+    note: str | None = None
+    active: bool = True
+
+
+class FeedbackComment(BaseModel):
+    """A colleague's note about the interface. Never a fact about a procurement.
+
+    ``element`` and ``element_label`` are captured from what was clicked. The
+    contents of an input are deliberately not among them: a comment box that
+    recorded what was in the field beside it would eventually record a password.
+    """
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int | None = None
+    page: str
+    element: str
+    element_label: str | None = None
+    tender_id: str | None = None
+    comment: str
+    reported_by: str | None = None
+    created_at: UtcDatetime = Field(default_factory=utc_now)
 
 
 class ScreeningVersions(BaseModel):
@@ -912,6 +976,53 @@ class UpsertStats(BaseModel):
     new: int = 0
     updated: int = 0
     unchanged: int = 0
+
+
+class Staleness(BaseModel):
+    """How many notices would be re-screened now, and what made each one stale.
+
+    Every count is over the **latest** result for a notice. Results are
+    append-only, so counting historical rows as well would leave this permanently
+    above zero however often anybody pressed re-screen.
+    """
+
+    never_screened: int = 0
+    changed_content: int = 0
+    older_rules: int = 0
+    older_policy: int = 0
+    older_profile: int = 0
+    different_model: int = 0
+    assessment_failed: int = 0
+
+    @property
+    def total(self) -> int:
+        return (
+            self.never_screened
+            + self.changed_content
+            + self.older_rules
+            + self.older_policy
+            + self.older_profile
+            + self.different_model
+            + self.assessment_failed
+        )
+
+    @property
+    def on_an_older_version(self) -> int:
+        """Screened, but under a configuration that is no longer the active one."""
+        return self.older_rules + self.older_policy + self.older_profile
+
+    def lines(self) -> list[tuple[str, int]]:
+        """The non-zero reasons in plain words, for the settings page."""
+        wanted = [
+            ("Never screened", self.never_screened),
+            ("The notice text or its CPV codes changed", self.changed_content),
+            ("Screened under an older rule set", self.older_rules),
+            ("Screened under an older scoring policy", self.older_policy),
+            ("Screened under an older mandate", self.older_profile),
+            ("Screened by a different model or prompt", self.different_model),
+            ("The assessment failed and nothing judged it", self.assessment_failed),
+        ]
+        return [(label, count) for label, count in wanted if count]
 
 
 class SchemaCheck(BaseModel):

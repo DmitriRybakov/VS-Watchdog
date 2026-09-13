@@ -151,6 +151,47 @@ _AWARD_CRITERION_TYPES: dict[str, str] = {
     "cost": "Cost",
 }
 
+# The qualification bar, in words. TED sends "slc-stand-other" and
+# "slc-abil-ref-services"; a colleague deciding whether we could bid needs
+# "minimum turnover" and "reference projects". Only codes whose meaning is known
+# are here - an unknown one returns None and the raw code is what gets shown.
+_SELECTION_CRITERIA: dict[str, str] = {
+    "slc-suit-reg-prof": "Enrolment in a professional register",
+    "slc-suit-reg-trade": "Enrolment in a trade register",
+    "slc-stand-ins": "Professional indemnity insurance",
+    "slc-stand-to-gen": "Minimum yearly turnover",
+    "slc-stand-to-spec": "Minimum turnover in this field of work",
+    "slc-stand-to-avg": "Minimum average yearly turnover",
+    "slc-stand-to-spec-avg": "Minimum average yearly turnover in this field of work",
+    "slc-stand-rat": "Financial ratio",
+    "slc-stand-acc": "How the bidder's accounts are set up",
+    "slc-stand-other": "Other financial standing requirement",
+    "slc-abil-ref-services": "Reference projects: services delivered",
+    "slc-abil-ref-works": "Reference projects: works delivered",
+    "slc-abil-ref-supp": "Reference projects: supplies delivered",
+    "slc-abil-staff-yrly-avg-mp": "Average yearly staff numbers",
+    "slc-abil-subc": "How much of the work may be subcontracted",
+    "slc-abil-educ": "Educational and professional qualifications",
+    "slc-abil-tech": "Technicians or technical bodies available",
+    "slc-abil-equ": "Tools, plant and technical equipment",
+    "slc-abil-qms": "Quality assurance scheme",
+    "slc-abil-envm": "Environmental management measures",
+    "slc-abil-samp": "Samples, descriptions or photographs",
+    "slc-abil-cert": "Certificates from a quality-control institute",
+    "slc-abil-study": "Study and research facilities",
+    "slc-abil-meas": "Measures for ensuring quality",
+    "slc-abil-syst": "Supply-chain management system",
+}
+
+# The three statutory categories the codes are grouped into, read off the code's
+# own prefix rather than guessed. A code outside our list still lands in the
+# right category, which is more use than the bare code and is not an invention.
+_SELECTION_CRITERION_FAMILIES: tuple[tuple[str, str], ...] = (
+    ("slc-suit", "Suitability to pursue the professional activity"),
+    ("slc-stand", "Economic and financial standing"),
+    ("slc-abil", "Technical and professional ability"),
+)
+
 # What the number beside an award criterion actually is. Verified; see the module
 # docstring. An unknown code means the number is shown bare.
 _NUMBER_KINDS: dict[str, str] = {
@@ -233,6 +274,22 @@ def dps_usage_label(code: str | None) -> str | None:
 
 def award_criterion_type_label(code: str | None) -> str | None:
     return _lookup(_AWARD_CRITERION_TYPES, code)
+
+
+def selection_criterion_label(code: str | None) -> str | None:
+    """The qualification requirement in plain words, or None for a code we do not know."""
+    return _lookup(_SELECTION_CRITERIA, code)
+
+
+def selection_criterion_family(code: str | None) -> str | None:
+    """Which of the three statutory categories a code belongs to, read off its prefix."""
+    if not code:
+        return None
+    key = code.strip().lower()
+    for prefix, name in _SELECTION_CRITERION_FAMILIES:
+        if key == prefix or key.startswith(f"{prefix}-"):
+            return name
+    return None
 
 
 def number_kind_label(code: str | None) -> str | None:

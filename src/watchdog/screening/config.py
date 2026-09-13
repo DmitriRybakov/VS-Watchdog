@@ -357,9 +357,20 @@ def save_rules_config(config: RulesConfig, path: Path | str = DEFAULT_CONFIG_PAT
     build a ``RulesConfig`` by copying and updating one, which skips validation.
     """
     validated = parse_rules_config(config.to_yaml_dict())
+    write_yaml_document(path, validated.to_yaml_dict(), header=_FILE_HEADER)
 
+
+def write_yaml_document(
+    path: Path | str, data: dict[str, Any], *, header: str | None = None
+) -> None:
+    """Write one YAML document, atomically, with an optional explanatory header.
+
+    Written beside the target and renamed into place, so an interrupted save
+    cannot leave half a configuration file behind. Shared with the policy and the
+    profile, which are exported from the database the same way.
+    """
     body = yaml.safe_dump(
-        validated.to_yaml_dict(),
+        data,
         allow_unicode=True,
         sort_keys=False,
         default_flow_style=False,
@@ -375,8 +386,9 @@ def save_rules_config(config: RulesConfig, path: Path | str = DEFAULT_CONFIG_PAT
     )
     try:
         with os.fdopen(handle, "w", encoding="utf-8", newline="\n") as stream:
-            stream.write(_FILE_HEADER)
-            stream.write("\n")
+            if header:
+                stream.write(header)
+                stream.write("\n")
             stream.write(body)
             stream.flush()
             os.fsync(stream.fileno())

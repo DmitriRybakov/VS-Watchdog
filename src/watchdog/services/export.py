@@ -39,6 +39,7 @@ from openpyxl.cell.cell import Cell
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
 
+from watchdog.core import vocabulary
 from watchdog.core.codelists import award_criterion_type_label, criterion_number
 from watchdog.core.models import RegisterRow, Tender
 
@@ -103,7 +104,13 @@ COLUMN_KINDS: tuple[tuple[str, Kind], ...] = (
     ("performance_city", Kind.TEXT),
     ("framework_agreement_across_lots", Kind.TEXT),
     ("contract_duration_across_lots", Kind.TEXT),
+    # The criteria and their numbers are two columns, not one. TED sends the names
+    # and the numbers as separate arrays and states no ordering between them, and
+    # equal lengths do not prove equal order - on a single-lot notice either. A
+    # wrong weight against the right criterion name is a mistake somebody acts on
+    # and nobody catches. See docs/decisions/0008.
     ("award_criteria_across_lots", Kind.TEXT),
+    ("award_criterion_numbers_unpaired", Kind.TEXT),
     ("submission_url_across_lots", Kind.TEXT),
     ("score", Kind.WHOLE),
     ("score_kind", Kind.TEXT),
@@ -127,6 +134,31 @@ COLUMN_KINDS: tuple[tuple[str, Kind], ...] = (
 )
 
 COLUMNS: tuple[str, ...] = tuple(name for name, _ in COLUMN_KINDS)
+
+# What a colleague reads at the top of the sheet. The column name is the stable
+# key and never changes; the heading is the team's own word for the thing, from
+# core.vocabulary, so a workbook exported here uses the same words as the register
+# it came from. A column the vocabulary does not cover keeps its key.
+COLUMN_LABELS: dict[str, str] = {
+    "title": vocabulary.label("tender_name"),
+    "buyer_name": vocabulary.label("client"),
+    "buyer_country": vocabulary.label("client_country"),
+    "country_of_performance": vocabulary.label("project_location"),
+    "published_date": vocabulary.label("published_date"),
+    "deadline_date": vocabulary.label("deadline_date"),
+    "source": vocabulary.label("public_platform"),
+    "notice_stage": vocabulary.label("phase_of_tender"),
+    "submission_languages_across_lots": f"{vocabulary.label('submission_language')} (across lots)",
+    "award_criteria_across_lots": f"{vocabulary.label('evaluation_and_award_criteria')} (names)",
+    "award_criterion_numbers_unpaired": "Award criterion numbers (not matched to names)",
+    "source_url": vocabulary.label("procurement_documents_link"),
+}
+
+
+def headings() -> list[str]:
+    """The header row: the team's word for a column, or its key where there is none."""
+    return [COLUMN_LABELS.get(name, name) for name in COLUMNS]
+
 
 # How each kind is displayed. "@" is Excel's format code for "this cell is text",
 # which is what keeps a leading zero on screen as well as in the file.
@@ -154,10 +186,12 @@ def _yes_no(value: bool | None) -> str | None:
 
 
 def _criteria(tender: Tender) -> str | None:
-    """The award criteria as one cell, each number carrying its verified meaning.
+    """The award criteria's names as one cell. Never with a number beside them.
 
-    Empty when TED's arrays disagreed and nothing could be read as one list: a
-    partial pairing in a spreadsheet is a wrong weight nobody would question.
+    Empty when TED's arrays disagreed and nothing could be read as one list. The
+    numbers go in their own column: TED sends the names and the numbers as two
+    arrays with no stated ordering between them, so a name and a weight shown
+    together in a spreadsheet would be an association nobody could check.
     """
     if tender.criteria_unpaired or not tender.award_criteria:
         return None
@@ -165,10 +199,23 @@ def _criteria(tender: Tender) -> str | None:
     parts: list[str] = []
     for item in tender.award_criteria:
         label = award_criterion_type_label(item.type) or item.type or "criterion"
-        number = criterion_number(item.number, item.number_kind)
-        name = item.name or label
-        parts.append(name if number is None else f"{name} {number}")
+        parts.append(item.name or item.description or label)
     return " | ".join(parts)
+
+
+def _criterion_numbers(tender: Tender) -> str | None:
+    """Every number the notice states beside its award criteria, in the order given."""
+    if tender.criteria_unpaired or not tender.award_criteria:
+        return None
+
+    parts = [
+        written
+        for written in (
+            criterion_number(item.number, item.number_kind) for item in tender.award_criteria
+        )
+        if written is not None
+    ]
+    return " | ".join(parts) or None
 
 
 def values(row: RegisterRow) -> dict[str, Any]:
@@ -212,6 +259,7 @@ def values(row: RegisterRow) -> dict[str, Any]:
             for item in tender.contract_durations
         ),
         "award_criteria_across_lots": _criteria(tender),
+        "award_criterion_numbers_unpaired": _criterion_numbers(tender),
         "submission_url_across_lots": " ".join(tender.submission_urls),
         "source_url": tender.source_url,
     }
@@ -268,7 +316,7 @@ def to_csv(rows: Sequence[RegisterRow]) -> Iterator[bytes]:
     # accented buyer name. The BOM is what tells it otherwise.
     yield "\ufeff".encode()
 
-    writer.writerow(COLUMNS)
+    writer.writerow(headings())
     yield _drain(buffer)
 
     for row in rows:
@@ -282,7 +330,7 @@ def to_xlsx(rows: Sequence[RegisterRow], *, sheet_name: str = "Register") -> byt
     sheet = workbook.active
     sheet.title = _sheet_name(sheet_name)
 
-    sheet.append(list(COLUMNS))
+    sheet.append(headings())
     for heading in sheet[1]:
         heading.font = Font(bold=True)
 

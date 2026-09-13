@@ -683,8 +683,10 @@ def test_detail_fields_round_trip_with_their_source_reference(
         TenderDetail(
             tender_id=tender.id,
             fields={
-                "scope": DetailField(value="Pre-FEED study", source_ref="section 2.1"),
-                "budget": DetailField(value=None, source_ref=None),
+                "scope_of_work_technical": DetailField(
+                    value="Pre-FEED study", source_ref="section 2.1"
+                ),
+                "site_visit_requirement": DetailField(value=None, source_ref=None),
             },
             extracted_at=datetime(2026, 3, 4, 8, 0, tzinfo=UTC),
             model="gpt-4o",
@@ -694,9 +696,9 @@ def test_detail_fields_round_trip_with_their_source_reference(
 
     detail = repository.get_detail(tender.id)
     assert detail is not None
-    assert detail.fields["scope"].source_ref == "section 2.1"
+    assert detail.fields["scope_of_work_technical"].source_ref == "section 2.1"
     # An unknown fact stays None, not "".
-    assert detail.fields["budget"].value is None
+    assert detail.fields["site_visit_requirement"].value is None
 
 
 # ------------------------------------------------------ runs and watermarks

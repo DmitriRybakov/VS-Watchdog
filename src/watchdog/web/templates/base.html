@@ -7,19 +7,27 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/watchdog.css') }}" />
     <script src="{{ url_for('static', path='js/htmx.min.js') }}" defer></script>
     <script src="{{ url_for('static', path='js/triage.js') }}" defer></script>
+    <script src="{{ url_for('static', path='js/detail.js') }}" defer></script>
+    <script src="{{ url_for('static', path='js/feedback.js') }}" defer></script>
   </head>
   {#
     Every HTMX request on the page carries the session's CSRF token, so each of
     the buttons that change something is confirmed as coming from Watchdog.
     Empty on a laptop with no sign-in configured, where there is no session.
+
+    data-feedback is how the feedback script decides whether to intercept a
+    click. Off unless this browser has turned it on.
   #}
-  <body hx-headers='{"X-CSRF-Token": "{{ request.state.csrf_token }}"}'>
+  <body hx-headers='{"X-CSRF-Token": "{{ request.state.csrf_token }}"}'
+        data-feedback="{{ 'on' if request.cookies.get('watchdog_feedback') == 'on' else 'off' }}">
     <header class="site-header">
       <a class="brand" href="/">Watchdog</a>
       <span class="subtitle">Entr Advisory &amp; Decision Support</span>
       <nav class="site-nav">
         <a href="/register">Register</a>
         <a href="/runs">Runs</a>
+        <a href="/settings">Settings</a>
+        <span id="feedback-toggle">{% include "partials/feedback_toggle.html" %}</span>
         {% if request.state.user %}
           <form class="sign-out" method="post" action="/logout">
             <input type="hidden" name="csrf_token" value="{{ request.state.csrf_token }}" />
@@ -29,6 +37,9 @@
       </nav>
     </header>
     <main>{% block content %}{% endblock %}</main>
+    {# One line. Removing feedback mode is removing this, the toggle in the nav,
+       two templates, a script, a route module, a service and a table. #}
+    {% include "partials/feedback.html" %}
     <footer class="site-footer">
       <span>Version {{ version }}</span>
       <span class="muted">All times UTC. Nothing is ever deleted.</span>

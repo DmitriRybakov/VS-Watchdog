@@ -26,7 +26,8 @@ from fastapi.staticfiles import StaticFiles
 from watchdog import __version__
 from watchdog.core.logging import configure_logging, get_logger
 from watchdog.core.settings import Settings, get_settings
-from watchdog.web.routes import auth, health, pages, register, runs
+from watchdog.web.routes import auth, feedback, health, pages, register, runs
+from watchdog.web.routes import settings as settings_routes
 from watchdog.web.security import AuthMiddleware
 from watchdog.web.templating import STATIC_DIR
 
@@ -39,15 +40,26 @@ class UnsafeToStart(RuntimeError):
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-    """Clear stranded runs once, then serve.
+    """Seed the configuration if it is absent, clear stranded runs, then serve.
 
     A run that has stopped reporting progress is one whose process is gone - on a
     host that sleeps, that is a spin-down rather than a crash. Left alone it would
     hold the lock and keep the buttons disabled for good, with nothing on the page
     to press. A run that *is* still reporting belongs to another instance and is
     left exactly where it is.
+
+    The configuration seeding is the other half. It loads config/*.yaml into the
+    database on a database that has none, **keeping each file's own version
+    number**, and does nothing at all where a version already exists. Overwriting
+    on startup would replace what a colleague saved last week with whatever the
+    image happened to ship, silently, on every deploy.
     """
-    from watchdog.services import jobs
+    from watchdog.services import configuration, jobs
+
+    try:
+        configuration.ensure_seeded()
+    except Exception as exc:  # noqa: BLE001 - a broken database must not stop the page loading
+        log.warning("startup_config_seed_skipped", error=str(exc))
 
     try:
         jobs.recover()
@@ -79,6 +91,8 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(register.router)
     app.include_router(runs.router)
+    app.include_router(settings_routes.router)
+    app.include_router(feedback.router)
     app.include_router(pages.router)
     return app
 
