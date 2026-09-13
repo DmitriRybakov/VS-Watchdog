@@ -32,10 +32,12 @@ import base64
 import binascii
 import hashlib
 import hmac
+import re
+import secrets
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from starlette.requests import Request
 from starlette.responses import PlainTextResponse, RedirectResponse, Response
@@ -171,6 +173,45 @@ def csrf_matches(expected: str, supplied: str | None) -> bool:
     if not expected or not supplied:
         return False
     return hmac.compare_digest(expected, supplied)
+
+
+# The shape ``secrets.token_urlsafe`` produces. A cookie of any other shape is
+# treated as absent rather than echoed back into the page.
+_NONCE = re.compile(r"\A[A-Za-z0-9_-]{16,64}\Z")
+
+
+def form_csrf_nonce(request: Request) -> str:
+    """The sign-in form's half of the double submit: the browser's own, or a new one.
+
+    Reused rather than reminted, because the sign-in page is fetched more often
+    than it is looked at. A browser asks for ``/favicon.ico`` beside every page,
+    that ask carries no session, and it is redirected here and follows the
+    redirect. Minting a nonce on each fetch replaces the cookie belonging to the
+    form already on screen, and the sign-in then fails on a page nobody touched.
+    """
+    existing = request.cookies.get(CSRF_COOKIE) or ""
+    return existing if _NONCE.match(existing) else secrets.token_urlsafe(24)
+
+
+def same_origin(request: Request) -> bool:
+    """Whether a form post came from this site, judged by host name alone.
+
+    The scheme is deliberately not compared. Render terminates TLS at its own
+    proxy and forwards plain HTTP, so a scheme rebuilt from the connection reads
+    ``http`` while the browser says ``https``; comparing the two would refuse
+    every sign-in on the hosted site. The ``Host`` header carries the public name
+    in both places, so comparing that compares like with like.
+
+    A request carrying no ``Origin`` is not refused here - not every client sends
+    one - and the token in the body still has to match the cookie.
+    """
+    origin = request.headers.get("origin")
+    if not origin or origin == "null":
+        return True
+    host = request.headers.get("host")
+    if not host:
+        return False
+    return urlsplit(origin).netloc.casefold() == host.casefold()
 
 
 # ------------------------------------------------------------------- cookies

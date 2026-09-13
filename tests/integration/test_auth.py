@@ -138,12 +138,19 @@ def test_a_wrong_password_does_not(signed_in_app: TestClient) -> None:
             "password": "not the password",
             "csrf_token": signed_in_app.cookies[security.CSRF_COOKIE],
         },
+        follow_redirects=False,
     )
 
-    assert response.status_code == 401
+    # A redirect to a fresh sign-in page, so refreshing reloads a form rather
+    # than sending the password again.
+    assert response.status_code == 303
+    assert "error=credentials" in response.headers["location"]
     assert security.SESSION_COOKIE not in signed_in_app.cookies
+
+    landed = signed_in_app.get(response.headers["location"])
+
     # Which half was wrong is not said, because saying it only helps a script.
-    assert "username and password" in response.text
+    assert "username and password" in landed.text
 
 
 def test_the_sign_in_page_does_not_need_the_stylesheet_it_cannot_load(
@@ -161,10 +168,30 @@ def test_a_sign_in_form_from_somewhere_else_is_refused(signed_in_app: TestClient
     response = signed_in_app.post(
         "/login",
         data={"username": USERNAME, "password": PASSWORD, "csrf_token": "made up"},
+        follow_redirects=False,
     )
 
-    assert response.status_code == 401
+    assert response.status_code == 303
+    assert "error=stale" in response.headers["location"]
     assert security.SESSION_COOKIE not in signed_in_app.cookies
+
+
+def test_the_token_a_browser_already_holds_survives_another_fetch_of_the_page(
+    signed_in_app: TestClient,
+) -> None:
+    """A browser fetches /login more often than a colleague looks at it.
+
+    /favicon.ico has no session, is redirected here and follows the redirect. If
+    that fetch reminted the nonce it would replace the cookie belonging to the
+    form on screen, and the sign-in would be refused as stale. See
+    tests/integration/test_sign_in_in_a_browser.py for the same thing in a browser.
+    """
+    signed_in_app.get("/login")
+    first = signed_in_app.cookies[security.CSRF_COOKIE]
+
+    signed_in_app.get("/login?next=%2Ffavicon.ico")
+
+    assert signed_in_app.cookies[security.CSRF_COOKIE] == first
 
 
 def test_the_session_cookie_cannot_be_read_by_a_script_or_sent_in_the_clear(
