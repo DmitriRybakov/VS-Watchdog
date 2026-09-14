@@ -26,7 +26,8 @@ from starlette.responses import Response
 
 from watchdog import __version__
 from watchdog.services import feedback as feedback_service
-from watchdog.services.feedback import EmptyComment
+from watchdog.services.feedback import EmptyComment, NamelessComment
+from watchdog.web import reviewer as reviewer_cookie
 from watchdog.web.deps import Store
 from watchdog.web.reviewer import Reviewer
 from watchdog.web.templating import templates
@@ -71,8 +72,22 @@ def record(
     element_label: str = Form(default=""),
     tender_id: str = Form(default=""),
     comment: str = Form(default=""),
+    reported_by: str = Form(default=""),
 ) -> HTMLResponse:
-    """Store one comment and say so. Performs no action of any kind."""
+    """Store one comment and say so. Performs no action of any kind.
+
+    A comment nobody can be asked about is half a comment, so this refuses a
+    nameless one rather than recording it as anonymous. The name comes from the
+    same cookie the review controls use; the box only asks for one when that
+    cookie is not set, and setting it here sets it for reviews too.
+    """
+    typed: str | None = None
+    if reviewer is None:
+        try:
+            typed = reviewer_cookie.clean(reported_by)
+        except reviewer_cookie.InvalidName as exc:
+            return _problem(request, str(exc))
+
     try:
         saved = feedback_service.record(
             page=page,
@@ -80,21 +95,29 @@ def record(
             element_label=element_label or None,
             comment=comment,
             tender_id=tender_id or None,
-            reported_by=reviewer,
+            reported_by=reviewer or typed,
             repository=store,
         )
-    except EmptyComment as exc:
-        return templates.TemplateResponse(
-            request,
-            "partials/feedback_result.html",
-            {"problem": str(exc), "saved": None, "version": __version__},
-            status_code=400,
-        )
+    except (EmptyComment, NamelessComment) as exc:
+        return _problem(request, str(exc))
 
-    return templates.TemplateResponse(
+    response = templates.TemplateResponse(
         request,
         "partials/feedback_result.html",
         {"problem": None, "saved": saved, "version": __version__},
+    )
+    if typed:
+        reviewer_cookie.remember(response, typed)
+    return response
+
+
+def _problem(request: Request, message: str) -> HTMLResponse:
+    """Why nothing was saved, in a sentence, with the comment still in the box."""
+    return templates.TemplateResponse(
+        request,
+        "partials/feedback_result.html",
+        {"problem": message, "saved": None, "version": __version__},
+        status_code=400,
     )
 
 

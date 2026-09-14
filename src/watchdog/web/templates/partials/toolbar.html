@@ -3,7 +3,7 @@
   two exports. Every control is a link or a select carrying the current filter,
   so nothing here can show a different set from the rows below it.
 #}
-<div class="toolbar">
+<div class="toolbar" data-area="Results toolbar">
   <p class="result-count" role="status">
     <strong>{{ view.page.total }}</strong>
     notice{{ '' if view.page.total == 1 else 's' }} match

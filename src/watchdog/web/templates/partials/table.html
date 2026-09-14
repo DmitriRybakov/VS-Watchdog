@@ -3,25 +3,36 @@
   decision needs and no more - this is not the thirty-two-column workbook, and
   everything else is one click away on the detail page.
 #}
+{% from "partials/help.html" import mark %}
 {% include "partials/toolbar.html" %}
 
 {% if not rows %}
   {% include "partials/nothing.html" %}
 {% else %}
-<div class="table-wrap">
+<div class="table-wrap" data-area="Register table">
   <table class="register-table">
     <thead>
       <tr>
-        <th scope="col">{{ 'Score' if view.ai_enabled else 'Evidence' }}</th>
-        <th scope="col">Band</th>
+        <th scope="col">{{ 'Score' if view.ai_enabled else 'Evidence' }}
+          {{ mark('One number from 1 to 5, weighed from three axes, 5 being the closest fit to
+                   our mandate.' if view.ai_enabled else
+                   'How much keyword and CPV evidence the notice carries, 0 to 3. Not a
+                    judgement of relevance.') }}</th>
+        <th scope="col">Band
+          {{ mark('Which pile the notice was put in: shortlist is worth reading, review is held
+                   for a person to decide, archive is low priority and still searchable.') }}</th>
         <th scope="col">{{ LABEL('tender_name') }}</th>
         <th scope="col">{{ LABEL('client') }}</th>
         <th scope="col">{{ LABEL('client_country') }}</th>
         <th scope="col">Domain</th>
         <th scope="col">{{ LABEL('published_date') }}</th>
         <th scope="col">{{ LABEL('deadline_date') }}</th>
-        <th scope="col">Signals</th>
-        <th scope="col">Conf.</th>
+        <th scope="col">Signals
+          {{ mark('The keyword rules that matched. Evidence, never a verdict - a notice nothing
+                   matched is not a notice we judged irrelevant.') }}</th>
+        <th scope="col">Conf.
+          {{ mark('How well evidenced the judgement is, not a chance that the tender is
+                   relevant.', 'confidence') }}</th>
         <th scope="col">Verdict</th>
         <th scope="col">Owner</th>
       </tr>

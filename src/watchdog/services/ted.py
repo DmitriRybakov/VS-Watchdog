@@ -13,6 +13,7 @@ from datetime import date, timedelta
 from pathlib import Path
 
 from watchdog.core.clock import utc_now
+from watchdog.core.countries import country_names
 from watchdog.core.models import Tender
 from watchdog.sources.errors import MappingError
 from watchdog.sources.ted import (
@@ -97,6 +98,102 @@ class ProbeResult:
 
 def get_config(path: Path | str = DEFAULT_CONFIG_PATH) -> TedSourceConfig:
     return load_ted_config(path)
+
+
+@dataclass(frozen=True)
+class Condition:
+    """One thing we ask TED for, in words, with what it leaves out."""
+
+    label: str
+    value: str
+    consequence: str
+
+
+@dataclass(frozen=True)
+class FetchConditions:
+    """What Watchdog asks TED for, readable by somebody who cannot open the YAML.
+
+    Nothing on screen used to say this, so a colleague looking for a notice that
+    is not here could not tell whether it had been screened out or never fetched
+    at all. Those are different problems with different fixes, and guessing
+    between them wastes the time the tool is meant to save.
+    """
+
+    conditions: tuple[Condition, ...]
+    cpv_codes: tuple[str, ...]
+    provisional: tuple[tuple[str, str, str], ...]
+    source_file: str
+
+
+def fetch_conditions(path: Path | str = DEFAULT_CONFIG_PATH) -> FetchConditions:
+    """The current fetch conditions as plain sentences. Reads, changes nothing."""
+    config = get_config(path)
+
+    countries = country_names(config.buyer_countries)
+    performance = (
+        ", ".join(country_names(config.place_of_performance))
+        if config.place_of_performance
+        else "Anywhere"
+    )
+    stages = ", ".join(stage.value.replace("_", " ") for stage in config.notice_stages)
+    natures = ", ".join(nature.value for nature in config.contract_natures)
+
+    conditions = [
+        Condition(
+            label="Subject categories",
+            value=f"{len(config.cpv_prefixes)} CPV codes, listed below",
+            consequence="A notice whose categories are all outside this list is never fetched.",
+        ),
+        Condition(
+            label="Where the buyer is",
+            value=f"{len(config.buyer_countries)} countries: {', '.join(countries)}",
+            consequence="A buyer outside these countries is never fetched.",
+        ),
+        Condition(
+            label="Where the work is",
+            value=performance,
+            consequence=(
+                "Not restricted, so a notice is never dropped for the place of performance."
+                if not config.place_of_performance
+                else "A notice performed elsewhere is never fetched."
+            ),
+        ),
+        Condition(
+            label="What is being bought",
+            value=natures or "Not restricted",
+            consequence="A works or supplies contract is never fetched."
+            if natures
+            else "Not restricted.",
+        ),
+        Condition(
+            label="How far along",
+            value=stages or "Not restricted",
+            consequence=(
+                "An award notice or a contract already signed is never fetched - "
+                "by then it is too late to bid."
+            ),
+        ),
+        Condition(
+            label="How far back",
+            value=(
+                f"{config.backfill_days} days on a first run, then everything published "
+                f"since the last one plus {config.overlap_days} days of overlap"
+            ),
+            consequence=(
+                "The overlap is deliberate: it re-reads a couple of days so a notice "
+                "published while a run was in flight is not missed."
+            ),
+        ),
+    ]
+
+    return FetchConditions(
+        conditions=tuple(conditions),
+        cpv_codes=tuple(config.cpv_prefixes),
+        provisional=tuple(
+            (item.code, item.reason, item.since.isoformat()) for item in config.provisional_cpv
+        ),
+        source_file=str(path),
+    )
 
 
 def window_for(days: int, *, today: date | None = None) -> tuple[date, date]:

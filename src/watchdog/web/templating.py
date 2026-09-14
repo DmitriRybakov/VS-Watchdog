@@ -21,6 +21,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from fastapi import Request
 from fastapi.templating import Jinja2Templates
 
 from watchdog.core import vocabulary
@@ -36,6 +37,7 @@ from watchdog.core.codelists import (
     procedure_type_label,
 )
 from watchdog.core.countries import country_name, country_names
+from watchdog.web.reviewer import get_reviewer
 
 WEB_DIR = Path(__file__).resolve().parent
 TEMPLATES_DIR = WEB_DIR / "templates"
@@ -179,6 +181,87 @@ def evidence_word(grade: int | None) -> str:
     return EVIDENCE_WORDS.get(grade if grade is not None else -1, "not graded")
 
 
+def thousands(value: object) -> str:
+    """A count with thousands separators. 3,080 is read at a glance; 3080 is not."""
+    try:
+        return f"{int(value):,}"  # type: ignore[call-overload]
+    except (TypeError, ValueError):
+        return str(value)
+
+
+def run_outcome(counts: object) -> str:
+    """What an update run actually did, as a sentence a colleague can act on.
+
+    The raw counts read as nonsense in front of somebody who did not write them:
+    "3,078 updated, 2 unchanged" sounds as though the register had held two
+    notices before.
+
+    "updated" is the one to be careful with. It counts notices where the fields we
+    compare differ from what came back, which is not the same claim as "the buyer
+    changed something": the first run after we start asking TED for a new field
+    updates every notice that has one. So the wording stays on our side of the
+    comparison - we updated what we hold - and the belt carries the caveat.
+    """
+    if not isinstance(counts, dict):
+        return ""
+
+    def number(key: str) -> int:
+        value = counts.get(key, 0)
+        return value if isinstance(value, int) else 0
+
+    new = number("new")
+    changed = number("updated")
+    same = number("unchanged")
+    seen_before = changed + same
+
+    parts: list[str] = []
+    if new:
+        parts.append(f"{new:,} new notice{'' if new == 1 else 's'}.")
+    elif seen_before:
+        parts.append("No new notices.")
+
+    if seen_before:
+        already = f"Rechecked {seen_before:,} existing notice{'' if seen_before == 1 else 's'}"
+        if changed and same:
+            already += (
+                f": updated our stored information for {changed:,}; {same:,} needed no changes"
+            )
+        elif changed:
+            already += (
+                f": updated our stored information for {'it' if changed == 1 else 'every one'}"
+            )
+        else:
+            already += ": it needed no changes" if same == 1 else ": none needed changes"
+        parts.append(already + ".")
+
+    quarantined = number("quarantined")
+    if quarantined:
+        parts.append(
+            f"{quarantined:,} could not be read and {'is' if quarantined == 1 else 'are'} "
+            "held aside rather than dropped."
+        )
+
+    # Anything a run reported that this wording does not name - a screening run's
+    # own counts, for instance. Shown rather than swallowed: a number a colleague
+    # cannot see is a number nobody can question.
+    said = {"new", "updated", "unchanged", "quarantined"}
+    if number("fetched") == new + seen_before + quarantined + number("failed"):
+        # Every fetched notice is already named above, so repeating the total adds
+        # nothing. A total that does not add up is another matter and stays.
+        said.add("fetched")
+    rest = [
+        f"{value:,} {key.replace('_', ' ')}"
+        for key, value in counts.items()
+        if key not in said and isinstance(value, int) and value
+    ]
+    if rest:
+        parts.append(", ".join(rest).capitalize() + ".")
+
+    if not parts:
+        return "Nothing was read."
+    return " ".join(parts)
+
+
 def given(value: object, kind: str = "source") -> str:
     """A value, or the kind of nothing it is. Never one word for three absences."""
     if value is None or (isinstance(value, str) and not value.strip()):
@@ -291,6 +374,16 @@ def criterion_weight(criterion: object) -> str:
     return written
 
 
+def recording_as(request: Request) -> str | None:
+    """The name this browser is recording under, for any page that has to say so.
+
+    The feedback box is included once in the base template and rendered by every
+    route, so it cannot be handed the name by a route. It is the same cookie the
+    review controls use, read the same way.
+    """
+    return get_reviewer(request)
+
+
 templates = Jinja2Templates(directory=str(TEMPLATES_DIR))
 templates.env.filters["safe_url"] = safe_url
 templates.env.filters["day"] = day
@@ -318,6 +411,9 @@ templates.env.filters["framework_agreement"] = framework_agreement_label
 templates.env.filters["dps_usage"] = dps_usage_label
 templates.env.filters["criterion_type"] = award_criterion_type_label
 templates.env.filters["clamped"] = clamped
+templates.env.filters["thousands"] = thousands
+templates.env.filters["run_outcome"] = run_outcome
+templates.env.globals["recording_as"] = recording_as
 templates.env.globals["NOT_IN_NOTICE"] = NOT_IN_NOTICE
 templates.env.globals["NOT_RETRIEVED"] = NOT_RETRIEVED
 templates.env.globals["NOT_ASSESSED"] = NOT_ASSESSED

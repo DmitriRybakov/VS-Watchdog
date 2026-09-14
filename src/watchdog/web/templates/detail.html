@@ -1,11 +1,17 @@
 {% extends "base.html" %}
+{% from "partials/help.html" import mark %}
 {% block title %}{{ row.tender.title }} &middot; Watchdog{% endblock %}
 
 {#
   One notice, laid out as our own register is: what the documents say, then what
-  Entr's analysis concluded. Every field carries where its value came from, and a
-  field nothing fills is still shown - its emptiness is information, and hiding it
-  would make the page look complete while a fact was silently missing.
+  Entr's analysis concluded. A field nothing fills is still shown - its emptiness
+  is information, and hiding it would make the page look complete while a fact was
+  silently missing.
+
+  Every field is the same shape at rest: label, value, and nothing else. What a
+  field means is in the hover mark beside its label. Where a value was read from
+  is in Technical details. Those are two different things and the page must not
+  let them look alike, which is exactly what it used to do.
 
   Everything less-used is behind one expander rather than a switch per field. A
   checkbox per field is a configuration surface nobody maintains, whose failure
@@ -15,8 +21,9 @@
 {% macro field(item) %}
   <div class="field" data-field="{{ item.key }}">
     <dt>
-      {{ item.label }}
-      <span class="pill pill-origin">{{ item.origin }}</span>
+      <span class="field-label">{{ item.label }}</span>
+      {{ mark(item.help, item.label | lower) }}
+      <span class="origin" title="{{ item.origin }}">{{ item.origin_short }}</span>
     </dt>
     <dd>
       {% if item.filled %}
@@ -29,14 +36,14 @@
             {% else %}
               <span lang="{{ value.language or '' }}">{{ value.text }}</span>
             {% endif %}
-            {% if value.note %}<span class="muted">{{ value.note }}</span>{% endif %}
+            {% if value.qualifier %}<span class="value-qualifier">{{ value.qualifier }}</span>{% endif %}
+            {{ mark(value.note) }}
           </p>
         {% endfor %}
       {% else %}
-        <p class="field-value muted">{{ ABSENT[item.absent] }}</p>
+        <p class="field-value is-absent">{{ ABSENT[item.absent] }}</p>
       {% endif %}
-      {% if item.caution %}<p class="muted field-caution">{{ item.caution }}</p>{% endif %}
-      {% if item.note %}<p class="muted field-note">{{ item.note }}</p>{% endif %}
+      {% if item.caution %}<p class="field-caution">{{ item.caution }}</p>{% endif %}
     </dd>
   </div>
 {% endmacro %}
@@ -45,7 +52,7 @@
 {% set documents = summary.groups[0] %}
 {% set analysis = summary.groups[1] %}
 
-<nav class="detail-nav" aria-label="Within this filtered list">
+<nav class="detail-nav" data-area="Notice navigation" aria-label="Within this filtered list">
   <a href="/register?{{ back }}">&larr; Back to the register</a>
   {% if around.position %}
     <span class="muted">{{ around.position }} of {{ around.total }} in this view</span>
@@ -67,7 +74,7 @@
 </nav>
 
 <article class="detail" data-tender-id="{{ row.tender.id }}">
-  <header>
+  <header data-area="Notice heading">
     <h1>{{ row.tender.title }}</h1>
     {#
       The same badge, from the same filter, as the register row this page was
@@ -75,18 +82,23 @@
       "No deadline given" on the detail page and as "12d left" on the list.
     #}
     {% set badge = row.days_left | days_badge %}
-    <p><span class="badge badge-{{ badge.state }}">{{ badge.text }}</span></p>
-    {% if row.tender.title_native %}
-      <h2 class="native" lang="{{ row.tender.title_native_language or '' }}">{{ row.tender.title_native }}</h2>
-      <p class="muted">The buyer's own title, in
-        {{ row.tender.title_native_language or 'a language the source did not state' }}.
-        This is the text the screening read.</p>
-    {% endif %}
+    <p class="detail-header-line">
+      <span class="badge badge-{{ badge.state }}">{{ badge.text }}</span>
+      {#
+        One switch for the whole page, remembered per browser the same way the
+        reviewer's name is. Not a checkbox per field.
+      #}
+      <label class="explanations-toggle">
+        <input type="checkbox" id="show-explanations" data-remember-check="explanations" />
+        Show explanations
+      </label>
+      {{ mark('Turns every hover mark on this page into a line of text under the value it
+               explains, so the notes can be read or printed without a mouse.') }}
+    </p>
   </header>
 
-  <section id="documents-summary">
-    <h3>{{ documents.label }}</h3>
-    <p class="muted">{{ documents.note }}</p>
+  <section id="documents-summary" data-area="From the documents">
+    <h3>{{ documents.label }} {{ mark(documents.note) }}</h3>
     <dl class="facts">
       {% for item in documents.prominent %}{{ field(item) }}{% endfor %}
     </dl>
@@ -98,10 +110,10 @@
     a long one folds behind an expander and is never cut short.
   #}
   {% set body = row.tender.description | clamped %}
-  <section id="description" class="description">
-    <h3>What the buyer is asking for</h3>
-    <p class="muted">The buyer's own description, exactly as the source sent it and in its
-      original language. Not a summary and not a translation.</p>
+  <section id="description" class="description" data-area="Description">
+    <h3>Description
+      {{ mark('The buyer\'s own description, exactly as the source sent it and in its original
+               language. Not a summary and not a translation.', 'the description') }}</h3>
     {% if body.lead %}
       {% for paragraph in body.lead %}<p class="source-text">{{ paragraph }}</p>{% endfor %}
       {% if body.rest %}
@@ -112,63 +124,87 @@
         </details>
       {% endif %}
     {% else %}
-      <p class="muted">{{ NOT_RETRIEVED }} &mdash; the source sent no description text with this
-        notice. It is usually in the notice documents, which Watchdog does not read yet.</p>
+      <p class="is-absent">{{ NOT_RETRIEVED }}
+        {{ mark('The source sent no description text with this notice. It is usually in the
+                 notice documents, which Watchdog does not read yet.') }}</p>
     {% endif %}
   </section>
 
-  <section id="analysis">
-    <h3>{{ analysis.label }}</h3>
-    <p class="muted">{{ analysis.note }}</p>
+  <section id="analysis" data-area="Entr AI analysis">
+    <h3>{{ analysis.label }} {{ mark(analysis.note) }}</h3>
 
     {% if row.screening %}
       {% set state = row.screening_state.value %}
       <p class="explanation">{{ row.screening.explanation }}</p>
       <dl class="facts">
-        <div>
+        <div class="field">
           <dt>
-            {% if state == 'assessed' %}Score
-            {% elif state == 'graded' %}Rules evidence grade
-            {% elif state == 'assessment_failed' %}{{ ASSESSMENT_FAILED_LABEL }}
-            {% else %}No score or grade{% endif %}
+            <span class="field-label">
+              {% if state == 'assessed' %}Score
+              {% elif state == 'graded' %}Evidence grade
+              {% elif state == 'assessment_failed' %}{{ ASSESSMENT_FAILED_LABEL }}
+              {% else %}No score or grade{% endif %}
+            </span>
+            {% if state == 'assessed' %}
+              {{ mark('One number from 1 to 5, weighed from three axes. 5 is the closest fit to
+                       our mandate.', 'the score') }}
+            {% elif state == 'graded' %}
+              {{ mark('How much keyword and CPV evidence the notice carries, from 0 to 3. It is
+                       not a judgement of relevance and never becomes one.', 'the evidence grade') }}
+            {% endif %}
           </dt>
           <dd>
             {% if state == 'assessed' %}
-              {{ row.screening.score }} of 5
-              &middot; {{ row.screening.axes_established }} of 3 axes established
+              <p class="field-value">{{ row.screening.score }} of 5
+                <span class="value-qualifier">{{ row.screening.axes_established }} of 3 axes established</span></p>
             {% elif state == 'graded' %}
-              {{ row.evidence_grade }} &ndash; {{ row.evidence_grade | evidence_label }}
-              <span class="muted">Keyword and CPV evidence. No model judged this notice.</span>
+              <p class="field-value">{{ row.evidence_grade }} of 3
+                <span class="value-qualifier">{{ row.evidence_grade | evidence_label }}, no model judged this notice</span></p>
             {% elif state == 'assessment_failed' %}
-              <span class="muted">{{ ASSESSMENT_FAILED_HINT }}
-                The notice is in the register at the fallback band so it is not lost, and it
-                is retried on the next screening run.</span>
+              <p class="field-value is-absent">{{ ASSESSMENT_FAILED_HINT }}
+                {{ mark('The notice is in the register at the fallback band so it is not lost,
+                         and it is retried on the next screening run.') }}</p>
             {% else %}
-              <span class="muted">This notice was screened but neither judged nor graded
-                &mdash; {{ row.screening.reason_codes | join(', ') | given('assessment') }}.</span>
+              <p class="field-value is-absent">Screened, but neither judged nor graded
+                <span class="value-qualifier">{{ row.screening.reason_codes | join(', ') | given('assessment') }}</span></p>
             {% endif %}
           </dd>
         </div>
-        <div><dt>Band</dt><dd>{{ row.screening.band.value | band_label }}</dd></div>
+        <div class="field">
+          <dt><span class="field-label">Band</span>
+            {{ mark('Which pile this notice was put in: shortlist is worth reading, review is
+                     held for a person to decide, archive is low priority and still searchable.',
+                    'the band') }}</dt>
+          <dd><p class="field-value">{{ row.screening.band.value | band_label }}</p></dd>
+        </div>
         {% if row.is_assessed %}
-          <div><dt>Confidence</dt><dd>{{ row.screening.confidence | percent }}
-            <span class="muted">How well evidenced the judgement is, not a chance that the
-              tender is relevant. {{ row.screening.confidence_reasons | join('; ') }}</span></dd></div>
+          <div class="field">
+            <dt><span class="field-label">Confidence</span>
+              {{ mark('How well evidenced the judgement is, not a chance that the tender is
+                       relevant.', 'confidence') }}</dt>
+            <dd><p class="field-value">{{ row.screening.confidence | percent }}
+              {{ mark(row.screening.confidence_reasons | join('; ')) }}</p></dd>
+          </div>
         {% elif row.evidence_grade is not none %}
-          <div><dt>How well evidenced</dt>
-            <dd>Keyword evidence: {{ row.evidence_grade | evidence_word }}, {{ row.evidence_grade }} of 3. {{ NOT_ASSESSED }}.
-              <span class="muted">Confidence describes a judgement, and none has been made,
-                so no percentage is shown.</span></dd></div>
+          <div class="field">
+            <dt><span class="field-label">How well evidenced</span>
+              {{ mark('Confidence describes a judgement, and none has been made, so no
+                       percentage is shown.', 'confidence') }}</dt>
+            <dd><p class="field-value">Keyword evidence: {{ row.evidence_grade | evidence_word }}, {{ row.evidence_grade }} of 3
+              <span class="value-qualifier">{{ NOT_ASSESSED }}</span></p></dd>
+          </div>
         {% else %}
-          <div><dt>How well evidenced</dt>
-            <dd>No judgement was made
-              &mdash; {{ row.screening.reason_codes | join(', ') | given('assessment') }}.
-              <span class="muted">Confidence describes a judgement; there is none here to
-                describe, so no percentage is shown.</span></dd></div>
+          <div class="field">
+            <dt><span class="field-label">How well evidenced</span>
+              {{ mark('Confidence describes a judgement; there is none here to describe, so no
+                       percentage is shown.', 'confidence') }}</dt>
+            <dd><p class="field-value is-absent">No judgement was made
+              <span class="value-qualifier">{{ row.screening.reason_codes | join(', ') | given('assessment') }}</span></p></dd>
+          </div>
         {% endif %}
       </dl>
     {% else %}
-      <p class="muted">This notice has never been screened.</p>
+      <p class="is-absent">This notice has never been screened.</p>
     {% endif %}
 
     <dl class="facts">
@@ -198,8 +234,11 @@
     beside a domain rule in the same style reads as evidence for the score, and an
     exclusion that changed nothing looks exactly like one that archived a notice.
   #}
-  <section id="matched-rules">
-    <h3>What the keyword rules found</h3>
+  <section id="matched-rules" data-area="What the keyword rules found">
+    <h3>What the keyword rules found
+      {{ mark('Keywords are evidence, never a verdict. A notice nothing matched is not a notice
+               we judged irrelevant - our vocabulary is English and notices arrive in every EU
+               language.') }}</h3>
     {% if summary.rule_groups %}
       {% for group in summary.rule_groups %}
         <div class="rule-group rule-group-{{ group.key }}">
@@ -225,13 +264,14 @@
     {% endif %}
   </section>
 
-  <section id="review">{% include "partials/review.html" %}</section>
+  <section id="review" data-area="Record a decision">{% include "partials/review.html" %}</section>
 
   {#
     One expander for everything less-used, remembered per browser the same way the
     reviewer's name is. Not a checkbox per field.
   #}
-  <details class="more-details" id="more-details" data-remember="more-details">
+  <details class="more-details" id="more-details" data-remember="more-details"
+           data-area="More details">
     <summary>More details</summary>
 
     <h4>{{ documents.label }}</h4>
@@ -241,69 +281,84 @@
 
     <h4>Lots</h4>
     <dl class="facts">
-      <div>
-        <dt>Lots</dt>
+      <div class="field">
+        <dt><span class="field-label">Lots</span>
+          {{ mark('A notice can be split into lots that are bid for separately. Where there is
+                   more than one, TED states no lot against the values above, so none of them is
+                   attached to a particular lot.', 'lots') }}</dt>
         <dd>
           {% if row.tender.lot_count %}
-            {{ row.tender.lot_count }} lot{{ '' if row.tender.lot_count == 1 else 's' }}
-            <span class="muted">{{ row.tender.lot_ids | join(', ') }}</span>
+            <p class="field-value">{{ row.tender.lot_count }} lot{{ '' if row.tender.lot_count == 1 else 's' }}
+              <span class="value-qualifier">{{ row.tender.lot_ids | join(', ') }}</span></p>
           {% else %}
-            {{ NOT_IN_NOTICE }}
-            <span class="muted">TED sent no lot identifiers for this notice.</span>
-          {% endif %}
-          {% if row.tender.multi_lot %}
-            <span class="muted">Values above are stated somewhere in the notice. With more than
-              one lot, TED does not say which lot each belongs to, so none is attached to one.</span>
+            <p class="field-value is-absent">{{ NOT_IN_NOTICE }}</p>
           {% endif %}
         </dd>
       </div>
-      <div>
-        <dt>Bidding portal</dt>
+      <div class="field">
+        <dt><span class="field-label">Bidding portal</span>
+          {{ mark('Where a bid is submitted. Not the platform the notice was published on, and
+                   not the procurement documents.', 'the bidding portal') }}</dt>
         <dd>
+          <p class="field-value">
           {% for url in row.tender.submission_urls %}
             {% set portal = url | safe_url %}
             {% if portal %}
               <a href="{{ portal }}" rel="noopener noreferrer" target="_blank">Bidding portal{{ ' ' ~ loop.index if row.tender.submission_urls | length > 1 }}</a>
             {% endif %}
-          {% else %}{{ NOT_IN_NOTICE }}{% endfor %}
-          <span class="muted">Where a bid is submitted. Not the platform the notice was
-            published on, and not the procurement documents.</span>
+          {% else %}<span class="is-absent">{{ NOT_IN_NOTICE }}</span>{% endfor %}
+          </p>
         </dd>
       </div>
-      <div>
-        <dt>CPV codes</dt>
-        <dd>{{ row.tender.cpv_all | join(', ') | given }}
-          <span class="muted">Main: {{ row.tender.cpv_main | given }}. A recall filter, never
-            evidence of relevance &mdash; see docs/decisions/0004.</span></dd>
+      <div class="field">
+        <dt><span class="field-label">CPV codes</span>
+          {{ mark('The buyer\'s own subject categories. We use them to decide which notices to
+                   fetch at all - they are a recall filter, never evidence of relevance.',
+                  'CPV codes') }}</dt>
+        <dd><p class="field-value">{{ row.tender.cpv_all | join(', ') | given }}
+          <span class="value-qualifier">main: {{ row.tender.cpv_main | given }}</span></p></dd>
       </div>
-      <div>
-        <dt>Contract nature</dt>
-        <dd>{{ row.tender.contract_natures | map(attribute='value') | join(', ') | given }}</dd>
+      <div class="field">
+        <dt><span class="field-label">Contract nature</span>
+          {{ mark('Whether the buyer is buying services, supplies or works. We fetch services.',
+                  'contract nature') }}</dt>
+        <dd><p class="field-value">{{ row.tender.contract_natures | map(attribute='value') | join(', ') | given }}</p></dd>
       </div>
-      <div>
-        <dt>Procedure</dt>
-        <dd>{{ row.tender.procedure_type | procedure_type | given }}
+      <div class="field">
+        <dt><span class="field-label">Procedure</span>
+          {{ mark('How the buyer runs the competition, and whether bidders have to get through a
+                   qualification or negotiation stage before they may bid.', 'the procedure') }}</dt>
+        <dd>
+          <p class="field-value">{{ row.tender.procedure_type | procedure_type | given }}
           {% if row.tender.has_qualification_stage is not none %}
-            <span class="muted">
-              {{ 'Bidders must get through a qualification or negotiation stage first.'
-                 if row.tender.has_qualification_stage
-                 else 'Anyone may tender; there is no separate qualification stage.' }}</span>
+            <span class="value-qualifier">
+              {{ 'bidders must qualify first' if row.tender.has_qualification_stage
+                 else 'anyone may tender; there is no separate qualification stage' }}</span>
           {% endif %}
+          </p>
         </dd>
       </div>
-      <div>
-        <dt>Client's sector</dt>
-        <dd>{{ row.tender.main_activity | main_activity | given }}
+      <div class="field">
+        <dt><span class="field-label">Client's sector</span>
+          {{ mark('What the buying organisation does. A utility buys under different rules from a
+                   general authority.', "the client's sector") }}</dt>
+        <dd>
+          <p class="field-value">{{ row.tender.main_activity | main_activity | given }}
           {% if row.tender.buyer_is_utility is not none %}
-            <span class="muted">{{ 'A utility.' if row.tender.buyer_is_utility
-              else 'A general authority, not a utility.' }}</span>
+            <span class="value-qualifier">{{ 'a utility' if row.tender.buyer_is_utility
+              else 'a general authority, not a utility' }}</span>
           {% endif %}
+          </p>
         </dd>
       </div>
     </dl>
 
     {% if changes %}
-      <h4>What changed at the source</h4>
+      {#
+        What we hold now against what we held before. It cannot say whether the
+        buyer changed the notice or we started reading a field we had not read.
+      #}
+      <h4>Changes to this record</h4>
       <ol class="history">
         {% for change in changes %}
           <li>{{ change.detected_at | moment }} &mdash; <strong>{{ change.field }}</strong>:
@@ -317,8 +372,26 @@
     Run ids, rule codes and version numbers. A colleague does not need them;
     whoever has to defend or debug a score does.
   #}
-  <details class="technical" id="technical-details" data-remember="technical-details">
+  <details class="technical" id="technical-details" data-remember="technical-details"
+           data-area="Technical details">
     <summary>Technical details</summary>
+
+    {#
+      Where each value was read from. This used to sit in grey text under the values
+      themselves, indistinguishable from the sentences explaining what a field
+      means. A colleague deciding on a tender does not need a TED field name;
+      whoever debugs a mapping needs nothing else.
+    #}
+    {% if summary.provenance_trail %}
+      <h4>Where each value came from</h4>
+      <ul class="provenance-trail">
+        {% for line in summary.provenance_trail %}
+          <li><strong>{{ line.field }}</strong>
+            &mdash; <span class="trail-value">{{ line.value | truncate(60) }}</span>
+            &mdash; {{ line.read_from }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
 
     <dl class="facts">
       <div><dt>Identity</dt><dd>{{ row.tender.source.value | upper }} {{ row.tender.source_id }}

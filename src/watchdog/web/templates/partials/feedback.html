@@ -5,7 +5,12 @@
 
   The intercepted click never runs. Pressing "Update from TED" in feedback mode
   opens this box and starts nothing.
+
+  The name is the same cookie the review controls use. A comment nobody can be
+  asked about is half a comment, so if the browser has no name yet this asks for
+  one here rather than recording "Name not recorded" and losing the thread.
 #}
+{% set who = recording_as(request) %}
 <dialog id="feedback-dialog" class="feedback-dialog" aria-labelledby="feedback-heading">
   <form id="feedback-form" method="dialog"
         hx-post="/feedback" hx-target="#feedback-result" hx-swap="innerHTML">
@@ -24,6 +29,17 @@
     <label for="feedback-comment">What is wrong, missing or confusing
       <textarea id="feedback-comment" name="comment" rows="5" maxlength="2000" required></textarea>
     </label>
+
+    {% if who %}
+      <p class="muted">Saving as <strong>{{ who }}</strong>.
+        Change the name at the top of the register.</p>
+    {% else %}
+      <label for="feedback-name">Your name
+        <input type="text" id="feedback-name" name="reported_by" maxlength="80" required
+               autocomplete="name" placeholder="So somebody can ask you about it" />
+      </label>
+      <p class="muted">Kept in this browser and used for your reviews too. Not a sign-in.</p>
+    {% endif %}
 
     <p class="muted">Only the element and its visible label are recorded. Nothing you have
       typed into a field on the page is sent.</p>

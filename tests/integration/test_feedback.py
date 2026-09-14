@@ -29,7 +29,8 @@ def test_turning_it_on_sets_the_cookie_and_says_what_it_does(client: TestClient)
     assert response.status_code == 200
     assert client.cookies.get(COOKIE) == "on"
     assert "Feedback mode: on" in response.text
-    assert "do nothing else" in response.text
+    assert "use y/n/u to" in response.text
+    assert "Turn feedback mode off to record tender decisions" in response.text
     assert 'data-feedback="on"' in client.get("/register").text
 
 
@@ -77,6 +78,45 @@ def test_a_comment_records_what_was_clicked_and_who_said_it(
     assert stored.reported_by == "Ada Lovelace"
 
 
+def test_a_comment_needs_a_name_so_somebody_can_be_asked_about_it(
+    client: TestClient, repository: Repository
+) -> None:
+    """Every comment is a question for whoever left it. An anonymous one is half a comment."""
+    response = client.post(
+        "/feedback",
+        data={
+            "page": "/register",
+            "element": "Register header: Update from TED",
+            "element_label": "Update from TED",
+            "comment": "This should say how far back it reads.",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "put your name in" in response.text
+    assert repository.list_feedback() == []
+
+
+def test_a_name_typed_in_the_comment_box_is_kept_for_reviews_too(
+    client: TestClient, repository: Repository
+) -> None:
+    """One name per browser, whichever box it was typed into."""
+    response = client.post(
+        "/feedback",
+        data={
+            "page": "/register",
+            "element": "Register header: Update from TED",
+            "element_label": "Update from TED",
+            "comment": "This should say how far back it reads.",
+            "reported_by": "Grace Hopper",
+        },
+    )
+
+    assert response.status_code == 200
+    assert repository.list_feedback()[0].reported_by == "Grace Hopper"
+    assert "Grace Hopper" in client.get("/register").text
+
+
 def test_an_empty_comment_is_refused_rather_than_stored_as_a_blank_row(
     client: TestClient, repository: Repository
 ) -> None:
@@ -93,6 +133,7 @@ def test_an_empty_comment_is_refused_rather_than_stored_as_a_blank_row(
 def test_a_comment_is_escaped_exactly_as_source_and_model_text_is(
     client: TestClient, repository: Repository
 ) -> None:
+    client.post("/register/reviewer", data={"name": "Ada Lovelace"})
     client.post(
         "/feedback",
         data={
@@ -113,6 +154,7 @@ def test_a_comment_is_escaped_exactly_as_source_and_model_text_is(
 def test_the_listing_groups_by_page_and_by_what_was_clicked(
     client: TestClient, repository: Repository
 ) -> None:
+    client.post("/register/reviewer", data={"name": "Ada Lovelace"})
     for element, comment in [
         ("#update-button", "Say how far back it reads."),
         ("#update-button", "And how long it will take."),
@@ -138,6 +180,7 @@ def test_the_listing_groups_by_page_and_by_what_was_clicked(
 def test_the_export_is_markdown_streamed_as_an_attachment(
     client: TestClient, repository: Repository
 ) -> None:
+    client.post("/register/reviewer", data={"name": "Ada Lovelace"})
     client.post(
         "/feedback",
         data={
@@ -190,3 +233,26 @@ def test_the_intercepting_script_never_sends_the_contents_of_a_field() -> None:
     assert "element.value" not in source.replace("Deliberately not element.value", "")
     assert "preventDefault" in source
     assert "stopImmediatePropagation" in source
+
+
+def test_what_was_clicked_is_recorded_by_its_visible_name_not_by_a_css_path() -> None:
+    """A CSS path says where something sits in the markup, not what it is.
+
+    It also breaks the moment the layout changes, which makes an old comment
+    unreadable. A visible label is what the person was actually looking at.
+    """
+    from watchdog.web.templating import STATIC_DIR, TEMPLATES_DIR
+
+    source = (STATIC_DIR / "js" / "feedback.js").read_text(encoding="utf-8")
+
+    # The label is tried first; a path is the last resort and says that it is one.
+    assert source.index("var name = label(element);") < source.index("function path(")
+    assert "unlabelled " in source
+
+    # The named landmarks the label is qualified by have to exist in the markup.
+    named = {
+        path.name
+        for path in TEMPLATES_DIR.rglob("*.html")
+        if "data-area=" in path.read_text(encoding="utf-8")
+    }
+    assert {"base.html", "register.html", "detail.html"} <= named

@@ -23,12 +23,15 @@
     <p class="muted">{{ page.count }} comment{{ '' if page.count == 1 else 's' }}</p>
 
     {% for element in page.elements %}
-      <h3>{{ element.label or element.element }}</h3>
-      <p class="muted"><code>{{ element.element }}</code></p>
+      <h3>{{ element.element }}</h3>
+      {% if element.label and element.label != element.element %}
+        <p class="muted">Clicked: {{ element.label }}</p>
+      {% endif %}
       <ol class="history">
         {% for comment in element.comments %}
           <li>
-            <strong>{{ comment.reported_by or 'Name not recorded' }}</strong>
+            {# Only a comment left before the box asked for a name can be anonymous. #}
+            <strong>{{ comment.reported_by or 'Left before the box asked for a name' }}</strong>
             &mdash; {{ comment.created_at | moment }}
             {% if comment.tender_id %}<span class="muted">notice {{ comment.tender_id }}</span>{% endif %}
             <p class="source-text">{{ comment.comment }}</p>

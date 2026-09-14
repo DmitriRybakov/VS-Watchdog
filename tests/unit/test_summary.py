@@ -245,7 +245,7 @@ def test_a_selection_criterion_code_we_do_not_know_falls_back_to_its_category(
     field = _field(summary_service.summarise(_row(tender)), "experience_qualification_requirement")
 
     assert field.values[0].text == "Technical and professional ability"
-    assert "slc-abil-brand-new" in (field.values[0].note or "")
+    assert "slc-abil-brand-new" in (field.values[0].provenance_note or "")
 
 
 def test_professional_indemnity_is_read_from_the_code_not_from_a_paired_description(
@@ -320,7 +320,7 @@ def test_phase_of_project_says_document_when_the_extraction_recorded_where_it_re
 
     assert field.filled
     assert field.provenance is Provenance.DOCUMENT
-    assert "section 2.1" in (field.values[0].note or "")
+    assert "section 2.1" in (field.values[0].provenance_note or "")
 
 
 def test_the_submission_language_never_borrows_the_publication_language(make_tender) -> None:

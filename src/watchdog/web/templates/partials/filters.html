@@ -5,8 +5,10 @@
   It posts to /register rather than to a fragment endpoint on purpose: that way
   the URL HTMX pushes is the same URL a person could type.
 #}
+{% from "partials/help.html" import mark %}
 <form class="filters"
       id="filters"
+      data-area="Filters"
       hx-get="/register"
       hx-target="#results"
       hx-swap="innerHTML"
@@ -25,14 +27,17 @@
   </div>
 
   <label for="filter-text">Free text
+    {{ mark('Searches the title, the buyer\'s own untranslated title and the description, in
+             whatever language they were published in. Press / to jump here.', 'free text') }}
     <input id="filter-text" type="search" name="q" value="{{ query.filters.text or '' }}"
-           placeholder="Title, native title or description"
-           aria-describedby="filter-text-help" />
+           placeholder="Title, native title or description" />
   </label>
-  <p id="filter-text-help" class="muted">Searches the buyer's own words. Press / to jump here.</p>
 
   <fieldset>
-    <legend>Band</legend>
+    <legend>Band
+      {{ mark('Which pile a notice was put in: shortlist is worth reading, review is held for a
+               person to decide, archive is low priority and still searchable. Nothing is ever
+               deleted.', 'a band') }}</legend>
     {% for band in ['shortlist', 'review', 'archive'] %}
       <label class="check">
         <input type="checkbox" name="band" value="{{ band }}"
@@ -90,9 +95,10 @@
     </select>
   </label>
 
-  <label for="filter-performance-country">Country of performance
-    <select id="filter-performance-country" name="performance_country"
-            aria-describedby="performance-help">
+  <label for="filter-performance-country">Execution location
+    {{ mark('Where the work happens, which is a different question from who is buying. Country
+             level only - regions arrive as codes we do not resolve.', 'execution location') }}
+    <select id="filter-performance-country" name="performance_country">
       <option value="">Any</option>
       {% for country in view.facets.performance_countries %}
         <option value="{{ country }}"
@@ -100,10 +106,6 @@
       {% endfor %}
     </select>
   </label>
-  <p id="performance-help" class="muted">
-    Where the work happens, which is a different question from who is buying.
-    Country level only &mdash; regions are not resolved.
-  </p>
 
   <label for="filter-source">Source
     <select id="filter-source" name="source">

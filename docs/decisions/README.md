@@ -5,6 +5,22 @@ consequence - especially decisions that become expensive to reverse.
 
 ## Outstanding
 
+- **During an outage, clicking Dismiss while the filter input has focus triggers its change request,
+  so the error banner reappears and Dismiss reads as not working.**
+
+- **Intermittent timeout in the CLI-output test fixture; cause unconfirmed. Verify environment
+  isolation and identify the slow command before changing the timeout.**
+
+- **The Supabase database password must be rotated before anyone else is given the site address.**
+  `watchdog config show` printed the whole `DATABASE_URL`, password included, before that leak was
+  fixed. It was run against the hosted database on a laptop, so the password is in terminal
+  scrollback and in whatever that terminal's buffer has been copied into. The leak is closed and
+  `tests/integration/test_secrets_never_reach_output.py` now checks every command's output, but a
+  password that has been printed is a password that is out. Rotating it is three steps in order:
+  a new database password in Supabase, then `DATABASE_URL` updated in the Render environment, then
+  `deploy/.env.render` updated to match. A Render deploy follows the variable change; nothing in
+  the code changes.
+
 - **THE RULE SET IS FROZEN AT VERSION 3 until the step 10 audit.** Step 7 tunes a scoring policy, and
   tuning against a moving vocabulary means never knowing whether a change in the distribution came
   from the policy or from the rules. Two exceptions, both narrow: a rule that crashes or corrupts, and

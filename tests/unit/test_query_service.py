@@ -361,29 +361,55 @@ def test_empty_results_still_report_the_surrounding_state(repository: Repository
     assert view.empty_database is True
 
 
-# ------------------------------------------------------- counts and saved views
+# ----------------------------------------------- the headline and saved views
 
 
-def test_every_header_count_matches_the_view_its_link_opens(register: Repository) -> None:
+def test_every_headline_figure_matches_the_view_its_link_opens(register: Repository) -> None:
     """The number and the page behind it are one query, so they cannot disagree."""
     view = _view(register, {})
+    head = view.headline
+    assert head is not None
 
-    for count in view.counts:
+    for count in [*head.figures, head.archived]:
         opened = _view(register, _params(count.query_string))
         assert opened.page.total == count.count, f"{count.key} disagrees with its own link"
 
 
-def test_counts_are_not_restricted_to_the_notices_carrying_evidence(
+def test_every_headline_figure_says_which_population_it_counted(register: Repository) -> None:
+    """Three numbers side by side invite arithmetic. Each has to say what it is of."""
+    head = _view(register, {}).headline
+    assert head is not None
+
+    for count in head.figures:
+        assert count.note, f"{count.key} does not say what it was counted out of"
+
+
+def test_the_headline_states_everything_held_and_what_was_archived(
     register: Repository,
 ) -> None:
-    """ "Published this week" is publication dates, not the evidence subset."""
-    register.upsert_tenders(
+    """ "Worth reading: 23" means nothing without the pile it was drawn from."""
+    view = _view(register, {})
+    head = view.headline
+    assert head is not None
+
+    everything = _view(register, _params(head.everything_query))
+
+    assert head.total_held == everything.page.total
+    assert head.total_held > 0
+
+
+def test_the_new_figure_falls_back_to_a_window_when_nothing_has_been_fetched(
+    repository: Repository,
+) -> None:
+    """ "Since the last update" has no meaning before there has been one, and says so."""
+    repository.upsert_tenders(
         [_tender("7-2026", published=date(2026, 9, 12), native="Skolegard")], run_id=RUN
     )
-    view = _view(register, {})
-    published = next(count for count in view.counts if count.key == "new_this_week")
+    head = _view(repository, {}).headline
+    assert head is not None
 
-    assert published.count == 1
+    assert head.new.key == "new_this_week"
+    assert head.new.count == 1
 
 
 def test_saved_views_do_not_offer_a_band_no_model_can_reach(register: Repository) -> None:

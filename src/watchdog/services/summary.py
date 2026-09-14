@@ -53,6 +53,7 @@ from watchdog.core.vocabulary import (
     Group,
     Provenance,
     provenance_label,
+    provenance_short,
 )
 
 # The three absences, in the words the templating layer already uses. Kept as
@@ -70,10 +71,24 @@ _TEAM_CODES = frozenset({"slc-abil-educ", "slc-abil-tech", "slc-abil-staff-yrly-
 
 @dataclass(frozen=True)
 class Value:
-    """One thing shown against a field, with anything it needs qualifying by."""
+    """One thing shown against a field, with anything it needs qualifying by.
+
+    Three different kinds of extra text hang off a value, and the page treats them
+    differently because a colleague needs them in different places:
+
+    - ``qualifier`` is part of the fact and is shown beside it. "Bids due" against
+      a date is not a comment on the date, it is what the date is.
+    - ``note`` explains what the value means to somebody reading it. It sits in the
+      hover mark, because twenty notices' worth of it on screen is prose.
+    - ``provenance_note`` says where this particular value was read from - a TED
+      field name, a code, a section reference. It belongs in Technical details,
+      where whoever debugs a mapping will look, and nowhere near the value.
+    """
 
     text: str
+    qualifier: str | None = None
     note: str | None = None
+    provenance_note: str | None = None
     # An http(s) link, already checked by the template's ``safe_url`` filter.
     href: str | None = None
     # A BCP 47-ish code for a ``lang`` attribute, when the text is not English.
@@ -89,6 +104,8 @@ class FieldView:
     group: Group
     provenance: Provenance
     origin: str
+    # The same origin as one word, for the marker that sits beside the label.
+    origin_short: str
     note: str | None
     values: tuple[Value, ...]
     # Which kind of nothing this is when there are no values.
@@ -101,6 +118,13 @@ class FieldView:
     @property
     def filled(self) -> bool:
         return bool(self.values)
+
+    @property
+    def help(self) -> str:
+        """Everything the hover mark beside this label says, in one string."""
+        parts = [self.note] if self.note else []
+        parts.append(f"Where this comes from: {self.origin.lower()}.")
+        return " ".join(parts)
 
 
 @dataclass(frozen=True)
@@ -130,6 +154,15 @@ class RuleGroup:
 
 
 @dataclass(frozen=True)
+class ProvenanceLine:
+    """Where one displayed value was read from. Technical details, never the grid."""
+
+    field: str
+    value: str
+    read_from: str
+
+
+@dataclass(frozen=True)
 class NoticeSummary:
     """Everything the detail page renders, worked out once."""
 
@@ -141,6 +174,17 @@ class NoticeSummary:
     @property
     def tender(self) -> Tender:
         return self.row.tender
+
+    @property
+    def provenance_trail(self) -> tuple[ProvenanceLine, ...]:
+        """Every value that recorded which field or code it was read from."""
+        return tuple(
+            ProvenanceLine(field=view.label, value=value.text, read_from=value.provenance_note)
+            for group in self.groups
+            for view in group.fields
+            for value in view.values
+            if value.provenance_note
+        )
 
 
 def summarise(row: RegisterRow, *, detail: TenderDetail | None = None) -> NoticeSummary:
@@ -310,6 +354,7 @@ def _field(spec: FieldSpec, row: RegisterRow, detail: TenderDetail | None) -> Fi
         group=spec.group,
         provenance=built.provenance,
         origin=provenance_label(built.provenance),
+        origin_short=provenance_short(built.provenance),
         note=spec.note,
         values=built.values,
         absent=built.absent,
@@ -337,32 +382,32 @@ def _extracted(detail: TenderDetail | None, key: str) -> _Built:
         return _Built(provenance=Provenance.DOCUMENT, absent=ABSENT_RETRIEVAL)
 
     origin = Provenance.DOCUMENT if field.source_ref else Provenance.ASSESSMENT
-    note = f"Read from {field.source_ref}." if field.source_ref else None
-    return _Built(values=(Value(text=field.value or "", note=note),), provenance=origin)
+    read_from = f"Read from {field.source_ref}." if field.source_ref else None
+    return _Built(
+        values=(Value(text=field.value or "", provenance_note=read_from),), provenance=origin
+    )
 
 
 def _tender_name(row: RegisterRow, _: TenderDetail | None) -> _Built:
     tender = row.tender
-    values = [
-        Value(
-            text=tender.title,
-            note=(
-                "The platform's display title. On TED it is composed as country, CPV "
-                "category and then the buyer's own title. The English is TED's; the "
-                "buyer's own words inside it are not translated."
-            ),
-            language=tender.title_language,
-        )
-    ]
-    if tender.title_native:
-        values.append(
+    return _Built(
+        values=(Value(text=tender.title, language=tender.title_language),),
+    )
+
+
+def _tender_name_native(row: RegisterRow, _: TenderDetail | None) -> _Built:
+    tender = row.tender
+    if not tender.title_native:
+        return _Built()
+    return _Built(
+        values=(
             Value(
                 text=tender.title_native,
-                note="The buyer's own title, untranslated. This is the text the screening read.",
+                qualifier=tender.title_native_language or "language not stated",
                 language=tender.title_native_language,
-            )
+            ),
         )
-    return _Built(values=tuple(values))
+    )
 
 
 def _client(row: RegisterRow, _: TenderDetail | None) -> _Built:
@@ -389,13 +434,16 @@ def _project_location(row: RegisterRow, _: TenderDetail | None) -> _Built:
         values.append(Value(text=", ".join(country_names(tender.place_of_performance_country))))
 
     if tender.performance_cities:
-        values.append(Value(text=", ".join(tender.performance_cities), note="Town or city stated."))
+        values.append(Value(text=", ".join(tender.performance_cities), qualifier="town or city"))
 
     if tender.place_of_performance:
         values.append(
             Value(
                 text=tender.place_of_performance,
-                note="Region codes exactly as sent, unresolved; see docs/decisions/0003.",
+                qualifier="region",
+                provenance_note=(
+                    "Region codes exactly as sent, unresolved; see docs/decisions/0003."
+                ),
             )
         )
 
@@ -442,7 +490,7 @@ def _published_date(row: RegisterRow, _: TenderDetail | None) -> _Built:
 def _deadline_date(row: RegisterRow, _: TenderDetail | None) -> _Built:
     tender = row.tender
     kind = _DEADLINE_KINDS.get(tender.deadline_type.value, "Type of deadline not stated")
-    read_from = f" Read from {tender.deadline_source}." if tender.deadline_source else ""
+    read_from = f"Read from {tender.deadline_source}." if tender.deadline_source else None
 
     if tender.deadline is not None:
         # The converted date and the converted time, together. Splitting them
@@ -450,7 +498,7 @@ def _deadline_date(row: RegisterRow, _: TenderDetail | None) -> _Built:
         # those are different days.
         stamp = tender.deadline.strftime("%Y-%m-%d %H:%M")
         return _Built(
-            values=(Value(text=f"{stamp} UTC", note=f"{kind}.{read_from}"),),
+            values=(Value(text=f"{stamp} UTC", qualifier=kind, provenance_note=read_from),),
         )
 
     if tender.deadline_date is not None:
@@ -458,10 +506,12 @@ def _deadline_date(row: RegisterRow, _: TenderDetail | None) -> _Built:
             values=(
                 Value(
                     text=tender.deadline_date.isoformat(),
+                    qualifier=kind,
                     note=(
-                        f"{kind}. A date with no time of day; none has been invented, so this "
-                        f"is not converted to UTC.{read_from}"
+                        "A date with no time of day; none has been invented, so this is not "
+                        "converted to UTC."
                     ),
+                    provenance_note=read_from,
                 ),
             )
         )
@@ -488,7 +538,7 @@ def _public_platform(row: RegisterRow, _: TenderDetail | None) -> _Built:
         values=(
             Value(
                 text=tender.source.value.upper(),
-                note=f"Notice {tender.source_id}"
+                provenance_note=f"Notice {tender.source_id}"
                 + (f", version {tender.source_version}" if tender.source_version else ""),
                 href=tender.source_url,
             ),
@@ -498,9 +548,14 @@ def _public_platform(row: RegisterRow, _: TenderDetail | None) -> _Built:
 
 def _phase_of_tender(row: RegisterRow, _: TenderDetail | None) -> _Built:
     tender = row.tender
-    note = f"Notice subtype {tender.notice_subtype}." if tender.notice_subtype else None
+    subtype = f"Notice subtype {tender.notice_subtype}." if tender.notice_subtype else None
     return _Built(
-        values=(Value(text=tender.notice_stage.value.replace("_", " ").capitalize(), note=note),)
+        values=(
+            Value(
+                text=tender.notice_stage.value.replace("_", " ").capitalize(),
+                provenance_note=subtype,
+            ),
+        )
     )
 
 
@@ -588,11 +643,15 @@ def _budget(row: RegisterRow, _: TenderDetail | None) -> _Built:
 
     for code in tender.framework_agreements:
         label = framework_agreement_label(code)
-        values.append(Value(text=label or code, note=None if label else "Code not in our list."))
+        values.append(
+            Value(text=label or code, provenance_note=None if label else "Code not in our list.")
+        )
 
     for code in tender.dps_usages:
         label = dps_usage_label(code)
-        values.append(Value(text=label or code, note=None if label else "Code not in our list."))
+        values.append(
+            Value(text=label or code, provenance_note=None if label else "Code not in our list.")
+        )
 
     return _Built(values=tuple(values))
 
@@ -627,7 +686,8 @@ def _team_composition(row: RegisterRow, detail: TenderDetail | None) -> _Built:
     if named:
         return _Built(
             values=tuple(
-                Value(text=selection_criterion_label(code) or code, note=code) for code in named
+                Value(text=selection_criterion_label(code) or code, provenance_note=code)
+                for code in named
             )
         )
     return _extracted(detail, "team_composition_requirement")
@@ -667,13 +727,21 @@ def _experience(row: RegisterRow, _: TenderDetail | None) -> _Built:
         plain = selection_criterion_label(code)
         family = selection_criterion_family(code)
         if plain:
-            values.append(Value(text=plain, note=family))
+            values.append(Value(text=plain, qualifier=family))
         elif family:
             values.append(
-                Value(text=family, note=f"TED code {code}; its exact meaning is not in our list.")
+                Value(
+                    text=family,
+                    provenance_note=f"TED code {code}; its exact meaning is not in our list.",
+                )
             )
         else:
-            values.append(Value(text=code, note="A code we do not recognise, shown as it arrived."))
+            values.append(
+                Value(
+                    text=code,
+                    provenance_note="A code we do not recognise, shown as it arrived.",
+                )
+            )
 
     descriptions = [
         (item.description or "").strip()
@@ -689,7 +757,7 @@ def _experience(row: RegisterRow, _: TenderDetail | None) -> _Built:
             "so no description is shown against a code."
         )
         values.extend(
-            Value(text=text, note="Buyer's own wording, unmatched.") for text in descriptions
+            Value(text=text, qualifier="buyer's own wording, unmatched") for text in descriptions
         )
 
     return _Built(values=tuple(values), caution=caution)
@@ -723,7 +791,7 @@ def _award_criteria(row: RegisterRow, _: TenderDetail | None) -> _Built:
         kind = award_criterion_type_label(item.type)
         if not text:
             continue
-        values.append(Value(text=text, note=kind))
+        values.append(Value(text=text, qualifier=kind))
 
     numbers: list[str] = []
     for item in tender.award_criteria:
@@ -809,6 +877,7 @@ def _across_lots_caution(tender: Tender) -> str | None:
 # import time rather than rendering as a blank.
 _BUILDERS = {
     "tender_name": _tender_name,
+    "tender_name_native": _tender_name_native,
     "client": _client,
     "client_country": _client_country,
     "project_location": _project_location,

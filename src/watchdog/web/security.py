@@ -359,17 +359,41 @@ class AuthMiddleware:
 
     async def _refuse(self, request: Request, send: Send) -> None:
         """No session. Send the browser to the sign-in page, whichever way it asked."""
-        wanted = request.url.path + (f"?{request.url.query}" if request.url.query else "")
-        target = f"{LOGIN_PATH}?next={quote(wanted, safe='')}"
+        target = f"{LOGIN_PATH}?next={quote(self._return_to(request), safe='')}"
 
         if request.headers.get("HX-Request") == "true":
-            # A fragment swap must not put a whole sign-in page inside the table.
+            # A 303 would be followed by HTMX and the sign-in page swapped into
+            # the table. HX-Redirect navigates the whole browser instead.
             response: Response = PlainTextResponse(
                 "Your session has ended. Signing in again.",
                 status_code=401,
-                headers={"HX-Redirect": LOGIN_PATH},
+                headers={"HX-Redirect": target},
             )
         else:
             response = RedirectResponse(target, status_code=303)
 
         await response(request.scope, request.receive, send)
+
+    def _return_to(self, request: Request) -> str:
+        """The page to come back to after signing in, filters and all.
+
+        For an HTMX request that is the address bar rather than the request's own
+        path: a verdict or a run is a write, and coming back to one would replay
+        it. A fragment asked for by a GET is part of the page it came from, so its
+        own URL is the right answer when the browser did not say otherwise.
+
+        The header is the browser's, so it is checked like any other input: a URL
+        naming another site is ignored rather than turned into a path here.
+        """
+        current = request.headers.get("HX-Current-URL")
+        if current:
+            here = urlsplit(current)
+            host = request.headers.get("host", "")
+            if not here.netloc or here.netloc.casefold() == host.casefold():
+                return safe_next(here.path + (f"?{here.query}" if here.query else ""))
+            return "/"
+        if request.method in SAFE_METHODS:
+            return safe_next(
+                request.url.path + (f"?{request.url.query}" if request.url.query else "")
+            )
+        return "/"

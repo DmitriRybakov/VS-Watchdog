@@ -1,4 +1,9 @@
-"""Command line entry point. Imports services and core only."""
+"""Command line entry point. Imports services and core only.
+
+``run()`` is what the ``watchdog`` command calls, not the Typer object directly.
+It exists for one failure that every command shares and no command can handle on
+its own: a database that cannot be reached. See ``_report_unreachable_database``.
+"""
 
 from __future__ import annotations
 
@@ -8,6 +13,7 @@ from datetime import date
 from typing import Annotated, Any
 
 import typer
+from sqlalchemy.exc import InterfaceError, OperationalError
 
 from watchdog import __version__
 from watchdog.core.countries import country_name, country_names
@@ -21,7 +27,14 @@ from watchdog.services import screen as screen_service
 from watchdog.services import ted as ted_service
 from watchdog.services.configuration import ConfigFrozen, ConfigInvalid
 
-app = typer.Typer(help="Watchdog - tender screening for Entr Advisory & Decision Support.")
+# Typer's decorated traceback prints the source of every frame and the local
+# variables in them. That is a thousand lines at a colleague who wanted a list of
+# runs, and a connection string is exactly the kind of thing that sits in a local
+# variable. Off, so a failure prints a sentence and nothing else.
+app = typer.Typer(
+    help="Watchdog - tender screening for Entr Advisory & Decision Support.",
+    pretty_exceptions_enable=False,
+)
 config_app = typer.Typer(help="Inspect and check the configuration.")
 quarantine_app = typer.Typer(help="Notices that could not be read, and recovering them.")
 app.add_typer(config_app, name="config")
@@ -56,7 +69,7 @@ def config_show() -> None:
     log = get_logger(__name__)
     log.info(
         "effective_configuration",
-        database_url=settings.database_url,
+        database=settings.database_target,
         llm_provider=settings.llm_provider,
         llm_model=settings.llm_model,
         llm_api_key_set=settings.llm_api_key is not None,
@@ -616,6 +629,38 @@ def _report_gap(outcome: ingest_service.IngestOutcome) -> None:
     typer.echo(f"  watchdog ingest --since-days {missing.days + 1}")
 
 
+def run() -> None:
+    """The ``watchdog`` command. Every command, plus the failure they all share.
+
+    A database that cannot be reached is not a bug in the command that happened
+    to be running, and there is nothing useful for it to say that is not the same
+    sentence every time. Caught once, here, rather than in each of fourteen
+    commands.
+    """
+    try:
+        app()
+    except (OperationalError, InterfaceError) as exc:
+        _report_unreachable_database(exc)
+        raise SystemExit(1) from exc
+
+
+def _report_unreachable_database(exc: Exception) -> None:
+    """Say the database is unreachable, name it safely, and log the reason.
+
+    The driver's own message names the host, the port and often the database
+    user. That belongs in the log, not in four lines of advice.
+    """
+    settings = get_settings()
+    get_logger(__name__).error(
+        "database_unreachable", database=settings.database_target, error=str(exc)
+    )
+
+    typer.secho("The database could not be reached.", fg=typer.colors.RED)
+    typer.echo(f"  The database is: {settings.database_target}")
+    typer.echo("  Check DATABASE_URL, that the database is awake, and the network connection.")
+    typer.echo("  The reason is in the log line above. Nothing was changed.")
+
+
 def _report_schema_problem(check: SchemaCheck) -> None:
     if check.empty:
         typer.secho("The database has not been set up yet.", fg=typer.colors.RED)
@@ -623,6 +668,8 @@ def _report_schema_problem(check: SchemaCheck) -> None:
         typer.secho("The database schema is out of date.", fg=typer.colors.RED)
         typer.echo(f"  It does not have: {check.summary}")
 
+    # Which database, because the usual cause is being pointed at the wrong one.
+    typer.echo(f"  The database is: {get_settings().database_target}")
     typer.echo("Run this once, then try again:")
     typer.echo("  .\\tasks.ps1 migrate      (on Windows)")
     typer.echo("  make migrate             (on Linux or in a container)")
@@ -949,4 +996,4 @@ def _load_ted_config() -> ted_service.TedSourceConfig:
 
 
 if __name__ == "__main__":
-    app()
+    run()

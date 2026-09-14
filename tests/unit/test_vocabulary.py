@@ -19,6 +19,7 @@ from watchdog.core.vocabulary import FIELDS, FIELDS_EXTRACTED, Group, Provenance
 # is a deliberate edit here and renaming one is a failure rather than a silence.
 EXPECTED_KEYS = (
     "tender_name",
+    "tender_name_native",
     "client",
     "client_country",
     "project_location",
@@ -54,11 +55,18 @@ def test_the_labels_are_the_teams_words_not_the_platforms() -> None:
     """TED says buyer and country of performance. Our register does not."""
     assert vocabulary.label("client") == "Client"
     assert vocabulary.label("client_country") == "Client Country"
-    assert vocabulary.label("project_location") == "Project Location"
     assert vocabulary.label("public_platform") == "Public Platform"
     assert vocabulary.label("phase_of_tender") == "Phase of Tender"
     assert vocabulary.label("tender_name") == "Tender Name"
     assert vocabulary.label("procurement_documents_link") == "Procurement Documents Link"
+
+
+def test_a_label_that_needed_a_sentence_beside_it_was_the_wrong_label() -> None:
+    """Where the work happens is not who is buying, and the label has to say so itself."""
+    assert vocabulary.label("project_location") == "Execution location"
+    assert vocabulary.spec("project_location").note is None
+
+    assert vocabulary.label("tender_name_native") == "Untranslated title"
 
 
 def test_the_language_field_is_labelled_submission_language() -> None:

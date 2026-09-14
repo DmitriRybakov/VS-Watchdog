@@ -54,6 +54,16 @@ PROVENANCE_LABELS: dict[Provenance, str] = {
     Provenance.REVIEW: "Recorded by a colleague",
 }
 
+# The same four origins as one word, for the marker that sits beside every value.
+# The sentence above is what the hover mark says; this is what the page shows at
+# rest, because twenty repetitions of a sentence is prose, not a record.
+PROVENANCE_SHORT: dict[Provenance, str] = {
+    Provenance.SOURCE: "Platform",
+    Provenance.DOCUMENT: "Document",
+    Provenance.ASSESSMENT: "Watchdog",
+    Provenance.REVIEW: "Colleague",
+}
+
 
 class Group(StrEnum):
     """The two halves of the register, as the workbook lays them out."""
@@ -109,6 +119,19 @@ FIELDS: tuple[FieldSpec, ...] = (
         group=Group.DOCUMENTS,
         provenance=Provenance.SOURCE,
         prominent=True,
+        note=(
+            "The platform's display title. On TED it is composed as country, CPV category "
+            "and then the buyer's own title, so the English in it is TED's and the buyer's "
+            "own words inside it are not translated."
+        ),
+    ),
+    FieldSpec(
+        key="tender_name_native",
+        label="Untranslated title",
+        group=Group.DOCUMENTS,
+        provenance=Provenance.SOURCE,
+        prominent=True,
+        note="The buyer's own words, as published. This is the text the screening read.",
     ),
     FieldSpec(
         key="client",
@@ -125,13 +148,15 @@ FIELDS: tuple[FieldSpec, ...] = (
         provenance=Provenance.SOURCE,
         prominent=True,
     ),
+    # "Execution location" rather than "Project Location": the old label needed a
+    # sentence beside it to say it was not the client's own country, and a label
+    # that needs a sentence is the wrong label.
     FieldSpec(
         key="project_location",
-        label="Project Location",
+        label="Execution location",
         group=Group.DOCUMENTS,
         provenance=Provenance.SOURCE,
         prominent=True,
-        note="Where the work happens. A different question from who is buying.",
     ),
     FieldSpec(
         key="published_date",
@@ -293,6 +318,10 @@ def in_group(group: Group) -> tuple[FieldSpec, ...]:
 
 def provenance_label(origin: Provenance) -> str:
     return PROVENANCE_LABELS[origin]
+
+
+def provenance_short(origin: Provenance) -> str:
+    return PROVENANCE_SHORT[origin]
 
 
 def group_label(group: Group) -> str:

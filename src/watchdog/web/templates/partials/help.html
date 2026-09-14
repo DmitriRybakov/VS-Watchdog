@@ -1,0 +1,24 @@
+{#
+  The one explanation mark, used everywhere an explanation is needed: fields,
+  buttons, filters, the score chip, the band names. The same shape every time, so
+  somebody learns it once and then stops noticing it.
+
+  Three things it has to survive:
+
+  - **No mouse.** The mark is focusable, so tabbing to it shows the text.
+  - **No hover.** On a touch screen a tap focuses it, which is the same thing.
+  - **No CSS at all.** The text is in the document, not in a title attribute, so a
+    screen reader and a printout both still have it.
+
+  It is never the place for where a value came from. That is provenance, it goes
+  in Technical details, and the two must not look alike.
+#}
+{% macro mark(text, subject='') -%}
+  {%- if text -%}
+    <span class="help">
+      <span class="help-mark" tabindex="0" role="note"
+            aria-label="{{ ('What ' ~ subject ~ ' means') if subject else 'What this means' }}">?</span>
+      <span class="help-text">{{ text }}</span>
+    </span>
+  {%- endif -%}
+{%- endmacro %}

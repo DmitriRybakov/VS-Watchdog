@@ -15,11 +15,21 @@
 
   var TYPING = { INPUT: true, SELECT: true, TEXTAREA: true };
 
+  /* Controls that keep their own keys. Enter on the outage banner's button has to
+   * press that button, and Enter on the comment box's Save has to save the
+   * comment; hijacking either for "open the notice" would throw away what the
+   * colleague was in the middle of doing. */
+  var OWN_KEYS = "#outage-banner, #feedback-dialog";
+
   function inAField(element) {
     return (
       !!element &&
       (TYPING[element.tagName] === true || element.isContentEditable === true)
     );
+  }
+
+  function ownsItsKeys(element) {
+    return !!(element && element.closest && element.closest(OWN_KEYS));
   }
 
   function results() {
@@ -108,6 +118,7 @@
 
   document.addEventListener("keydown", function (event) {
     if (event.metaKey || event.ctrlKey || event.altKey) return;
+    if (ownsItsKeys(event.target)) return;
     if (inAField(event.target) && event.key !== "Escape") return;
 
     switch (event.key) {

@@ -44,7 +44,7 @@ azure = [
 ]
 
 [project.scripts]
-watchdog = "watchdog.cli:app"
+watchdog = "watchdog.cli:run"
 
 [tool.setuptools.packages.find]
 where = ["src"]

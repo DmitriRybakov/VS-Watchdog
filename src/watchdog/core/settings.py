@@ -3,6 +3,17 @@
 Every value comes from the environment, so the only difference between a laptop,
 Render and Azure is environment variables. Nothing here touches the database,
 the network or the filesystem at import time: call ``get_settings()``.
+
+Four of these values are credentials and are marked ``repr=False``. That covers
+exactly one thing, and it is worth knowing which: the object's representation.
+So a log line holding the settings object, a traceback frame and a failed
+assertion are all safe, and were the way a secret escaped once.
+
+It does **not** cover ``model_dump()``, ``model_dump_json()``, ``dict(settings)``,
+``settings.__dict__``, printing a field directly, or a validation error echoing a
+rejected value. Nothing in this application does any of those with a credential -
+the rule is that a secret is read at the point it is used and never assembled
+into a message - and tests/unit/test_settings.py pins both halves.
 """
 
 from __future__ import annotations
@@ -22,12 +33,13 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    database_url: str = Field(default="sqlite:///data/watchdog.db")
+    # Carries the database password on a hosted service, so it is never printed.
+    database_url: str = Field(default="sqlite:///data/watchdog.db", repr=False)
 
     # "disabled" is the default; the whole application must work with it.
     llm_provider: str = Field(default="disabled")
     llm_model: str | None = Field(default=None)
-    llm_api_key: str | None = Field(default=None)
+    llm_api_key: str | None = Field(default=None, repr=False)
     llm_endpoint: str | None = Field(default=None)
     # Azure dates its API rather than versioning it by name.
     llm_api_version: str = Field(default="2024-10-21")
@@ -48,10 +60,10 @@ class Settings(BaseSettings):
     # The shared sign-in for a hosted pilot. One username, one password, one team.
     # Unset on a laptop, which is why a laptop needs no sign-in.
     auth_username: str | None = Field(default=None)
-    auth_password: str | None = Field(default=None)
+    auth_password: str | None = Field(default=None, repr=False)
     # Signs the session cookie. Changing it signs everybody out, which is the
     # only way to end a session that is already issued.
-    session_secret: str | None = Field(default=None)
+    session_secret: str | None = Field(default=None, repr=False)
     session_hours: int = Field(default=12, ge=1, le=720)
 
     # Set by Render on every service it runs. Read only so that a hosted service
@@ -71,6 +83,21 @@ class Settings(BaseSettings):
     @property
     def auth_configured(self) -> bool:
         return bool(self.auth_username and self.auth_password and self.session_secret)
+
+    @property
+    def database_target(self) -> str:
+        """Which database this is, with nothing in it that could open the database.
+
+        What to print when a connection fails. The whole URL carries the password
+        and printing nothing at all is no better: the usual fault is a service
+        pointed at the wrong database, and the host and the name are what say so.
+        """
+        scheme, separator, rest = self.database_url.partition("://")
+        if not separator:
+            return self.database_url
+        # Everything before the last @ is the user name and the password.
+        _, _, host_and_name = rest.rpartition("@")
+        return f"{scheme.partition('+')[0]}://{host_and_name.partition('?')[0]}"
 
     @property
     def auth_required(self) -> bool:

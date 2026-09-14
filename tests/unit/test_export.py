@@ -245,7 +245,7 @@ def test_the_heading_row_uses_the_teams_word_and_the_column_keys_stay_stable() -
     assert len(headings) == len(export.COLUMNS)
     assert headings[export.COLUMNS.index("buyer_name")] == "Client"
     assert headings[export.COLUMNS.index("buyer_country")] == "Client Country"
-    assert headings[export.COLUMNS.index("country_of_performance")] == "Project Location"
+    assert headings[export.COLUMNS.index("country_of_performance")] == "Execution location"
     assert headings[export.COLUMNS.index("source")] == "Public Platform"
     assert headings[export.COLUMNS.index("notice_stage")] == "Phase of Tender"
     # A column the vocabulary does not name keeps its key rather than gaining an

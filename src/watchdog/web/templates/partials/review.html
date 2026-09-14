@@ -23,6 +23,7 @@
 {% endif %}
 
 <form id="review-form"
+      data-area="Record a decision"
       class="review-form"
       hx-post="/register/{{ row.tender.id }}/review"
       hx-target="#review"

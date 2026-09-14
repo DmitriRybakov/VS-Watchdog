@@ -47,6 +47,15 @@ class EmptyComment(ValueError):
     """A comment with nothing in it. Refused rather than stored as a blank row."""
 
 
+class NamelessComment(ValueError):
+    """A comment nobody can be asked about. Refused rather than stored anonymously.
+
+    Every one of these is a question for whoever left it - what did you expect to
+    see, what were you trying to do. A row saying "Name not recorded" cannot be
+    followed up, so it is worth less than the interruption of asking.
+    """
+
+
 @dataclass(frozen=True)
 class ElementGroup:
     """Every comment left on one element of one page."""
@@ -83,6 +92,12 @@ def record(
     if not text:
         raise EmptyComment("Write something in the box before saving the comment.")
 
+    who = _clean(reported_by, 128)
+    if not who:
+        raise NamelessComment(
+            "Please put your name in before saving, so somebody can ask you about this."
+        )
+
     store = repository or Repository(get_session_factory())
     saved = store.save_feedback(
         FeedbackComment(
@@ -91,7 +106,7 @@ def record(
             element_label=_clean(element_label, MAX_LABEL),
             tender_id=_clean(tender_id, 255),
             comment=_trim(text, MAX_COMMENT),
-            reported_by=_clean(reported_by, 128),
+            reported_by=who,
             created_at=utc_now(),
         )
     )

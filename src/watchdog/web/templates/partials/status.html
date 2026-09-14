@@ -8,6 +8,7 @@
   mid-run - stops reporting, and is shown as something to restart rather than as
   something to wait for.
 #}
+{% import 'partials/help.html' as help %}
 <div class="belt{{ ' is-running' if job and job.running else '' }}"
      {% if job and job.running %}
      hx-get="/runs/status"
@@ -75,11 +76,24 @@
       </p>
 
     {% elif job and job.status %}
+      {#
+        What the run did, in words. The raw counts read as nonsense to anyone who
+        did not write them: "3,078 updated, 2 unchanged" sounds as though the
+        register had held two notices before.
+      #}
+      {% set what = 'screening' if job.kind and job.kind.value == 'screen' else 'update' %}
       <p class="run-result" role="status">
-        Last run: <strong>{{ job.status.value }}</strong>
-        {% if job.counts %}
-          &mdash;
-          {% for name, value in job.counts.items() %}{% if value %}{{ value }} {{ name | replace('_', ' ') }}{{ ', ' if not loop.last }}{% endif %}{% endfor %}
+        <strong>{{ 'The last ' ~ what ~ ' finished.' if job.status.value == 'succeeded'
+                   else 'The last ' ~ what ~ ' finished with problems.' }}</strong>
+        {{ job.counts | run_outcome }}
+        {% if what == 'update' and job.counts and job.counts.get('updated') %}
+          {{ help.mark(
+               'Updated means what we hold now is not what we held before. That is usually the '
+               'buyer correcting the notice, but it is also what happens the first time we ask '
+               'TED for a field we were not asking for before. The count cannot tell the two '
+               'apart. Which fields moved on a given notice is listed on its own page, under '
+               '"Changes to this record".',
+               'notices we updated') }}
         {% endif %}
         {% if job.finished_at %}<span class="muted">at {{ job.finished_at | moment }}</span>{% endif %}
       </p>

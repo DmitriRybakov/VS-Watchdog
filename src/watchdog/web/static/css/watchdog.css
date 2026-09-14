@@ -192,45 +192,195 @@ kbd {
   color: var(--wd-error-fg);
 }
 
-/* ------------------------------------------------------------------ counts */
-
-.counts {
+/* The banner that says a click did nothing. Fixed to the window, because the
+   control that failed may be far down a long register and a message beside it
+   would never be seen. */
+.outage {
+  position: fixed;
+  z-index: 1000;
+  top: var(--wd-tight);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(46rem, calc(100vw - 2rem));
+  border: 1px solid var(--wd-error-fg);
+  box-shadow: var(--pico-box-shadow);
   display: flex;
-  gap: var(--wd-tight);
+  gap: var(--wd-gap);
+  align-items: center;
   flex-wrap: wrap;
+}
+
+.outage p {
+  margin: 0;
+}
+
+.outage-text {
+  flex: 1 1 20rem;
+}
+
+.outage-actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--wd-gap);
+  align-items: center;
+}
+
+.outage .button,
+.outage .link-button {
+  margin: 0;
+}
+
+.outage .link-button {
+  color: var(--wd-error-fg);
+}
+
+/* ---------------------------------------------------------------- headline */
+
+/* Three figures, one line, one population each. Not six boxes of equal weight
+   drawn from four different populations and adding up to nothing. */
+.headline {
   margin-block: var(--wd-gap);
 }
 
-.count {
-  flex: 1 1 8rem;
-  border: 1px solid var(--pico-muted-border-color);
-  border-radius: var(--pico-border-radius);
-  padding: var(--wd-tight);
+.headline-figures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--wd-gap);
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.headline-figure {
   text-decoration: none;
-  display: block;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  padding: 0.1rem 0;
+  border-bottom: 2px solid transparent;
 }
 
-.count:hover,
-.count:focus-visible {
-  border-color: var(--pico-primary);
+.headline-figure:hover,
+.headline-figure:focus-visible {
+  border-bottom-color: var(--pico-primary);
 }
 
-.count-number {
-  display: block;
-  font-size: 1.6rem;
+.headline-number {
+  font-size: 1.7rem;
   font-weight: 700;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
-.count-label {
-  display: block;
+.headline-label {
+  font-size: 0.95rem;
+}
+
+.headline-sep {
+  color: var(--pico-muted-border-color);
+}
+
+/* One line of mechanics underneath, not a fourth competing figure. */
+.headline-mechanics {
+  margin: 0.2rem 0 0;
   font-size: 0.85rem;
+  color: var(--pico-muted-color);
 }
 
-.count-note {
-  display: block;
-  font-size: 0.72rem;
+/* ----------------------------------------------------------- explanations */
+
+/* One mark for every explanation on every page, so it is learned once. It is a
+   real focusable element carrying real text, not a title attribute: that way it
+   works with a keyboard, on a touch screen, in a screen reader and on paper. */
+.help {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+
+.help-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
   color: var(--pico-muted-color);
+  cursor: help;
+  user-select: none;
+}
+
+.help-mark:hover,
+.help-mark:focus-visible {
+  border-color: var(--pico-primary);
+  color: var(--pico-primary);
+}
+
+.help-text {
+  position: absolute;
+  left: 0;
+  top: calc(100% + 0.25rem);
+  z-index: 20;
+  width: max-content;
+  max-width: min(26rem, 80vw);
+  padding: var(--wd-tight);
+  background: var(--pico-card-background-color, var(--pico-background-color));
+  border: 1px solid var(--pico-muted-border-color);
+  border-radius: var(--pico-border-radius);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 18%);
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--pico-color);
+  white-space: normal;
+  /* Hidden without being removed: a screen reader and a printout still have it. */
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+}
+
+.help:hover > .help-text,
+.help:focus-within > .help-text {
+  clip: auto;
+  clip-path: none;
+  height: auto;
+  width: max-content;
+  overflow: visible;
+}
+
+/* "Show explanations": the same text, laid out under the value instead of over
+   it, for anyone who would rather read than hover. One switch for the page. */
+body.explanations-on .help {
+  display: block;
+}
+
+body.explanations-on .help-mark {
+  display: none;
+}
+
+body.explanations-on .help-text {
+  position: static;
+  clip: auto;
+  clip-path: none;
+  height: auto;
+  width: auto;
+  max-width: 60rem;
+  overflow: visible;
+  box-shadow: none;
+  border: 0;
+  border-left: 2px solid var(--pico-muted-border-color);
+  border-radius: 0;
+  padding: 0.1rem 0 0.1rem var(--wd-tight);
+  background: transparent;
+  color: var(--pico-muted-color);
+  display: block;
 }
 
 .views {
@@ -503,9 +653,18 @@ kbd {
 .card-facts,
 .facts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
-  gap: 0.4rem var(--wd-gap);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0 var(--wd-gap);
   margin: var(--wd-tight) 0;
+}
+
+/* Every field is one cell of the same shape. The rule above each one is what
+   stops a long value from running into the next label: the eye finds the
+   boundary without having to read. */
+.facts > div {
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--pico-muted-border-color);
+  min-width: 0;
 }
 
 .card-facts dt,
@@ -514,12 +673,13 @@ kbd {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   color: var(--pico-muted-color);
-  margin: 0;
+  margin: 0 0 0.1rem;
 }
 
 .card-facts dd,
 .facts dd {
-  margin: 0 0 0.3rem;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .evidence-list {
@@ -763,14 +923,28 @@ kbd {
 
 /* ------------------------------------------------------------------ detail */
 
-.detail .native {
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-
 .detail .explanation {
   border-left: 3px solid var(--pico-primary);
   padding-left: var(--wd-tight);
+}
+
+.detail-header-line {
+  display: flex;
+  gap: var(--wd-gap);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.explanations-toggle {
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.explanations-toggle input {
+  margin: 0;
 }
 
 /* The buyer's own words, set to read rather than to scan. Line breaks inside a
@@ -794,32 +968,77 @@ kbd {
   font-size: 0.9rem;
 }
 
-/* One field on the detail page: the team's label, where the value came from, and
-   the value. The origin pill is text, never a colour, so it survives a print. */
+/* Where each value was read from. Technical details only - it must never look
+   like the text that explains what a field means. */
+.provenance-trail {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.85rem;
+}
+
+.provenance-trail li {
+  padding: 0.15rem 0;
+  border-bottom: 1px solid var(--pico-muted-border-color);
+}
+
+.trail-value {
+  font-style: italic;
+}
+
+/* One field: a quiet label, a prominent value, and nothing else at rest. The
+   boundary between one field and the next has to be findable at a glance, so
+   each row carries its own rule rather than relying on white space. */
 .field dt {
   display: flex;
-  gap: var(--wd-tight);
+  gap: 0.35rem;
   align-items: baseline;
   flex-wrap: wrap;
 }
 
-.pill-origin {
-  font-size: 0.7rem;
+.field-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
   color: var(--pico-muted-color);
+}
+
+/* Which of the four origins this value has, as one word. Text, never a colour,
+   so it survives a print and a colour-blind reader. */
+.origin {
+  font-size: 0.68rem;
+  color: var(--pico-muted-color);
+  opacity: 0.75;
   text-transform: none;
+  margin-left: auto;
 }
 
 .field-value {
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 0.15rem 0;
+  font-size: 1rem;
+  line-height: 1.35;
 }
 
-.field-value .muted {
-  display: block;
+/* Part of the fact, not a comment on it: "bids due", "region", "main: 71300000".
+   Quiet, inline, and never a sentence. */
+.value-qualifier {
+  color: var(--pico-muted-color);
+  font-size: 0.8rem;
+}
+
+.value-qualifier::before {
+  content: "\00b7\00a0";
+}
+
+.is-absent {
+  color: var(--pico-muted-color);
+  font-style: italic;
 }
 
 .field-caution {
   border-left: 3px solid var(--wd-urgent-fg);
   padding-left: var(--wd-tight);
+  font-size: 0.85rem;
+  margin: 0.2rem 0 0;
 }
 
 .detail-nav {

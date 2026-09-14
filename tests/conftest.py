@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-import os
 from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import UTC, date, datetime
 from decimal import Decimal
 from pathlib import Path
@@ -12,7 +12,7 @@ from fastapi.testclient import TestClient
 
 from watchdog.core.enums import ContractNature, DeadlineType, NoticeStage, SourcePlatform
 from watchdog.core.models import Tender, TextBlock
-from watchdog.core.settings import get_settings
+from watchdog.core.settings import Settings, get_settings
 from watchdog.screening import RuleEngine, RulesConfig, load_rules_config
 from watchdog.screening.profile import Profile, load_profile
 from watchdog.storage.db import (
@@ -30,30 +30,118 @@ TED_FIXTURES_DIR = FIXTURES_DIR / "ted"
 # working directory, so a test run from anywhere reads the same files.
 CONFIG_DIR = Path(__file__).resolve().parents[1] / "config"
 
+# Every variable the application reads. A test run must not depend on what the
+# terminal happens to hold: dot-sourcing deploy\Use-DeployEnv.ps1 puts the hosted
+# DATABASE_URL, AUTH_USERNAME, AUTH_PASSWORD, SESSION_SECRET and LLM_API_KEY into
+# the window, and every Python process started there inherits them. That switches
+# the shared sign-in on for the whole suite, so every page test meets a login form
+# instead of the page it is about.
+DEPLOYMENT_VARIABLES = (
+    "DATABASE_URL",
+    "ENVIRONMENT",
+    "RENDER",
+    "AUTH_USERNAME",
+    "AUTH_PASSWORD",
+    "SESSION_SECRET",
+    "SESSION_HOURS",
+    "LLM_PROVIDER",
+    "LLM_MODEL",
+    "LLM_API_KEY",
+    "LLM_ENDPOINT",
+    "LLM_API_VERSION",
+    "LLM_TIMEOUT_SECONDS",
+    "LLM_SAMPLING",
+    "LLM_NOTICE_CHARS",
+    "LLM_CONCURRENCY",
+    "LOG_LEVEL",
+    "DATA_DIR",
+)
 
-@pytest.fixture(scope="session", autouse=True)
-def _never_the_real_register() -> Iterator[None]:
-    """Point the process-wide database at memory, for the whole test session.
+# Held in memory, so a test run cannot open data/watchdog.db even by accident.
+TEST_DATABASE_URL = "sqlite+pysqlite:///:memory:"
 
-    Without this, anything that reaches for the configured database rather than
-    taking an injected one - the application's startup recovery, most obviously -
-    would read and write ``data/watchdog.db``. A test suite that can edit the
-    register it is testing is a test suite nobody can trust.
+
+@contextmanager
+def isolated_environment(*, data_dir: Path | None = None) -> Iterator[None]:
+    """Clear every deployment variable and set the few a test run needs.
+
+    The fault this fixes is test isolation, not settings loading: reading real
+    environment variables is how the application is configured in production and
+    must not change. What changes is that the suite now states its own
+    configuration instead of inheriting whichever window it was started from.
+
+    ``.env`` is switched off for the same reason - a file on one laptop must not
+    decide what the suite is testing either.
     """
-    os.environ["DATABASE_URL"] = "sqlite+pysqlite:///:memory:"
-    get_settings.cache_clear()
-    get_session_factory.cache_clear()
-
-    factory = get_session_factory()
-    with factory() as session:
-        Base.metadata.create_all(session.connection())
-        session.commit()
-
+    patch = pytest.MonkeyPatch()
     try:
+        for name in DEPLOYMENT_VARIABLES:
+            patch.delenv(name, raising=False)
+        patch.setitem(Settings.model_config, "env_file", None)
+
+        patch.setenv("DATABASE_URL", TEST_DATABASE_URL)
+        patch.setenv("ENVIRONMENT", "dev")
+        patch.setenv("LLM_PROVIDER", "disabled")
+        if data_dir is not None:
+            patch.setenv("DATA_DIR", str(data_dir))
+
+        get_settings.cache_clear()
         yield
     finally:
+        patch.undo()
         get_settings.cache_clear()
+
+
+@pytest.fixture(scope="session", autouse=True)
+def _never_the_real_register(tmp_path_factory: pytest.TempPathFactory) -> Iterator[None]:
+    """Decide the environment the whole suite runs in, rather than inheriting one.
+
+    Two things would otherwise reach outside the test run. Anything that asks for
+    the configured database rather than taking an injected one - the application's
+    startup recovery, most obviously - would read and write ``data/watchdog.db``;
+    a test suite that can edit the register it is testing is a test suite nobody
+    can trust. And a terminal holding the hosted credentials would turn the
+    sign-in on for every page test.
+
+    The two assertions below are the check, not a comment: if this ever stops
+    working, the suite says so on the first line rather than in eighty-six
+    confusing failures.
+    """
+    with isolated_environment(data_dir=tmp_path_factory.mktemp("data")):
+        settings = get_settings()
+        assert settings.database_url == TEST_DATABASE_URL, (
+            "the test suite resolved a database that is not the in-memory one; "
+            "check DEPLOYMENT_VARIABLES in tests/conftest.py"
+        )
+        assert settings.auth_required is False, (
+            "the test suite switched the shared sign-in on; "
+            "check DEPLOYMENT_VARIABLES in tests/conftest.py"
+        )
+
         get_session_factory.cache_clear()
+        factory = get_session_factory()
+        with factory() as session:
+            Base.metadata.create_all(session.connection())
+            session.commit()
+
+        try:
+            yield
+        finally:
+            get_session_factory.cache_clear()
+
+
+@pytest.fixture(autouse=True)
+def _settings_are_read_fresh_for_each_test() -> Iterator[None]:
+    """No test inherits the settings another test built.
+
+    ``get_settings`` caches for the life of the process. Several tests switch the
+    sign-in on deliberately and clear that cache when they are done; clearing it
+    here as well means a test that forgets cannot sign the next one out of its own
+    pages.
+    """
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
 
 
 def load_ted_fixture(name: str) -> dict:
@@ -111,6 +199,11 @@ def client(repository: Repository) -> Iterator[TestClient]:
     Overriding the dependency rather than the environment is what keeps a test run
     off the real register: the routes, the startup recovery and the background
     jobs all take their repository from here.
+
+    The import is inside the function on purpose. ``watchdog.web.app`` builds the
+    ASGI object at import, which reads the configuration - at the top of this file
+    that would happen while pytest was still collecting, before any fixture had
+    isolated the environment.
     """
     from watchdog.web.app import create_app
     from watchdog.web.deps import get_repository

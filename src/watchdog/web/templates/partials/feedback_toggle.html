@@ -19,7 +19,9 @@
     {{ 'Feedback mode: on' if is_on else 'Feedback mode: off' }}
   </button>
   {% if is_on %}
-    <span class="pill" role="status">Clicks open a comment box and do nothing else</span>
+    {# One rule for the mouse and the keyboard: neither records a decision while the mode is on. #}
+    <span class="pill" role="status">Feedback mode is on. Click a control or use y/n/u to
+      comment on it. Turn feedback mode off to record tender decisions.</span>
     <a href="/feedback">See comments</a>
   {% endif %}
 </form>

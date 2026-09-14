@@ -240,14 +240,34 @@ class SavedView:
 
 @dataclass(frozen=True)
 class HeaderCount:
-    """One number in the header strip, and the view clicking it opens."""
+    """One number in the header, and the view clicking it opens."""
 
     key: str
     label: str
     count: int
     query_string: str
-    # Shown under the number when the count needs a sentence to be honest.
+    # Which population this number was counted out of. Never optional in the
+    # headline: a figure that does not say what it was counted out of is a figure
+    # nobody can check, and three of those side by side invite arithmetic that
+    # does not hold.
     note: str | None = None
+
+
+@dataclass(frozen=True)
+class Headline:
+    """What is new, what is worth my time, what is closing - and the mechanics."""
+
+    new: HeaderCount
+    worth: HeaderCount
+    closing: HeaderCount
+    # Everything the register holds, open or closed, in any band.
+    total_held: int
+    archived: HeaderCount
+    everything_query: str
+
+    @property
+    def figures(self) -> list[HeaderCount]:
+        return [self.new, self.worth, self.closing]
 
 
 @dataclass
@@ -256,7 +276,7 @@ class RegisterView:
 
     query: RegisterQuery
     page: RegisterPage
-    counts: list[HeaderCount] = field(default_factory=list)
+    headline: Headline | None = None
     views: list[SavedView] = field(default_factory=list)
     facets: RegisterFacets = field(default_factory=RegisterFacets)
     last_ingest: Run | None = None
@@ -405,10 +425,11 @@ def build(
     return RegisterView(
         query=query,
         page=page,
-        counts=header_counts(
+        headline=headline(
             repository,
             ai_enabled=ai_enabled,
             as_of=today,
+            total_held=total_held,
             last_ingest_run_id=last_ingest.run_id if last_ingest is not None else None,
         ),
         views=saved_views(ai_enabled=ai_enabled),
@@ -517,87 +538,90 @@ def _at_position(query: RegisterQuery, absolute: int) -> str:
     return query.query_string(offset=offset or None, cursor=absolute - offset)
 
 
-def header_counts(
+def headline(
     repository: Repository,
     *,
     ai_enabled: bool,
     as_of: date,
+    total_held: int,
     last_ingest_run_id: str | None = None,
-) -> list[HeaderCount]:
-    """The counts in the header strip. Each one is the filter its link carries.
+) -> Headline:
+    """The three questions people arrive with, and nothing competing with them.
 
-    Every number comes from the register as it is, not from a subset chosen to
-    look tidy: "new this week" is publication dates, not the notices that happen
-    to carry evidence.
+    What is new, what is worth my time, what is closing. Six boxes of equal
+    weight, drawn from four different populations and adding up to nothing, made
+    the register look like a dashboard and answered none of the three.
+
+    Each figure still carries the exact filter its link opens, so a number and the
+    view behind it can never drift apart, and each one says which population it
+    counted - a count with no stated population is a number nobody can check.
     """
     working = default_bands(ai_enabled=ai_enabled)
     week_from = as_of - timedelta(days=WEEK_DAYS - 1)
 
-    wanted: list[tuple[str, str, str | None, dict[str, object]]] = []
-
     if last_ingest_run_id is not None:
-        wanted.append(
-            (
-                "new_since_run",
-                "New since last update",
-                None,
-                {"run": last_ingest_run_id, "past": "1"},
-            )
-        )
-
-    wanted.append(
-        (
-            "new_this_week",
-            "Published this week",
-            "All bands, strongest evidence first",
-            {"published_from": week_from.isoformat(), "band": ALL_BANDS},
-        )
-    )
-
-    if ai_enabled:
-        wanted.append(("shortlist", "Shortlist", None, {"band": [Band.SHORTLIST.value]}))
-        wanted.append(("review", "Needs review", None, {"band": [Band.REVIEW.value]}))
+        new_key, new_label = "new_since_run", "new since the last update"
+        new_params: dict[str, object] = {"run": last_ingest_run_id, "past": "1"}
     else:
-        wanted.append(
-            (
-                "evidence",
-                "Strongest evidence",
-                "Keyword and CPV matches, no judgement",
-                {"band": [Band.REVIEW.value]},
-            )
-        )
+        # Nothing has been fetched yet, so "since the last update" has no meaning.
+        # A published-date window is a different question and says so.
+        new_key, new_label = "new_this_week", "published in the last 7 days"
+        new_params = {"published_from": week_from.isoformat(), "band": ALL_BANDS}
 
-    wanted.append(
-        (
-            "closing_soon",
-            f"Closing within {CLOSING_SOON_DAYS} days",
-            _closing_note(ai_enabled),
-            {"closing": CLOSING_SOON_DAYS, "band": [band.value for band in working]},
-        )
-    )
-    wanted.append(
-        (
-            "undecided",
-            "Undecided",
-            None,
-            {"undecided": "1", "band": [band.value for band in working]},
-        )
-    )
-    wanted.append(("archive", "Archived", None, {"band": [Band.ARCHIVE.value], "past": "1"}))
+    worth_params: dict[str, object] = {"band": [band.value for band in working]}
+    worth_label = "worth reading" if ai_enabled else "with the strongest evidence"
 
-    counts: list[HeaderCount] = []
-    for key, label, note, params in wanted:
+    closing_params: dict[str, object] = {
+        "closing": CLOSING_SOON_DAYS,
+        "band": [band.value for band in working],
+    }
+    archive_params: dict[str, object] = {"band": [Band.ARCHIVE.value], "past": "1"}
+    everything_params: dict[str, object] = {"band": ALL_BANDS, "past": "1"}
+
+    def figure(key: str, label: str, params: dict[str, object], note: str) -> HeaderCount:
         query = parse(params, ai_enabled=ai_enabled, as_of=as_of)
-        counts.append(
-            HeaderCount(
-                key=key,
-                label=label,
-                count=repository.count_register(query.filters),
-                query_string=_encode(params),
-                note=note,
-            )
+        return HeaderCount(
+            key=key,
+            label=label,
+            count=repository.count_register(query.filters),
+            query_string=_encode(params),
+            note=note,
         )
-    return counts
+
+    archived = figure(
+        "archive",
+        "archived",
+        archive_params,
+        "Of everything we hold, including notices whose deadline has passed.",
+    )
+
+    return Headline(
+        new=figure(
+            new_key,
+            new_label,
+            new_params,
+            "Of the notices still open for bidding."
+            if last_ingest_run_id is not None
+            else "Of everything we hold, by the date the buyer published it.",
+        ),
+        worth=figure(
+            "worth_reading",
+            worth_label,
+            worth_params,
+            "Of the notices still open for bidding."
+            if ai_enabled
+            else "Keyword and CPV matches only - no model judged these.",
+        ),
+        closing=figure(
+            "closing_soon",
+            f"closing within {CLOSING_SOON_DAYS} days",
+            closing_params,
+            _closing_note(ai_enabled) or "Of the notices still open for bidding.",
+        ),
+        total_held=total_held,
+        archived=archived,
+        everything_query=_encode(everything_params),
+    )
 
 
 def saved_views(*, ai_enabled: bool) -> list[SavedView]:

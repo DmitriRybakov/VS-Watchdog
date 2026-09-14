@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "partials/help.html" import mark %}
 {% block title %}Settings &middot; Watchdog{% endblock %}
 
 {#
@@ -51,6 +52,62 @@
       {% endif %}
     </article>
   {% endfor %}
+</section>
+
+{#
+  What we ask TED for. Read-only, because it is still edited in a file, but on
+  screen: without it a colleague who cannot find a notice has no way to tell
+  whether it was screened out or never fetched at all, and those are different
+  problems with different fixes.
+
+  It is deliberately not in the versioned list above. Changing a fetch condition
+  does not re-judge what we already hold - it changes what arrives next time, so
+  it needs a fresh read from TED rather than a re-screen.
+#}
+<section class="card" id="fetch-conditions" data-area="What we ask TED for">
+  <h2>What we ask TED for</h2>
+  <p class="muted">Only notices matching every condition below are ever read. A notice that
+    fails one of them never reaches the register, so it is never screened, never scored and
+    never archived &mdash; it is simply not here.</p>
+
+  {% if fetch_error %}
+    <p class="notice notice-error" role="alert">These conditions could not be read:
+      {{ fetch_error }}</p>
+  {% elif fetch %}
+    <dl class="facts">
+      {% for item in fetch.conditions %}
+        <div class="field">
+          <dt><span class="field-label">{{ item.label }}</span>
+            {{ mark(item.consequence, item.label | lower) }}</dt>
+          <dd><p class="field-value">{{ item.value }}</p></dd>
+        </div>
+      {% endfor %}
+    </dl>
+
+    <details>
+      <summary>The {{ fetch.cpv_codes | length }} subject categories we search for</summary>
+      <p class="cpv-codes">{{ fetch.cpv_codes | join(', ') }}</p>
+      {% if fetch.provisional %}
+        <h4>On trial</h4>
+        <p class="muted">Codes added on a stated bet rather than a measured gain. They are
+          searched for exactly like any other.</p>
+        <ul>
+          {% for code, reason, since in fetch.provisional %}
+            <li><strong>{{ code }}</strong> &mdash; {{ reason }}
+              <span class="muted">(since {{ since }})</span></li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </details>
+
+    <p class="notice notice-info" role="note">
+      <strong>Changing these needs a fresh read from TED, not a re-screen.</strong>
+      Widening a condition does not go back and find the notices it would have caught:
+      press <strong>Update from TED</strong> afterwards to read them in. Today they are
+      changed in <code>{{ fetch.source_file }}</code>, which is a file on the server rather
+      than a control on this page.
+    </p>
+  {% endif %}
 </section>
 
 {#

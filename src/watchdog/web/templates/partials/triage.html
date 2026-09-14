@@ -11,7 +11,7 @@
 {% if not rows %}
   {% include "partials/nothing.html" %}
 {% else %}
-<div class="triage" data-cursor="{{ view.cursor }}" data-count="{{ rows | length }}">
+<div class="triage" data-area="Triage cards" data-cursor="{{ view.cursor }}" data-count="{{ rows | length }}">
 
   <ol class="queue" role="listbox" aria-label="Notices to triage" tabindex="0">
     {% for row in rows %}

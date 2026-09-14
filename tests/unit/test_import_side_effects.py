@@ -1,5 +1,11 @@
 """Importing Watchdog must not connect to a database or touch the network.
 
+Not the same as importing nothing happening. ``watchdog.web.app`` ends with
+``app = create_app()`` because uvicorn loads an ASGI object by name, so importing
+that one module reads the configuration and configures logging on purpose. What
+is checked here is the part that holds for every module including that one: no
+connection and no network call.
+
 Run in a fresh interpreter so the check cannot be satisfied by modules another
 test already imported.
 """

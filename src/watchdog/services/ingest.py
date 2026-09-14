@@ -95,7 +95,13 @@ class IngestWindow:
 
 @dataclass
 class IngestCounts:
-    """What one run did. Every fetched notice ends up in exactly one of these."""
+    """What one run did. Every fetched notice ends up in exactly one of these.
+
+    ``updated`` means the fields we compare differed from what came back, which is
+    not the same claim as "the buyer changed it": asking TED for a field we did
+    not ask for before updates every notice that has one. Nothing here can tell
+    those apart.
+    """
 
     fetched: int = 0
     new: int = 0

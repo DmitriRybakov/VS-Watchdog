@@ -46,10 +46,26 @@ change to the policy cannot reach the fetcher.
 
 ## Import-time behaviour
 
-Importing any Watchdog module must not open a database connection, make a network call or write a
-file. Configuration is read by `core.settings.get_settings()`, logging is set up by
-`core.logging.configure_logging()`, and both are called from `create_app()` or a CLI command.
-`tests/unit/test_import_side_effects.py` enforces this.
+Importing a Watchdog module must not open a database connection, make a network call or write a
+file. That is the rule, and `tests/unit/test_import_side_effects.py` enforces it across every
+module in the package.
+
+It is not the same as saying an import does nothing, and one module deliberately does something.
+`web/app.py` ends with `app = create_app()`, because `uvicorn watchdog.web.app:app` needs an ASGI
+object to load - so importing that module reads the configuration, configures logging and refuses
+to go on if a hosted process is unsafe to start. It still opens no connection.
+
+What follows for the test suite: the modules pytest imports while collecting capture nothing, and
+the entry-point module is the one exception. Fixtures import it inside the function that needs it
+(`tests/conftest.py`, the `client` fixture) rather than at the top of a file, so the environment is
+already isolated by the time it is read. Importing `watchdog.web.app` at module level in a test
+file would read whatever the terminal happened to hold, before any fixture could have a say.
+`tests/integration/test_environment.py` checks both halves: nothing is read before the entry point,
+and the entry point itself reaches no database.
+
+Configuration is read by `core.settings.get_settings()` and logging is set up by
+`core.logging.configure_logging()`. Both are called from `create_app()` or a CLI command, never
+from a module body anywhere else.
 
 Migrations are an explicit command (`make migrate`). They never run at startup.
 

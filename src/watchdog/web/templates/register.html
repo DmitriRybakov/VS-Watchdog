@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "partials/help.html" import mark %}
 {% block title %}Register &middot; Watchdog{% endblock %}
 
 {% block content %}
@@ -8,11 +9,11 @@
      data-results-url="/register/results">
 
   {# The header belt. It replaces itself while a run is going; see triage.js. #}
-  <div id="run-status">
+  <div id="run-status" data-area="Update belt">
     {% include "partials/status.html" %}
   </div>
 
-  <div id="reviewer">
+  <div id="reviewer" data-area="Your name">
     {% include "partials/reviewer.html" %}
   </div>
 
@@ -31,14 +32,30 @@
     </section>
   {% else %}
 
-  <section class="counts" aria-label="Register summary">
-    {% for count in view.counts %}
-      <a class="count" href="/register?{{ count.query_string }}">
-        <span class="count-number">{{ count.count }}</span>
-        <span class="count-label">{{ count.label }}</span>
-        {% if count.note %}<span class="count-note">{{ count.note }}</span>{% endif %}
-      </a>
-    {% endfor %}
+  {#
+    Three figures answering the three questions people arrive with: what is new,
+    what is worth my time, what is closing. One line of mechanics underneath, not
+    a fourth figure competing with them. Every filter that used to be a box is
+    still one click away in the saved views below - this is about prominence, not
+    removal.
+  #}
+  {% set head = view.headline %}
+  <section class="headline" data-area="Register headline" aria-label="Where the register stands">
+    <p class="headline-figures">
+      {% for figure in head.figures %}
+        {% if not loop.first %}<span class="headline-sep" aria-hidden="true">&middot;</span>{% endif %}
+        <a class="headline-figure" href="/register?{{ figure.query_string }}">
+          <span class="headline-number">{{ figure.count | thousands }}</span>
+          <span class="headline-label">{{ figure.label }}</span>
+        </a>{{ mark(figure.note, figure.label) }}
+      {% endfor %}
+    </p>
+    <p class="headline-mechanics">
+      From <a href="/register?{{ head.everything_query }}">{{ head.total_held | thousands }}
+      notices</a> matching our search terms.
+      <a href="/register?{{ head.archived.query_string }}">{{ head.archived.count | thousands }}</a>
+      scored too low to be worth reading &mdash; still searchable.
+    </p>
   </section>
 
   {% if view.unscreened %}
@@ -50,7 +67,7 @@
     </p>
   {% endif %}
 
-  <nav class="views" aria-label="Saved views">
+  <nav class="views" data-area="Saved views" aria-label="Saved views">
     {% for saved in view.views %}
       <a class="view-link {{ 'is-current' if query.view == saved.key else '' }}"
          href="/register?{{ saved.query_string }}"
@@ -61,7 +78,7 @@
   <div class="register-body">
     {% include "partials/filters.html" %}
 
-    <div id="results" class="results" aria-live="polite">
+    <div id="results" class="results" data-area="Results" aria-live="polite">
       {% if query.mode == 'table' %}
         {% include "partials/table.html" %}
       {% else %}

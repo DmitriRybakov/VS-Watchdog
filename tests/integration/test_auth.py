@@ -117,7 +117,55 @@ def test_a_fragment_request_is_told_to_navigate_rather_than_swapping_a_login_pag
     response = signed_in_app.get("/runs/status", headers={"HX-Request": "true"})
 
     assert response.status_code == 401
-    assert response.headers["HX-Redirect"] == "/login"
+    assert response.headers["HX-Redirect"] == "/login?next=%2Fruns%2Fstatus"
+
+
+def test_a_fragment_comes_back_to_the_page_it_was_asked_from(
+    signed_in_app: TestClient,
+) -> None:
+    """Filters are in the address bar, so signing in must land on that address."""
+    response = signed_in_app.get(
+        "/register/results?band=review&q=hydrogen",
+        headers={
+            "HX-Request": "true",
+            "HX-Current-URL": "http://testserver/register?band=review&q=hydrogen",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.headers["HX-Redirect"] == (
+        "/login?next=%2Fregister%3Fband%3Dreview%26q%3Dhydrogen"
+    )
+
+
+def test_a_write_whose_session_ended_comes_back_to_the_page_not_to_the_write(
+    signed_in_app: TestClient,
+) -> None:
+    """Signing in must not repeat the verdict the ended session failed to record."""
+    response = signed_in_app.post(
+        "/register/ted:00123456-2026/verdict",
+        data={"verdict": "relevant"},
+        headers={
+            "HX-Request": "true",
+            "HX-Current-URL": "http://testserver/register?band=review",
+        },
+    )
+
+    assert response.status_code == 401
+    assert response.headers["HX-Redirect"] == "/login?next=%2Fregister%3Fband%3Dreview"
+
+
+def test_a_current_url_on_somebody_elses_site_is_not_followed(
+    signed_in_app: TestClient,
+) -> None:
+    """The header comes from the browser, so it is validated like any other input."""
+    response = signed_in_app.get(
+        "/runs/status",
+        headers={"HX-Request": "true", "HX-Current-URL": "https://elsewhere.example/steal"},
+    )
+
+    assert response.status_code == 401
+    assert response.headers["HX-Redirect"] == "/login?next=%2F"
 
 
 # --------------------------------------------------------------- signing in

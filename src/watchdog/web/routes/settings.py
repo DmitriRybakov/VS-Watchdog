@@ -36,6 +36,7 @@ from watchdog.core.settings import Settings
 from watchdog.services import configuration as config_service
 from watchdog.services import jobs
 from watchdog.services import query as query_service
+from watchdog.services import ted as ted_service
 from watchdog.services.configuration import ConfigFrozen, ConfigInvalid
 from watchdog.storage.repository import Repository
 from watchdog.web.deps import Config, Store
@@ -270,11 +271,24 @@ def _proposed_rules(current: dict[str, Any], form: dict[str, Any]) -> dict[str, 
 
 def _overview(store: Repository, settings: Settings) -> dict[str, Any]:
     versions = {kind: config_service.active(kind, repository=store) for kind in ConfigKind}
+
+    # What we ask TED for. Read-only for now, but visible: without it a colleague
+    # cannot tell whether a notice that is not here was screened out or never
+    # fetched, and those have different fixes.
+    try:
+        conditions: ted_service.FetchConditions | None = ted_service.fetch_conditions()
+        conditions_error: str | None = None
+    except (OSError, ValueError) as exc:
+        conditions = None
+        conditions_error = str(exc)
+
     return {
         "kinds": list(ConfigKind),
         "labels": KIND_LABELS,
         "notes": KIND_NOTES,
         "versions": versions,
+        "fetch": conditions,
+        "fetch_error": conditions_error,
         "history": {kind: config_service.history(kind, repository=store) for kind in ConfigKind},
         "frozen_at": config_service.FROZEN_RULES_VERSION,
         "freeze_reason": config_service.FREEZE_REASON,

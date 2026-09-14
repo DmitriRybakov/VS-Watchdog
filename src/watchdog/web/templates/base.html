@@ -9,6 +9,7 @@
     <script src="{{ url_for('static', path='js/triage.js') }}" defer></script>
     <script src="{{ url_for('static', path='js/detail.js') }}" defer></script>
     <script src="{{ url_for('static', path='js/feedback.js') }}" defer></script>
+    <script src="{{ url_for('static', path='js/outage.js') }}" defer></script>
   </head>
   {#
     Every HTMX request on the page carries the session's CSRF token, so each of
@@ -20,10 +21,10 @@
   #}
   <body hx-headers='{"X-CSRF-Token": "{{ request.state.csrf_token }}"}'
         data-feedback="{{ 'on' if request.cookies.get('watchdog_feedback') == 'on' else 'off' }}">
-    <header class="site-header">
+    <header class="site-header" data-area="Site header">
       <a class="brand" href="/">Watchdog</a>
       <span class="subtitle">Entr Advisory &amp; Decision Support</span>
-      <nav class="site-nav">
+      <nav class="site-nav" data-area="Main menu">
         <a href="/register">Register</a>
         <a href="/runs">Runs</a>
         <a href="/settings">Settings</a>

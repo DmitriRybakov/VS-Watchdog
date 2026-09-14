@@ -1,0 +1,66 @@
+{#
+  Shown when the database cannot be reached. Self-contained for the same reason
+  the sign-in page is: whatever else has gone wrong, this page must render.
+
+  It carries no host name, no database name and no error text. What went wrong is
+  in the service log, where the person who can act on it will look; on screen it
+  would only be something a colleague cannot use and an attacker can.
+#}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Temporarily unavailable &mdash; Watchdog</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f6f7f9;
+        color: #16191d;
+      }
+      .card {
+        width: min(34rem, 92vw);
+        background: #fff;
+        border: 1px solid #d8dce2;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+      }
+      h1 { font-size: 1.4rem; margin: 0 0 1rem; }
+      p { margin: 0 0 1rem; line-height: 1.5; }
+      .muted { color: #5b6470; font-size: .9rem; margin-bottom: 0; }
+      a.button {
+        display: inline-block;
+        padding: .6rem 1.1rem;
+        border-radius: 5px;
+        background: #1d4ed8;
+        color: #fff;
+        font-weight: 600;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>The database is temporarily unavailable</h1>
+      <p>
+        Watchdog could not reach the database that holds the register. Nothing has been lost:
+        no notice, no score and no decision you have already recorded.
+      </p>
+      <p>
+        This is usually a service that has gone to sleep or a connection that dropped. Wait a
+        moment and try again.
+      </p>
+      <p><a class="button" href="{{ retry_path }}">Try again</a></p>
+      <p class="muted">
+        If it keeps happening, tell whoever looks after Watchdog. The reason is in the service
+        log with the time this happened: {{ occurred_at }}.
+      </p>
+    </main>
+  </body>
+</html>

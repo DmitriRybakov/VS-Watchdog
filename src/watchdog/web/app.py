@@ -13,6 +13,8 @@ Two things happen here that do not happen anywhere else:
   by a process that died. It is tolerant of a database that has not been migrated
   yet: the register has a page that says so, and refusing to start would only
   hide it.
+- **A database that cannot be reached is answered with a page, not a failure.**
+  See ``web/errors.py``.
 """
 
 from __future__ import annotations
@@ -26,6 +28,7 @@ from fastapi.staticfiles import StaticFiles
 from watchdog import __version__
 from watchdog.core.logging import configure_logging, get_logger
 from watchdog.core.settings import Settings, get_settings
+from watchdog.web.errors import DATABASE_UNREACHABLE, database_unavailable
 from watchdog.web.routes import auth, feedback, health, pages, register, runs
 from watchdog.web.routes import settings as settings_routes
 from watchdog.web.security import AuthMiddleware
@@ -80,6 +83,9 @@ def create_app() -> FastAPI:
         docs_url="/api/docs",
         lifespan=lifespan,
     )
+
+    for failure in DATABASE_UNREACHABLE:
+        app.add_exception_handler(failure, database_unavailable)
 
     if settings.auth_required:
         # Added before the routes are mounted, so it covers the static files, the
